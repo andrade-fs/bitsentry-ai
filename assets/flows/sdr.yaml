@@ -1,42 +1,71 @@
 id: sdr
 name: Structured Discovery Research
-description: Structured idea/research/knowledge workflow.
+description: >
+  Structured workflow for knowledge discovery and blog content generation.
+  Prioritizes the 'BitSentry Angle' and technical validation.
 family: sdr
 orchestrator_skill: sdr-orchestrator
+status: declarative
+
+# Infraestructura necesaria para el ciclo de vida del conocimiento
+requires:
+  mcps:
+    - engram        # Persistencia de la "memoria institucional"
+  optional_mcps:
+    - context7      # Recuperación de fuentes externas o papers
+
+# Etapas del Pipeline de Descubrimiento
 stages:
   - id: capture
     skill: sdr-capture
-    description: Capture raw topic and constraints.
+    description: "Capture raw topic, identify sources, and define hypothesis."
+    outputs: [ "state.yaml", "capture.md" ]
+
   - id: research
     skill: sdr-research
-    description: Expand and analyze concepts.
+    description: "Deep dive into concepts and technical evidence gathering."
+    outputs: [ "research.md" ]
+
   - id: synthesis
     skill: sdr-synthesis
-    description: Build thesis and high-value angles.
+    description: "Distill findings into a unique thesis and high-value angles."
+    outputs: [ "synthesis.md" ]
+
   - id: questions
     skill: sdr-questions
-    description: Evaluate quality and relevance.
+    description: "Adversarial evaluation of quality and BitSentry relevance."
+    is_gate: true # Gate 1: ¿Vale la pena seguir?
+
   - id: structure
     skill: sdr-structure
-    description: Propose content/note structure.
+    description: "Map the narrative to the BitSentry Blog MD Specification."
+    outputs: [ "structure.md" ]
+
   - id: validate
     skill: sdr-validate
-    description: Green/yellow/red quality gate.
+    description: "Final quality check (Semáforo GREEN/YELLOW/RED)."
+    is_gate: true # Gate 2: Validación técnica y visual
+
   - id: archive
     skill: sdr-archive
-    description: Final decision and next actions.
-requires:
-  mcps:
-    - engram
+    description: "Generate final blog-ready MD and persist session state."
+    outputs: [ "final-post.md", "archive.md" ]
+
+# Conexiones con otros flujos y herramientas
 handoffs:
   - to: sdd
-    when: research becomes implementation work
-  - to: notes
-    when: reusable note/article structure is ready
-outputs:
-  - capture
-  - research
-  - synthesis
-  - structure
-  - validation
-status: declarative
+    when: "research findings require a technical implementation or POC"
+    payload_type: "handoff-contract"
+    
+  - to: support/issue-creation
+    when: "research identifies technical debt or new required features"
+    
+  - to: support/judgment-day
+    when: "the topic is highly controversial or critical for cybersecurity"
+
+# Promesa de salida del flujo
+final_artifacts:
+  - path: "notes/sdr/{slug}/final-post.md"
+    type: "blog-post"
+  - path: "notes/sdr/{slug}/state.yaml"
+    type: "session-state"

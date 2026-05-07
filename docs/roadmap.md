@@ -32,6 +32,7 @@
 - Stabilize default capability presets and skill packs for common workflows
 - Improve capability ergonomics for day-to-day development/research modes
 - Add declarative SDD/SDR/support skill families and shared contracts
+- Fill skill contracts with phase-grade content and enforce headings via tests
 
 ### Phase 4.0 — Orchestrator MVP (next)
 - Introduce minimal runtime flow routing with strict safety checkpoints

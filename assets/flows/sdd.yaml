@@ -1,48 +1,82 @@
 id: sdd
 name: Spec Driven Development
-description: Structured software/product change workflow.
+description: >
+  Structured software/product change workflow. 
+  Follows a strict requirement-to-verification pipeline.
 family: sdd
 orchestrator_skill: sdd-orchestrator
+status: declarative
+
+# Requisitos de infraestructura para el Runtime
+requires:
+  mcps:
+    - engram        # Persistencia de memoria/estado
+    - opencode      # Gestión de artefactos de código
+  optional_mcps:
+    - context7      # Recuperación de contexto extendido
+
+# Definición de Etapas (Pipeline)
 stages:
   - id: init
     skill: sdd-init
-    description: Bootstrap change context and boundaries.
+    description: "Bootstrap change context and identity (Slug/Goal)."
+    outputs: [ "state.yaml", "init.md" ]
+
   - id: explore
     skill: sdd-explore
-    description: Analyze current architecture and constraints.
+    description: "Analyze current architecture and impact surface."
+    outputs: [ "explore.md" ]
+
   - id: propose
     skill: sdd-propose
-    description: Define problem, goal, approach, alternatives.
+    description: "Define strategy and alternatives. Gate 1 checkpoint."
+    outputs: [ "proposal.md" ]
+    is_gate: true
+
   - id: spec
     skill: sdd-spec
-    description: Define requirements and acceptance criteria.
+    description: "Define requirements and acceptance criteria."
+    outputs: [ "spec.md" ]
+
   - id: design
     skill: sdd-design
-    description: Define technical design.
+    description: "Define technical architecture and data contracts."
+    outputs: [ "design.md" ]
+
   - id: tasks
     skill: sdd-tasks
-    description: Build implementation checklist.
+    description: "Build atomic implementation checklist."
+    outputs: [ "tasks.md" ]
+
   - id: apply
     skill: sdd-apply
-    description: Implement within approved boundaries.
+    description: "Implement code within approved task boundaries."
+    outputs: [ "apply.md" ]
+    is_gate: true # Gate 2: Pre-implementation final check
+
   - id: verify
     skill: sdd-verify
-    description: Validate quality and compliance.
+    description: "Validate quality and compliance against spec."
+    outputs: [ "verify.md" ]
+
   - id: archive
     skill: sdd-archive
-    description: Close and summarize.
-requires:
-  mcps:
-    - engram
-  optional_mcps:
-    - context7
+    description: "Formalize closure, summary, and next-steps."
+    outputs: [ "archive.md" ]
+    is_gate: true # Gate 3: Final review
+
+# Lógica de Handoffs (Cross-Flow)
 handoffs:
   - to: sdr
-    when: deeper research is needed before implementation
-outputs:
-  - proposal
-  - spec
-  - design
-  - tasks
-  - verify-report
-status: declarative
+    when: "deeper research or hypothesis validation is needed"
+  - to: support/judgment-day
+    when: "high-risk changes require adversarial review"
+  - to: support/issue-creation
+    when: "post-archive technical debt is identified"
+
+# Artefactos finales que el flujo garantiza
+final_artifacts:
+  - path: "sdd/{slug}/state.yaml"
+    type: "session-state"
+  - path: "sdd/{slug}/archive.md"
+    type: "manifesto"

@@ -2,33 +2,43 @@ id: support
 name: Support Skill Set
 description: Reusable helper skills for SDD/SDR and future orchestrator.
 family: support
-orchestrator_skill: skill-registry
-stages:
-  - id: registry
-    skill: skill-registry
-    description: Generate compact project skill registry.
-  - id: quality
-    skill: judgment-day
-    description: Strict quality review pass.
-  - id: testing
-    skill: go-testing
-    description: Reusable Go testing patterns.
-  - id: issue
-    skill: issue-creation
-    description: Declarative issue drafting.
-  - id: pr
-    skill: branch-pr
-    description: Declarative branch/PR planning.
+orchestrator_skill: support-skill-registry # Nombre completo para evitar colisiones
+status: declarative
+
 requires:
   mcps:
     - engram
+  shared: # Referencia explícita a que estas skills son las guardianas de los contratos
+    - persistence-contract
+    - handoff-contract
+    - result-envelope
+
+stages:
+  - id: registry
+    skill: support-skill-registry
+    description: "Maintains the global map of capabilities."
+  - id: quality
+    skill: support-judgment-day
+    description: "Adversarial audit for final verdicts."
+  - id: testing
+    skill: support-go-testing
+    description: "Ensures Go code integrity and coverage."
+  - id: issue
+    skill: support-issue-creation
+    description: "Transforms findings into actionable tickets."
+  - id: pr
+    skill: support-branch-pr
+    description: "Plans the safe integration of code."
+
 handoffs:
   - to: sdd
-    when: implementation workflow needs helper skill support
+    when: "implementation workflow needs helper skill support"
   - to: sdr
-    when: research workflow needs helper skill support
+    when: "research workflow needs helper skill support"
+
 outputs:
   - registry
   - review-verdict
   - testing-guidance
-status: declarative
+  - issue-draft
+  - pr-plan
