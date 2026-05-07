@@ -1,0 +1,42 @@
+id: sdr
+name: Structured Discovery Research
+description: Structured idea/research/knowledge workflow.
+family: sdr
+orchestrator_skill: sdr-orchestrator
+stages:
+  - id: capture
+    skill: sdr-capture
+    description: Capture raw topic and constraints.
+  - id: research
+    skill: sdr-research
+    description: Expand and analyze concepts.
+  - id: synthesis
+    skill: sdr-synthesis
+    description: Build thesis and high-value angles.
+  - id: questions
+    skill: sdr-questions
+    description: Evaluate quality and relevance.
+  - id: structure
+    skill: sdr-structure
+    description: Propose content/note structure.
+  - id: validate
+    skill: sdr-validate
+    description: Green/yellow/red quality gate.
+  - id: archive
+    skill: sdr-archive
+    description: Final decision and next actions.
+requires:
+  mcps:
+    - engram
+handoffs:
+  - to: sdd
+    when: research becomes implementation work
+  - to: notes
+    when: reusable note/article structure is ready
+outputs:
+  - capture
+  - research
+  - synthesis
+  - structure
+  - validation
+status: declarative

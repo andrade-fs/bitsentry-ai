@@ -1,0 +1,48 @@
+id: sdd
+name: Spec Driven Development
+description: Structured software/product change workflow.
+family: sdd
+orchestrator_skill: sdd-orchestrator
+stages:
+  - id: init
+    skill: sdd-init
+    description: Bootstrap change context and boundaries.
+  - id: explore
+    skill: sdd-explore
+    description: Analyze current architecture and constraints.
+  - id: propose
+    skill: sdd-propose
+    description: Define problem, goal, approach, alternatives.
+  - id: spec
+    skill: sdd-spec
+    description: Define requirements and acceptance criteria.
+  - id: design
+    skill: sdd-design
+    description: Define technical design.
+  - id: tasks
+    skill: sdd-tasks
+    description: Build implementation checklist.
+  - id: apply
+    skill: sdd-apply
+    description: Implement within approved boundaries.
+  - id: verify
+    skill: sdd-verify
+    description: Validate quality and compliance.
+  - id: archive
+    skill: sdd-archive
+    description: Close and summarize.
+requires:
+  mcps:
+    - engram
+  optional_mcps:
+    - context7
+handoffs:
+  - to: sdr
+    when: deeper research is needed before implementation
+outputs:
+  - proposal
+  - spec
+  - design
+  - tasks
+  - verify-report
+status: declarative
