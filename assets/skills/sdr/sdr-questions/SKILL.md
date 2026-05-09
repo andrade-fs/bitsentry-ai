@@ -21,7 +21,7 @@ Apply a "Value Stress Test" to the synthesis. This skill ensures that the resear
 - `sdr-synthesis` is complete.
 - You need to decide the final format (Deep Dive, Quick Note, or Discard).
 
-## Workflow: The "BitSentry Value Protocol"
+## Workflow
 1.  **Originality Check**: Is this common knowledge or does it provide a unique perspective?
 2.  **Actionability**: Can a reader take this and apply it to their HomeLab/Workplace immediately?
 3.  **Cliché Audit**: Detect and remove "AI-generic" filler or repetitive technical advice.
@@ -41,3 +41,20 @@ Must answer:
 - **target: engram** | `sdr/{slug}/quality_gate` | Reasoning for publication.
 
 **Next Recommended**: `sdr-structure`
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Boundaries
+This section is required by contract. Keep behavior declarative and avoid runtime orchestration changes.
+
+## Result Envelope
+Return status, executive summary, artifacts, next recommended, risks, and skill resolution when applicable.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

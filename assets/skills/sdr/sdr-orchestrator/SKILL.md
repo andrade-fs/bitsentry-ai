@@ -35,7 +35,7 @@ The orchestrator must ensure that final outputs follow the **BitSentry MD Specif
 3.  **Admonitions**: Use strictly `> [!NOTE]`, `> [!IMPORTANT]`, and `> [!WARNING]`.
 4.  **Code Blocks**: Must include language tags (`python`, `javascript`, `bash`, `sql`) for macOS-style rendering.
 
-## Workflow: The "Discovery Protocol"
+## Workflow
 1.  **Reconstruct**: Load `state.yaml` from `notes/sdr/{slug}/`. If missing, trigger `sdr-capture`.
 2.  **Phase Transition**: Follow the SDR DAG:
     `capture` → `research` → `synthesis` → `questions` → `structure` → `validate` → `archive`.
@@ -104,3 +104,8 @@ Coordinated SDR session `{slug}`. Transitioning to `{next_phase}`. Blog structur
 - [ ] The "Bitsentry Angle" is present (Uniqueness check).
 ```
 
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

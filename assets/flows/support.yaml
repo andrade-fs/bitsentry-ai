@@ -1,44 +1,147 @@
 id: support
 name: Support Skill Set
-description: Reusable helper skills for SDD/SDR and future orchestrator.
+kind: support
+selectable: true
+top_level_flow: false
+description: >
+  Reusable helper skill pack for SDD, SDR and future Bitsentry orchestrators.
+  Support skills are not a primary workflow. They provide registry, review,
+  testing, issue planning, PR planning and skill-creation utilities.
 family: support
-orchestrator_skill: support-skill-registry # Nombre completo para evitar colisiones
+skill_pack: support
+orchestrator_skill: support/skill-registry
 status: declarative
+
+triggers:
+  - review
+  - audit
+  - testing
+  - registry
+  - issue
+  - pr
+  - branch
+  - skill
+  - quality
+  - verdict
+  - checklist
+
+routing:
+  prefer_when:
+    - "A primary flow needs helper capabilities such as quality review, test guidance, issue drafting or PR planning."
+    - "The task asks for a skill registry, skill creation, review verdict, Go test strategy, issue draft or PR plan."
+  avoid_when:
+    - "The user is starting a software/product change; use SDD as the primary flow."
+    - "The user is researching, validating or structuring an idea/note; use SDR as the primary flow."
+  fallback: none
+
+contracts:
+  - result-envelope
+  - persistence-contract
+  - handoff-contract
+  - engram-convention
+  - opencode-convention
+  - skill-loading
 
 requires:
   mcps:
     - engram
-  shared: # Referencia explícita a que estas skills son las guardianas de los contratos
-    - persistence-contract
-    - handoff-contract
-    - result-envelope
+  optional_mcps:
+    - context7
+
+persistence:
+  engram_root: "support/{slug}"
+  local_root: "support/{slug}"
+  opencode_root: "artifacts/support/{slug}"
 
 stages:
   - id: registry
-    skill: support-skill-registry
-    description: "Maintains the global map of capabilities."
+    skill: support/skill-registry
+    description: "Scan skills, flows and shared conventions to maintain a compact capability map."
+    outputs:
+      - "skill-registry.md"
+
   - id: quality
-    skill: support-judgment-day
-    description: "Adversarial audit for final verdicts."
+    skill: support/judgment-day
+    description: "Perform adversarial review and produce a PASS/PASS WITH NOTES/PARTIAL/BLOCKED verdict."
+    outputs:
+      - "judgment-day.md"
+
   - id: testing
-    skill: support-go-testing
-    description: "Ensures Go code integrity and coverage."
+    skill: support/go-testing
+    description: "Provide hermetic Go testing guidance for CLI/TUI/config/planner code."
+    outputs:
+      - "go-testing.md"
+
+  - id: skill_creation
+    skill: support/skill-creator
+    description: "Create or improve skills using the Bitsentry skill template and shared contracts."
+    outputs:
+      - "skill-draft.md"
+
   - id: issue
-    skill: support-issue-creation
-    description: "Transforms findings into actionable tickets."
+    skill: support/issue-creation
+    description: "Transform findings, follow-ups or technical debt into a structured issue draft."
+    outputs:
+      - "issue-draft.md"
+
   - id: pr
-    skill: support-branch-pr
-    description: "Plans the safe integration of code."
+    skill: support/branch-pr
+    description: "Create a safe branch and PR plan with test evidence and rollback notes."
+    outputs:
+      - "pr-plan.md"
+
+stage_graph:
+  registry:
+    next: []
+  quality:
+    next: []
+  testing:
+    next: []
+  skill_creation:
+    next: []
+  issue:
+    next: []
+  pr:
+    next: []
 
 handoffs:
   - to: sdd
-    when: "implementation workflow needs helper skill support"
+    when: "support output identifies implementation work, refactor, tests or architecture changes"
+    payload_type: handoff-contract
+
   - to: sdr
-    when: "research workflow needs helper skill support"
+    when: "support output identifies research, documentation, note-making or idea validation work"
+    payload_type: handoff-contract
+
+  - to: support/judgment-day
+    when: "a generated issue, PR plan, skill draft or testing plan needs strict review"
+    payload_type: handoff-contract
+
+final_artifacts:
+  - path: "support/{slug}/skill-registry.md"
+    type: registry
+  - path: "support/{slug}/judgment-day.md"
+    type: review-verdict
+  - path: "support/{slug}/go-testing.md"
+    type: testing-guidance
+  - path: "support/{slug}/skill-draft.md"
+    type: skill-draft
+  - path: "support/{slug}/issue-draft.md"
+    type: issue-draft
+  - path: "support/{slug}/pr-plan.md"
+    type: pr-plan
 
 outputs:
   - registry
   - review-verdict
   - testing-guidance
+  - skill-draft
   - issue-draft
   - pr-plan
+
+notes:
+  - "Support is selectable as a helper pack, but it is not a top-level workflow."
+  - "Support stages are independent utility invocations, not a mandatory sequential pipeline."
+  - "Support skills remain declarative in this phase and must not call external APIs."
+  - "issue-creation produces issue drafts only; it must not call GitHub APIs."
+  - "branch-pr produces branch/PR plans only; it must not push branches or open PRs."

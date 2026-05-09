@@ -26,7 +26,7 @@ Codify new AI capabilities into a structured, deterministic format. This skill a
 - You need to add a specialized support tool (e.g., a "Security Scanner" or "Database Migrator").
 - You want to expand the Bitsentry ecosystem with a new `family` of skills.
 
-## Workflow: The "Codification Protocol"
+## Workflow
 1.  **Intent Distillation**: Define the single responsibility of the new skill.
 2.  **Metadata Alignment**: 
     - Assign to a `family` (sdd, sdr, support, etc.).
@@ -83,3 +83,14 @@ Skill `{skill-name}` drafted for family `{family}`. Compliant with all Bitsentry
 - [ ] `Boundaries` section is explicit and restrictive.
 - [ ] Persistence keys follow the `flow/slug/type` convention.
 - [ ] `Result Envelope` format is strictly adhered to.
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

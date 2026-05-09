@@ -2,36 +2,26 @@ package capabilities
 
 import (
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
 
 func TestAllSkillFilesContainRequiredSections(t *testing.T) {
-	skillFiles := []string{
-		"../../assets/skills/sdd/sdd-orchestrator/SKILL.md",
-		"../../assets/skills/sdd/sdd-init/SKILL.md",
-		"../../assets/skills/sdd/sdd-explore/SKILL.md",
-		"../../assets/skills/sdd/sdd-propose/SKILL.md",
-		"../../assets/skills/sdd/sdd-spec/SKILL.md",
-		"../../assets/skills/sdd/sdd-design/SKILL.md",
-		"../../assets/skills/sdd/sdd-tasks/SKILL.md",
-		"../../assets/skills/sdd/sdd-apply/SKILL.md",
-		"../../assets/skills/sdd/sdd-verify/SKILL.md",
-		"../../assets/skills/sdd/sdd-archive/SKILL.md",
-		"../../assets/skills/sdr/sdr-orchestrator/SKILL.md",
-		"../../assets/skills/sdr/sdr-capture/SKILL.md",
-		"../../assets/skills/sdr/sdr-research/SKILL.md",
-		"../../assets/skills/sdr/sdr-synthesis/SKILL.md",
-		"../../assets/skills/sdr/sdr-questions/SKILL.md",
-		"../../assets/skills/sdr/sdr-structure/SKILL.md",
-		"../../assets/skills/sdr/sdr-validate/SKILL.md",
-		"../../assets/skills/sdr/sdr-archive/SKILL.md",
-		"../../assets/skills/support/skill-registry/SKILL.md",
-		"../../assets/skills/support/judgment-day/SKILL.md",
-		"../../assets/skills/support/go-testing/SKILL.md",
-		"../../assets/skills/support/skill-creator/SKILL.md",
-		"../../assets/skills/support/issue-creation/SKILL.md",
-		"../../assets/skills/support/branch-pr/SKILL.md",
+	groups := []string{"sdd", "sdr", "support"}
+	skillFiles := make([]string, 0)
+	for _, group := range groups {
+		pattern := filepath.Join("..", "..", "assets", "skills", group, "*", "SKILL.md")
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			t.Fatalf("glob %s: %v", pattern, err)
+		}
+		skillFiles = append(skillFiles, matches...)
+	}
+	sort.Strings(skillFiles)
+	if len(skillFiles) == 0 {
+		t.Fatal("no SKILL.md files found under assets/skills/{sdd,sdr,support}")
 	}
 
 	required := []string{
@@ -57,10 +47,37 @@ func TestAllSkillFilesContainRequiredSections(t *testing.T) {
 			t.Fatalf("skill file is empty: %s", path)
 		}
 		for _, h := range required {
-			if !strings.Contains(content, h) {
+			if !hasRequiredHeading(content, h) {
 				t.Fatalf("skill file %s missing heading %q", path, h)
 			}
 		}
+	}
+}
+
+func TestHasExactHeadingLine(t *testing.T) {
+	tests := []struct {
+		name    string
+		line    string
+		wantOK  bool
+	}{
+		{name: "exact", line: "## Handoffs", wantOK: true},
+		{name: "trimmed exact", line: "  ## Handoffs  ", wantOK: true},
+		{name: "duplicated hashes", line: "## ## Handoffs", wantOK: false},
+		{name: "different level", line: "### Handoffs", wantOK: false},
+		{name: "prefixed text", line: "texto ## Handoffs", wantOK: false},
+		{name: "suffix text", line: "## Handoffs extra", wantOK: false},
+		{name: "partial heading", line: "## Hand", wantOK: false},
+		{name: "inside paragraph", line: "En este párrafo va ## Handoffs incrustado.", wantOK: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			content := strings.Join([]string{"# Skill: x", tt.line}, "\n")
+			got := hasExactHeadingLine(content, "## Handoffs")
+			if got != tt.wantOK {
+				t.Fatalf("hasExactHeadingLine(%q) = %v, want %v", tt.line, got, tt.wantOK)
+			}
+		})
 	}
 }
 

@@ -32,7 +32,7 @@ Create the technical blueprint for the change. This skill maps the specification
 - **Exploration Findings**: `sdd/{slug}/explore.md`.
 - **Session State**: `sdd/{slug}/state.yaml`.
 
-## Workflow: The "Architectural Blueprint Protocol"
+## Workflow
 1.  **Component Modeling**: Identify new/modified classes, interfaces, or modules.
 2.  **Data Flow & Schema**: Define DB changes, API contracts (JSON/Protobuf), and state transitions.
 3.  **Integration Strategy**: Detail how the new logic hooks into existing entry points identified in `explore`.
@@ -61,3 +61,11 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 **Status**: `success | partial | blocked`
 
 **Next Recommended**: `sdd-tasks`
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

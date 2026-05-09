@@ -25,7 +25,7 @@ Ensure the technical integrity of Go-based components. This skill automates the 
 - You need a pre-flight check before `sdd-verify`.
 - Validating TUI/CLI logic or complex algorithms.
 
-## Workflow: The "Hermetic Go Protocol"
+## Workflow
 1.  **Static Analysis**: 
     - Execute `gofmt -s -l` to check formatting.
     - Run `go vet ./...` to detect common pragmatism issues.
@@ -84,3 +84,9 @@ Go testing for `{slug}` completed. Coverage: `{XX}%`. Race detector: `{CLEAN|ISS
 - [ ] No race conditions detected.
 - [ ] Table-driven tests used for complex logic.
 - [ ] All filesystem tests use `t.TempDir()`.
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

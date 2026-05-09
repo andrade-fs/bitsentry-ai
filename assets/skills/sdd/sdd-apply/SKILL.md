@@ -31,7 +31,7 @@ Direct the implementation process. This skill acts as the bridge between the pla
 - **Design & Spec**: The "How" and "What" of the change.
 - **Code Context**: Direct access to the target files.
 
-## Workflow: The "Implementation Guardrail Protocol"
+## Workflow
 1.  **Task Selection**: Pick the next available task from the `tasks.md` list.
 2.  **Code Generation/Modification**:
     - Apply changes following the architectural patterns from `explore`.
@@ -62,3 +62,11 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 ## Result Envelope
 **Status**: `success | partial | blocked`
 **Next Recommended**: `sdd-verify`
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

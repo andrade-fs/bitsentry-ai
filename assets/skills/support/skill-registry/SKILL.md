@@ -24,7 +24,7 @@ Synthesize all distributed `SKILL.md` and `flow.yaml` files into a single, high-
 - The folder structure or family definitions have changed.
 - The orchestrator needs a fresh "Compact Map" to resolve dependencies or handoffs.
 
-## Workflow: The "Indexing Protocol"
+## Workflow
 1.  **System Scan**: Identify all directories under `assets/skills/` and `assets/flows/`.
 2.  **Metadata Extraction**: 
     - Parse `family`, `name`, `phase`, and `status` from frontmatter.
@@ -77,3 +77,14 @@ Registry refreshed. `{Total_Skills}` skills and `{Total_Flows}` flows indexed ac
 - [ ] Every skill has a unique ID and Family.
 - [ ] Handoff targets exist in the registry (no broken links).
 - [ ] Output is optimized for minimal token consumption.
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

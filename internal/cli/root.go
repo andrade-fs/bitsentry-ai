@@ -34,6 +34,7 @@ func NewRootCmd() (*cobra.Command, error) {
 	rootCmd.AddCommand(
 		newVersionCmd(),
 		newDoctorCmd(rt),
+		newRouteCmd(rt),
 		newAgentsCmd(rt),
 		newProfilesCmd(rt),
 		newProfileCmd(rt),

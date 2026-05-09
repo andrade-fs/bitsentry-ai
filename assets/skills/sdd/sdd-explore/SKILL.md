@@ -37,7 +37,7 @@ Investigate the current state of the system to resolve the `unknowns` identified
 - Relevant documentation or existing specs.
 - Specific files suggested by the user.
 
-## Workflow: The "Reconnaissance Protocol"
+## Workflow
 1.  **Unknowns Triage**: Prioritize the `unknowns` list from the session state.
 2.  **Surface Mapping**: 
     - Identify core files/modules affected.
@@ -102,3 +102,6 @@ Exploration of `{slug}` complete. Identified `{N}` affected files and resolved `
 - [ ] Side effects on external dependencies are identified.
 - [ ] Existing architectural patterns are documented.
 - [ ] No code was written or modified.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

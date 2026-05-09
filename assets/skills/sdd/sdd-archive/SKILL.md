@@ -31,7 +31,7 @@ Formalize the end of an SDD session. This skill ensures that all knowledge gaine
 - **Session State**: Full `sdd/{slug}/state.yaml`.
 - **All Phase Artifacts**: From `init` to `verify`.
 
-## Workflow: The "Session Consolidation Protocol"
+## Workflow
 1.  **Final Summary**: Synthesize the entire journey from raw request to verified code.
 2.  **Artifact Indexing**: Create a final list of all `sdd/` files produced.
 3.  **Unresolved Follow-ups**: Extract "deferred" tasks or technical debt into a handoff-ready format.
@@ -63,3 +63,11 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 **Handoffs**:
 - **To Issue Creation**: For any follow-up debt.
 - **To Branch PR**: To finalize the merge request text.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

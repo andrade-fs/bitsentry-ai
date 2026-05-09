@@ -37,7 +37,7 @@ Synthesize the findings from `sdd-explore` into a concrete strategy. This skill 
 - Alternative approaches suggested by the user.
 - Global architectural constraints.
 
-## Workflow: The "Strategic Alignment Protocol"
+## Workflow
 1.  **Problem Statement**: Re-articulate the problem based on exploration (why the current state is insufficient).
 2.  **Solution Synthesis**: 
     - Formulate the **Proposed Approach** (the "Happy Path").
@@ -105,3 +105,6 @@ Proposal for `{slug}` generated. Strategy: `{summary}`. Awaiting Gate 1 approval
 - [ ] Rollback strategy is present.
 - [ ] No implementation-level details (code) are included.
 - [ ] Impact on existing dependencies is clear.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

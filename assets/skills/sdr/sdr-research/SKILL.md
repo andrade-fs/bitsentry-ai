@@ -21,7 +21,7 @@ Investigate the `unknowns` from the capture phase. This skill gathers raw techni
 - `sdr-capture` is successful.
 - You need to dive into documentation, logs, or external sources to find evidence.
 
-## Workflow: The "Evidence Protocol"
+## Workflow
 1.  **Unknown Resolution**: Address each question from the `state.yaml`.
 2.  **Fact Extraction**: Identify key technical data (versions, commands, configurations).
 3.  **Cross-Reference**: Compare sources to find contradictions or unique "BitSentry" angles.
@@ -39,3 +39,20 @@ Investigate the `unknowns` from the capture phase. This skill gathers raw techni
 - **target: engram** | `sdr/{slug}/evidence` | Structured technical facts.
 
 **Next Recommended**: `sdr-synthesis`
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Boundaries
+This section is required by contract. Keep behavior declarative and avoid runtime orchestration changes.
+
+## Result Envelope
+Return status, executive summary, artifacts, next recommended, risks, and skill resolution when applicable.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

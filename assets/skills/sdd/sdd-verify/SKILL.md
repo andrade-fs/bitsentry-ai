@@ -30,7 +30,7 @@ Act as the final quality filter. This skill ensures that the code produced in `s
 - **Implementation Log**: `sdd/{slug}/apply.md`.
 - **Test Evidence**: Logs, test results, or build status from the environment.
 
-## Workflow: The "Rigorous Validation Protocol"
+## Workflow
 1.  **Spec Compliance Matrix**: Map each Acceptance Criterion (AC) to a test result or code verification.
 2.  **Regression Check**: Verify that existing functionality remains intact (based on `explore` dependencies).
 3.  **Static Analysis Review**: Check for linting, types, and architectural violations.
@@ -58,3 +58,11 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 ## Result Envelope
 **Status**: `success | partial | blocked`
 **Next Recommended**: `sdd-archive` (or return to `sdd-apply` if blocked)
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

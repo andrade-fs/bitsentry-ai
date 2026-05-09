@@ -21,7 +21,7 @@ The final assembly line. This skill produces the definitive `.md` file that will
 - `sdr-validate` has issued a GREEN or YELLOW verdict.
 - You are ready to close the research session and publish.
 
-## Workflow: The "Final Assembly Protocol"
+## Workflow
 1.  **Frontmatter Construction**: Generate the YAML block exactly as specified:
     - `title`, `date`, `excerpt`, `coverImage`, `category`, `authorName`, `authorAvatar`.
 2.  **Narrative Assembly**:
@@ -71,3 +71,17 @@ Content...
 
 **Handoffs**:
 - **To Issue Creation**: If the post identifies a bug or feature to be implemented in the lab.
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Result Envelope
+Return status, executive summary, artifacts, next recommended, risks, and skill resolution when applicable.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

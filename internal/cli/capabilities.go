@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path/filepath"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -29,10 +30,119 @@ func newCapabilitiesCmd(rt *Runtime) *cobra.Command {
 		newCapabilitiesConfigureCmd(rt),
 		newCapabilitiesValidateCmd(rt),
 		newCapabilitiesPlanCmd(rt),
+		newCapabilitiesExportPreviewCmd(rt),
+		newCapabilitiesExportCmd(rt),
 		newCapabilitiesApplyCmd(rt),
 	)
 
 	return cmd
+}
+
+func newCapabilitiesExportPreviewCmd(rt *Runtime) *cobra.Command {
+	var targetAgent string
+	var selected []string
+	cmd := &cobra.Command{
+		Use:   "export-preview",
+		Short: "Preview selection-aware capabilities export to target managed area",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runCapabilitiesExport(rt, cmd, true, targetAgent, selected)
+		},
+	}
+	cmd.Flags().StringVar(&targetAgent, "target-agent", "opencode", "Target agent adapter (phase support: opencode)")
+	cmd.Flags().StringArrayVar(&selected, "select", []string{}, "Explicit selection IDs (flow/pack aliases), repeatable")
+	return cmd
+}
+
+func newCapabilitiesExportCmd(rt *Runtime) *cobra.Command {
+	var targetAgent string
+	var selected []string
+	cmd := &cobra.Command{
+		Use:   "export",
+		Short: "Export selection-aware capabilities assets to target managed area",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runCapabilitiesExport(rt, cmd, rt.DryRun, targetAgent, selected)
+		},
+	}
+	cmd.Flags().StringVar(&targetAgent, "target-agent", "opencode", "Target agent adapter (phase support: opencode)")
+	cmd.Flags().StringArrayVar(&selected, "select", []string{}, "Explicit selection IDs (flow/pack aliases), repeatable")
+	return cmd
+}
+
+func runCapabilitiesExport(rt *Runtime, cmd *cobra.Command, preview bool, targetAgent string, selected []string) error {
+	if strings.TrimSpace(targetAgent) == "" {
+		targetAgent = "opencode"
+	}
+	if targetAgent != "opencode" {
+		return fmt.Errorf("unsupported target agent %q in this phase; only opencode is supported", targetAgent)
+	}
+	cfg, err := rt.App.ConfigManager.Load()
+	if err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
+	resolved := uniqueSorted(selected)
+	if len(resolved) == 0 {
+		resolved = uniqueSorted(append(append([]string{}, cfg.Components.Flows.Selected...), cfg.Components.Skills.Selected...))
+	}
+	catalog, err := capabilities.DiscoverAssets(".")
+	if err != nil {
+		return fmt.Errorf("discover assets: %w", err)
+	}
+	projection, err := capabilities.BuildOpenCodeExportProjection(catalog, resolved)
+	if err != nil {
+		return fmt.Errorf("build export projection: %w", err)
+	}
+	details, err := buildOpenCodeStatus(context.Background(), rt)
+	if err != nil {
+		return err
+	}
+	configRoot := strings.TrimSpace(details.TargetConfigCandidate)
+	if configRoot == "" {
+		return fmt.Errorf("no OpenCode config root candidate resolved")
+	}
+	result, err := capabilities.ExecuteOpenCodeSkillsExport(projection, configRoot, preview)
+	if err != nil {
+		_, _ = capabilities.WriteOpenCodeSkillsExportReport(capabilities.SkillsExportResult{DryRun: preview, Status: "failed", TargetRoot: filepath.Join(configRoot, "bitsentry"), SelectedIDs: resolved, Warnings: projection.Warnings, Skipped: projection.Skipped})
+		return err
+	}
+	reportPath, reportErr := capabilities.WriteOpenCodeSkillsExportReport(result)
+	out := cmd.OutOrStdout()
+	mode := "export"
+	if preview {
+		mode = "preview"
+	}
+	fmt.Fprintf(out, "Capabilities %s\n", mode)
+	fmt.Fprintf(out, "- target-agent: %s\n", targetAgent)
+	fmt.Fprintf(out, "- selected IDs: %s\n", fallback(strings.Join(result.SelectedIDs, ", "), "none"))
+	fmt.Fprintf(out, "- managed target root: %s\n", result.TargetRoot)
+	fmt.Fprintf(out, "- included flows: %s\n", fallback(strings.Join(result.IncludedFlows, ", "), "none"))
+	fmt.Fprintf(out, "- included skill packs: %s\n", fallback(strings.Join(result.IncludedPacks, ", "), "none"))
+	fmt.Fprintf(out, "- included skills count: %d\n", result.IncludedSkills)
+	fmt.Fprintf(out, "- generated files: %s\n", fallback(strings.Join(result.GeneratedFiles, ", "), "none"))
+	fmt.Fprintf(out, "- written files count: %d\n", len(result.WrittenFiles))
+	if result.BackupPath != "" {
+		fmt.Fprintf(out, "- backup path: %s\n", result.BackupPath)
+	}
+	if len(result.Warnings) > 0 {
+		fmt.Fprintln(out, "- warnings:")
+		for _, w := range result.Warnings {
+			fmt.Fprintf(out, "  - %s\n", w)
+		}
+	}
+	if len(result.Skipped) > 0 {
+		fmt.Fprintln(out, "- skipped:")
+		for _, s := range result.Skipped {
+			fmt.Fprintf(out, "  - %s\n", s)
+		}
+	}
+	if reportErr == nil {
+		fmt.Fprintf(out, "- report path: %s\n", reportPath)
+	} else {
+		fmt.Fprintf(out, "- report warning: %v\n", reportErr)
+	}
+	if preview {
+		fmt.Fprintln(out, "No files were modified.")
+	}
+	return nil
 }
 
 func newCapabilitiesValidateCmd(rt *Runtime) *cobra.Command {

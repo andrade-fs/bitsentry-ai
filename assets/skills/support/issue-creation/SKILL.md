@@ -24,7 +24,7 @@ Standardize the creation of work units. This skill ensures that every issue has 
 - A research finding in `sdr-validate` requires a follow-up implementation.
 - You need to break a large goal into smaller, manageable chunks.
 
-## Workflow: The "Issue Blueprint Protocol"
+## Workflow
 1.  **Context Synthesis**: Distill the problem statement into a concise "Why".
 2.  **Identity Creation**: 
     - **Title**: Action-oriented (e.g., `Implement ZFS Scrub Automation`).
@@ -80,3 +80,14 @@ Issue draft for `{slug}` created. Ready for backlog ingestion.
 - [ ] Acceptance criteria are binary (Pass/Fail).
 - [ ] Labels and priority are logically assigned.
 - [ ] Non-goals are clearly defined to protect the implementation agent.
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

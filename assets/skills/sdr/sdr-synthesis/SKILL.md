@@ -21,7 +21,7 @@ Convert the raw "Evidence Log" into a coherent narrative. This skill defines the
 - Research is sufficient to form a clear opinion or explanation.
 - You need to fill the `excerpt` and `title` (final) of the blog metadata.
 
-## Workflow: The "Distillation Protocol"
+## Workflow
 1.  **Thesis Formation**: Define the "Long Story Short" (1 sentence).
 2.  **Point Filtering**: Select the 3-5 most impactful points from the research.
 3.  **Angle Refinement**: How is this different from generic tutorials? (The "BitSentry touch").
@@ -42,3 +42,20 @@ Convert the raw "Evidence Log" into a coherent narrative. This skill defines the
 - **target: engram** | `sdr/{slug}/thesis` | Compressed knowledge for future sessions.
 
 **Next Recommended**: `sdr-questions`
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Boundaries
+This section is required by contract. Keep behavior declarative and avoid runtime orchestration changes.
+
+## Result Envelope
+Return status, executive summary, artifacts, next recommended, risks, and skill resolution when applicable.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

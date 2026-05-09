@@ -34,6 +34,25 @@
 - Add declarative SDD/SDR/support skill families and shared contracts
 - Fill skill contracts with phase-grade content and enforce headings via tests
 
+### Phase 3.8A — Flow Manifest Normalization (completed)
+- Normalize SDD/SDR/support flow manifests for dynamic discovery/routing readiness
+- Enforce flow manifest contract checks in tests
+
+### Phase 3.8B — Dynamic Asset Discovery API (completed)
+- Add read-only discovery API for flows, skill packs, skills, shared contracts, and orchestrator docs
+- Validate discovered skills against strict required heading contract
+- Keep runtime orchestration/export/apply behavior unchanged
+
+### Phase 3.8C — Selection-aware OpenCode Export Projection (completed)
+- Add read-only projection from selected IDs to discovered assets for OpenCode managed area
+- Generate skill registry preview content from projected assets
+- Preserve existing OpenCode apply behavior and runtime boundaries
+
+### Phase 3.9 — Selection-aware OpenCode Export/Apply (completed)
+- Integrate projection into safe export pipeline for OpenCode managed bitsentry area
+- Add generic capabilities commands: `export-preview` and `export` (opencode target)
+- Add dry-run/export report persistence and managed path safety checks
+
 ### Phase 4.0 — Orchestrator MVP (next)
 - Introduce minimal runtime flow routing with strict safety checkpoints
 
@@ -56,3 +75,4 @@
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability
+- Normalize flow manifests for dynamic discovery/routing readiness

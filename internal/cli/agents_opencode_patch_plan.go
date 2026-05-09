@@ -190,10 +190,10 @@ func buildOpenCodeJSONPatchPlan(targetFile string, selectedMCPs []string, select
 	}
 
 	context7Value := map[string]any{
-		"selected":   selectedSet["context7"],
-		"enabled":    selectedSet["context7"],
-		"command":    "npx",
-		"args":       []string{"-y", "@upstash/context7-mcp"},
+		"selected": selectedSet["context7"],
+		"enabled":  selectedSet["context7"],
+		"command":  "npx",
+		"args":     []string{"-y", "@upstash/context7-mcp"},
 	}
 	context7Action := "add"
 	if contains(plan.ExistingMCPKeys, "context7") {

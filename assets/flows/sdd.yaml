@@ -1,82 +1,205 @@
 id: sdd
 name: Spec Driven Development
+kind: flow
+selectable: true
+top_level_flow: true
 description: >
-  Structured software/product change workflow. 
+  Structured software/product change workflow.
   Follows a strict requirement-to-verification pipeline.
 family: sdd
-orchestrator_skill: sdd-orchestrator
+skill_pack: sdd
+orchestrator_skill: sdd/sdd-orchestrator
 status: declarative
 
-# Requisitos de infraestructura para el Runtime
+triggers:
+  - feature
+  - implement
+  - implementation
+  - refactor
+  - bugfix
+  - tests
+  - architecture
+  - release
+  - migration
+  - module
+  - code
+
+routing:
+  prefer_when:
+    - "The task requires a software/product/code change."
+    - "The task involves implementation, refactoring, testing, release or architecture."
+    - "The user wants a structured change with verification."
+  avoid_when:
+    - "The task is primarily research, content planning, note validation or idea discovery."
+    - "The user explicitly opts out of SDD ceremony."
+  fallback: sdr
+
+slug:
+  required: true
+  immutable: true
+  format: kebab-case
+  source: init
+  collision_policy: append-deterministic-qualifier
+
+contracts:
+  - result-envelope
+  - persistence-contract
+  - handoff-contract
+  - engram-convention
+  - opencode-convention
+  - skill-loading
+
 requires:
   mcps:
-    - engram        # Persistencia de memoria/estado
-    - opencode      # Gestión de artefactos de código
+    - engram
+  targets:
+    - opencode
   optional_mcps:
-    - context7      # Recuperación de contexto extendido
+    - context7
+  support_skills:
+    - support/judgment-day
+    - support/go-testing
+    - support/issue-creation
+    - support/branch-pr
 
-# Definición de Etapas (Pipeline)
+persistence:
+  engram_root: "sdd/{slug}"
+  local_root: "sdd/{slug}"
+  opencode_root: "artifacts/sdd/{slug}"
+
 stages:
   - id: init
-    skill: sdd-init
-    description: "Bootstrap change context and identity (Slug/Goal)."
-    outputs: [ "state.yaml", "init.md" ]
+    skill: sdd/sdd-init
+    description: "Bootstrap change context and identity: slug, goal, scope and initial state."
+    outputs:
+      - "state.yaml"
+      - "init.md"
 
   - id: explore
-    skill: sdd-explore
-    description: "Analyze current architecture and impact surface."
-    outputs: [ "explore.md" ]
+    skill: sdd/sdd-explore
+    description: "Analyze current architecture, affected areas, constraints and impact surface."
+    outputs:
+      - "explore.md"
 
   - id: propose
-    skill: sdd-propose
-    description: "Define strategy and alternatives. Gate 1 checkpoint."
-    outputs: [ "proposal.md" ]
+    skill: sdd/sdd-propose
+    description: "Define strategy, alternatives, rollback idea and approval checkpoint."
+    outputs:
+      - "proposal.md"
     is_gate: true
+    gate: proposal-approval
 
   - id: spec
-    skill: sdd-spec
-    description: "Define requirements and acceptance criteria."
-    outputs: [ "spec.md" ]
+    skill: sdd/sdd-spec
+    description: "Define requirements, acceptance criteria, edge cases and compliance checklist."
+    outputs:
+      - "spec.md"
 
   - id: design
-    skill: sdd-design
-    description: "Define technical architecture and data contracts."
-    outputs: [ "design.md" ]
+    skill: sdd/sdd-design
+    description: "Define technical architecture, data contracts, integration points and risk controls."
+    outputs:
+      - "design.md"
 
   - id: tasks
-    skill: sdd-tasks
-    description: "Build atomic implementation checklist."
-    outputs: [ "tasks.md" ]
+    skill: sdd/sdd-tasks
+    description: "Build atomic implementation checklist from approved proposal/spec/design."
+    outputs:
+      - "tasks.md"
 
   - id: apply
-    skill: sdd-apply
+    skill: sdd/sdd-apply
     description: "Implement code within approved task boundaries."
-    outputs: [ "apply.md" ]
-    is_gate: true # Gate 2: Pre-implementation final check
+    outputs:
+      - "apply.md"
+    is_gate: true
+    gate: pre-implementation
 
   - id: verify
-    skill: sdd-verify
+    skill: sdd/sdd-verify
     description: "Validate quality and compliance against spec."
-    outputs: [ "verify.md" ]
+    outputs:
+      - "verify.md"
 
   - id: archive
-    skill: sdd-archive
-    description: "Formalize closure, summary, and next-steps."
-    outputs: [ "archive.md" ]
-    is_gate: true # Gate 3: Final review
+    skill: sdd/sdd-archive
+    description: "Formalize closure, final summary, decisions and next steps."
+    outputs:
+      - "archive.md"
+    is_gate: true
+    gate: final-review
 
-# Lógica de Handoffs (Cross-Flow)
+stage_graph:
+  init:
+    next:
+      - explore
+  explore:
+    next:
+      - propose
+  propose:
+    next:
+      - spec
+      - design
+    gate: proposal-approval
+  spec:
+    next:
+      - tasks
+  design:
+    next:
+      - tasks
+  tasks:
+    next:
+      - apply
+  apply:
+    next:
+      - verify
+    gate: pre-implementation
+  verify:
+    next:
+      - archive
+  archive:
+    next: []
+    gate: final-review
+
 handoffs:
   - to: sdr
-    when: "deeper research or hypothesis validation is needed"
+    when: "deeper research, external comparison or hypothesis validation is needed"
+    payload_type: handoff-contract
   - to: support/judgment-day
     when: "high-risk changes require adversarial review"
+    payload_type: handoff-contract
+  - to: support/go-testing
+    when: "Go verification guidance is needed"
+    payload_type: handoff-contract
   - to: support/issue-creation
-    when: "post-archive technical debt is identified"
+    when: "post-archive technical debt or follow-up work is identified"
+    payload_type: handoff-contract
+  - to: support/branch-pr
+    when: "a branch/PR plan or draft is needed after verification"
+    payload_type: handoff-contract
 
-# Artefactos finales que el flujo garantiza
 final_artifacts:
   - path: "sdd/{slug}/state.yaml"
-    type: "session-state"
+    type: session-state
+  - path: "sdd/{slug}/init.md"
+    type: phase-artifact
+  - path: "sdd/{slug}/explore.md"
+    type: phase-artifact
+  - path: "sdd/{slug}/proposal.md"
+    type: gate-artifact
+  - path: "sdd/{slug}/spec.md"
+    type: phase-artifact
+  - path: "sdd/{slug}/design.md"
+    type: phase-artifact
+  - path: "sdd/{slug}/tasks.md"
+    type: phase-artifact
+  - path: "sdd/{slug}/apply.md"
+    type: phase-artifact
+  - path: "sdd/{slug}/verify.md"
+    type: verification-artifact
   - path: "sdd/{slug}/archive.md"
-    type: "manifesto"
+    type: closure-manifest
+
+notes:
+  - "Spec and design may run in parallel in a future runtime after proposal approval."
+  - "If runtime does not support parallel stages, execute spec before design."

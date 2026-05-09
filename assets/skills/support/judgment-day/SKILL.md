@@ -25,7 +25,7 @@ To provide an uncompromising quality gate. This skill re-evaluates all evidence 
 - An extra layer of scrutiny is needed before `sdd-archive` or `sdr-archive`.
 - You suspect "hallucination drift" or "lazy validation" in previous phases.
 
-## Workflow: The "Adversarial Audit Protocol"
+## Workflow
 1.  **Evidence Stress-Test**: Don't just read the "PASS" verdict; verify the logs/output provided in `verify.md` or `validate.md`.
 2.  **Assumption Hunting**: Identify statements starting with "It should...", "I assume...", or "Likely...". Convert them into `BLOCKED` status until proven.
 3.  **Control Gap Analysis**: Check for missing security controls, edge cases not covered, or performance bottlenecks ignored.
@@ -76,3 +76,14 @@ Judgment Day for `{slug}` concluded. Verdict: `{VERDICT}`. `{N}` critical issues
 - [ ] Verdict is backed by specific evidence found in artifacts.
 - [ ] No "soft" approvals for high-risk gaps.
 - [ ] Remediation steps are actionable.
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

@@ -32,7 +32,7 @@ Deconstruct the approved `sdd-design` and `sdd-spec` into a granular, ordered ex
 - **Requirements**: `sdd/{slug}/spec.md`.
 - **Exploration Report**: `sdd/{slug}/explore.md`.
 
-## Workflow: The "Tactical Planning Protocol"
+## Workflow
 1.  **Atomic Breakdown**: Identify the smallest possible units of work (e.g., "Create interface X", "Add field Y to DB").
 2.  **Dependency Mapping**: Determine which tasks must happen first (e.g., "Data layer before API layer").
 3.  **Target Assignment**: Explicitly map tasks to specific files or modules identified in `explore`.
@@ -59,3 +59,11 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 ## Result Envelope
 **Status**: `success | partial | blocked`
 **Next Recommended**: `sdd-apply` (Needs Gate 2 Approval)
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

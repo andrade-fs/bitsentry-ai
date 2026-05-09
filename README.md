@@ -99,6 +99,8 @@ bitsentry-ai
 ├── capabilities status
 ├── capabilities validate
 ├── capabilities plan
+├── capabilities export-preview
+├── capabilities export
 ├── capabilities configure
 ├── capabilities apply
 └── config path
@@ -161,6 +163,62 @@ The repository includes declarative skill assets under:
 Current status:
 - Contracts and skill definitions are available as assets.
 - Runtime orchestration/execution is intentionally out of scope in this phase.
+
+## Dynamic Asset Discovery API (Phase 3.8B)
+
+Read-only discovery is now available in-process via `internal/capabilities`:
+
+- `DiscoverAssets(root string) (AssetCatalog, error)`
+
+Discovery scans:
+- `assets/flows/*.yaml`
+- `assets/skills/_shared/*.md`
+- `assets/skills/<pack-id>/**/SKILL.md`
+- `assets/orchestrators/*.md` (optional; missing directory is handled gracefully)
+
+Catalog includes discovered flows, skill packs, skills, shared contracts, and orchestrator contracts with file metadata and validation status.
+
+Notes:
+- This phase is discovery only (no runtime orchestration, no autonomous execution).
+- OpenCode export/apply behavior remains unchanged.
+
+## Selection-aware OpenCode Export Projection (Phase 3.8C)
+
+Read-only projection is now available in-process:
+
+- `BuildOpenCodeExportProjection(catalog AssetCatalog, selectedIDs []string)`
+- `GenerateSkillRegistry(projection OpenCodeExportProjection)`
+
+Behavior:
+- Resolves selected IDs to discovered flows/skill packs (including aliases like `bitsentry-sdd -> sdd`).
+- Includes required assets for selected flows/packs:
+  - `_shared` contracts
+  - selected flow manifests
+  - selected skill packs and discovered skills
+  - support pack when selected flows require support skills
+  - optional orchestrator contracts if present
+- Generates a registry preview (`bitsentry/skill-registry.md`) from projection data.
+
+Notes:
+- Projection only (no file writes, no OpenCode config mutations).
+- Existing apply/export runtime behavior is unchanged in this phase.
+
+## OpenCode Skills Export (Phase 3.9)
+
+Selection-aware export commands (generic capabilities surface):
+
+```bash
+bitsentry-ai capabilities export-preview --target-agent opencode [--select ...]
+bitsentry-ai capabilities export --target-agent opencode --dry-run [--select ...]
+bitsentry-ai capabilities export --target-agent opencode [--select ...]
+```
+
+Behavior:
+- Uses dynamic discovery + projection to decide included assets.
+- Dry-run previews written paths without modifying OpenCode files.
+- Real export writes only under managed area: `<opencode-config-root>/bitsentry/`.
+- Generated registry always included when assets are exported: `bitsentry/skill-registry.md`.
+- Export reports are persisted to `~/.bitsentry-ai/exports/opencode-skills/` with `latest.yaml`.
 
 
 ## Default profiles (8)

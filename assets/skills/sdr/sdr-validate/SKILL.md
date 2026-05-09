@@ -21,7 +21,7 @@ Acting as the final editorial gate. This skill performs a cold, adversarial revi
 - `sdr-structure` is complete.
 - You have a near-final draft of the research and its technical snippets.
 
-## Workflow: The "Semáforo Check"
+## Workflow
 1.  **BitSentry Semáforo Protocol**:
     - **GREEN (Pass)**: Content is original, technical blocks are correct, and visual style is consistent.
     - **YELLOW (Review)**: Missing a technical subtitle (0x //), weak edge cases, or generic excerpt.
@@ -45,3 +45,20 @@ Must include:
 - **target: engram** | `sdr/{slug}/verdict` | Quality historical data.
 
 **Next Recommended**: `sdr-archive`
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Boundaries
+This section is required by contract. Keep behavior declarative and avoid runtime orchestration changes.
+
+## Result Envelope
+Return status, executive summary, artifacts, next recommended, risks, and skill resolution when applicable.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

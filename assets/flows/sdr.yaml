@@ -1,71 +1,179 @@
 id: sdr
 name: Structured Discovery Research
+kind: flow
+selectable: true
+top_level_flow: true
 description: >
-  Structured workflow for knowledge discovery and blog content generation.
-  Prioritizes the 'BitSentry Angle' and technical validation.
+  Structured workflow for knowledge discovery, idea validation, note-making
+  and blog/content generation. Prioritizes the BitSentry angle and technical validation.
 family: sdr
-orchestrator_skill: sdr-orchestrator
+skill_pack: sdr
+orchestrator_skill: sdr/sdr-orchestrator
 status: declarative
 
-# Infraestructura necesaria para el ciclo de vida del conocimiento
+triggers:
+  - research
+  - idea
+  - note
+  - notes
+  - blog
+  - article
+  - synthesize
+  - validate
+  - audience
+  - cliche
+  - resources
+  - compare
+  - topic
+  - content
+
+routing:
+  prefer_when:
+    - "The task is about research, notes, blog/content, idea validation or synthesis."
+    - "The task is ambiguous and should be discovered before implementation."
+    - "The user asks whether a topic is useful, cliché, reproducible or worth pursuing."
+  avoid_when:
+    - "The task already has an approved implementation plan."
+    - "The task is a direct code change with clear requirements."
+  fallback: none
+
+slug:
+  required: true
+  immutable: true
+  format: kebab-case
+  source: capture
+  collision_policy: append-deterministic-qualifier
+
+contracts:
+  - result-envelope
+  - persistence-contract
+  - handoff-contract
+  - engram-convention
+  - opencode-convention
+  - skill-loading
+
 requires:
   mcps:
-    - engram        # Persistencia de la "memoria institucional"
+    - engram
   optional_mcps:
-    - context7      # Recuperación de fuentes externas o papers
+    - context7
+  support_skills:
+    - support/judgment-day
+    - support/skill-registry
+    - support/issue-creation
 
-# Etapas del Pipeline de Descubrimiento
+persistence:
+  engram_root: "sdr/{slug}"
+  local_root: "notes/sdr/{slug}"
+  opencode_root: "artifacts/sdr/{slug}"
+
 stages:
   - id: capture
-    skill: sdr-capture
-    description: "Capture raw topic, identify sources, and define hypothesis."
-    outputs: [ "state.yaml", "capture.md" ]
+    skill: sdr/sdr-capture
+    description: "Capture raw topic, source/resource, hypothesis, audience and constraints."
+    outputs:
+      - "state.yaml"
+      - "capture.md"
 
   - id: research
-    skill: sdr-research
-    description: "Deep dive into concepts and technical evidence gathering."
-    outputs: [ "research.md" ]
+    skill: sdr/sdr-research
+    description: "Deep dive into concepts, context, sources and technical evidence."
+    outputs:
+      - "research.md"
 
   - id: synthesis
-    skill: sdr-synthesis
-    description: "Distill findings into a unique thesis and high-value angles."
-    outputs: [ "synthesis.md" ]
+    skill: sdr/sdr-synthesis
+    description: "Distill findings into a thesis, main points and high-value angles."
+    outputs:
+      - "synthesis.md"
 
   - id: questions
-    skill: sdr-questions
-    description: "Adversarial evaluation of quality and BitSentry relevance."
-    is_gate: true # Gate 1: ¿Vale la pena seguir?
+    skill: sdr/sdr-questions
+    description: "Evaluate usefulness, audience fit, reproducibility, cliché risk and BitSentry angle."
+    outputs:
+      - "questions.md"
+    is_gate: true
+    gate: continuation-review
 
   - id: structure
-    skill: sdr-structure
-    description: "Map the narrative to the BitSentry Blog MD Specification."
-    outputs: [ "structure.md" ]
+    skill: sdr/sdr-structure
+    description: "Map the narrative to the BitSentry note/blog structure."
+    outputs:
+      - "structure.md"
 
   - id: validate
-    skill: sdr-validate
-    description: "Final quality check (Semáforo GREEN/YELLOW/RED)."
-    is_gate: true # Gate 2: Validación técnica y visual
+    skill: sdr/sdr-validate
+    description: "Final quality gate using GREEN/YELLOW/RED decision."
+    outputs:
+      - "validation.md"
+    is_gate: true
+    gate: quality-review
 
   - id: archive
-    skill: sdr-archive
-    description: "Generate final blog-ready MD and persist session state."
-    outputs: [ "final-post.md", "archive.md" ]
+    skill: sdr/sdr-archive
+    description: "Generate final note/post-ready artifact and persist session state."
+    outputs:
+      - "final-post.md"
+      - "archive.md"
 
-# Conexiones con otros flujos y herramientas
+stage_graph:
+  capture:
+    next:
+      - research
+  research:
+    next:
+      - synthesis
+  synthesis:
+    next:
+      - questions
+  questions:
+    next:
+      - structure
+    gate: continuation-review
+  structure:
+    next:
+      - validate
+  validate:
+    next:
+      - archive
+    gate: quality-review
+  archive:
+    next: []
+
 handoffs:
   - to: sdd
-    when: "research findings require a technical implementation or POC"
-    payload_type: "handoff-contract"
-    
+    when: "research findings require technical implementation, a POC or product work"
+    payload_type: handoff-contract
   - to: support/issue-creation
-    when: "research identifies technical debt or new required features"
-    
+    when: "research identifies technical debt, product work or follow-up tasks"
+    payload_type: handoff-contract
   - to: support/judgment-day
-    when: "the topic is highly controversial or critical for cybersecurity"
+    when: "topic is controversial, high-risk or strategically important"
+    payload_type: handoff-contract
+  - to: support/skill-registry
+    when: "a new reusable skill should be proposed or discovered"
+    payload_type: handoff-contract
 
-# Promesa de salida del flujo
 final_artifacts:
-  - path: "notes/sdr/{slug}/final-post.md"
-    type: "blog-post"
   - path: "notes/sdr/{slug}/state.yaml"
-    type: "session-state"
+    type: session-state
+  - path: "notes/sdr/{slug}/capture.md"
+    type: phase-artifact
+  - path: "notes/sdr/{slug}/research.md"
+    type: phase-artifact
+  - path: "notes/sdr/{slug}/synthesis.md"
+    type: phase-artifact
+  - path: "notes/sdr/{slug}/questions.md"
+    type: gate-artifact
+  - path: "notes/sdr/{slug}/structure.md"
+    type: phase-artifact
+  - path: "notes/sdr/{slug}/validation.md"
+    type: validation-artifact
+  - path: "notes/sdr/{slug}/final-post.md"
+    type: publishable-artifact
+  - path: "notes/sdr/{slug}/archive.md"
+    type: closure-manifest
+
+notes:
+  - "SDR should be preferred for ambiguous tasks before SDD implementation."
+  - "The final-post artifact should follow the BitSentry markdown/blog conventions when available."

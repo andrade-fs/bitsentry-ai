@@ -30,7 +30,7 @@ Formalize the transition from "Implementation/Verification" to "Integration". Th
 - **Implementation Summary**: `sdd/{slug}/apply.md`.
 - **Verification Evidence**: `sdd/{slug}/verify.md`.
 
-## Workflow: The "Pre-Integration Protocol"
+## Workflow
 1.  **Branch Naming**: Generate a deterministic branch name (e.g., `feature/oauth2-provider` or `fix/mem-leak-storage`).
 2.  **Commit Sequencing**: Break the `apply.md` changes into a logical commit plan (e.g., "Refactor interface", "Implement logic", "Add tests").
 3.  **PR Narrative Construction**:
@@ -86,3 +86,6 @@ Branch/PR plan generated for `{slug}`. Ready for human execution.
 - [ ] PR description includes "Why" (Proposal) and "Proof" (Verify).
 - [ ] Rollback steps are explicit and tested.
 - [ ] No git commands were executed.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

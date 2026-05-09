@@ -31,7 +31,7 @@ Initialize the "Source of Truth" for an SDD session. This skill transforms a vag
 - **Raw Request**: The user's prompt, issue description, or task.
 - **Context**: Project name and existing constraints (if any).
 
-## Workflow: The "Normalization Protocol"
+## Workflow
 1.  **Intent Extraction**: Identify the `Action` (e.g., Add), `Object` (e.g., Auth Provider), and `Context`.
 2.  **Identity Generation**:
     - **Name**: Human-readable (e.g., `OAuth2 Provider Support`).
@@ -111,3 +111,6 @@ Initialized SDD session `{slug}`. Identity and scope established. Ready for `sdd
 - [ ] Persistence paths use the new `slug` consistently.
 - [ ] No code or architectural design was attempted.
 ```
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

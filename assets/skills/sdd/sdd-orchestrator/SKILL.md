@@ -34,7 +34,7 @@ Exclusively coordinate the SDD lifecycle by managing the transition between spec
 - `last_envelope`: The output from the previous phase skill.
 - `skill_registry`: Catalog of available `sdd-*` skills.
 
-## Workflow: The "Orchestrator Protocol"
+## Workflow
 *The agent must follow these steps in strict linear order:*
 
 1.  **Reconstruct**: Parse `state.yaml`. If not found, invoke `sdd-init` protocol logic.
@@ -56,7 +56,7 @@ Exclusively coordinate the SDD lifecycle by managing the transition between spec
 ## Outputs
 Must return a `Result Envelope` that updates the orchestrator's view of the world.
 
-### Persistence Actions
+## Persistence Actions
 Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 
 - **target: local** | `sdd/{slug}/state.yaml` | The definitive session state.
@@ -68,7 +68,7 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 - **NO Bypass**: Do not skip `sdd-verify` even for "trivial" changes.
 - **Stateless Operation**: Do not rely on hidden memory; everything must be in `state.yaml`.
 
-## Result Envelope (Standard)
+## Result Envelope
 **Status**: `success | partial | blocked`
 
 **Executive Summary**:
@@ -97,7 +97,7 @@ Brief status of the flow. (e.g., "Session `auth-fix` moved from `propose` to `sp
 - Any detected drift between the proposal and the current design/implementation.
 
 
-## ## Handoffs
+## Handoffs
 Compliant with _shared/handoff-contract.md
 ### 1) To SDR
 - **when**: technical research, idea validation, or external comparison is needed.

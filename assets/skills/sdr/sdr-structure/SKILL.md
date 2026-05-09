@@ -21,7 +21,7 @@ Design the technical skeleton of the blog post. This skill enforces your specifi
 - `sdr-questions` has given a "Proceed" verdict.
 - You need a blueprint before writing the final Markdown prose.
 
-## Workflow: The "Architectural Layout Protocol"
+## Workflow
 1.  **Headline Mapping**: Design the H1 and H2s. Use the `01 // TITLE` format for technical headers.
 2.  **Narrative Arc**: Organize the synthesis points into: `Introduction`, `The Concept`, `The Technical Stack`, `Mistakes/Lessons`, and `Conclusion`.
 3.  **Admonition Placement**: Identify where to insert `[!NOTE]`, `[!IMPORTANT]`, or `[!WARNING]` blocks for critical security/safety info.
@@ -40,3 +40,20 @@ Must follow the **BitSentry MD Specification**:
 - **target: engram** | `sdr/{slug}/blueprint` | Final structural metadata.
 
 **Next Recommended**: `sdr-validate`
+
+## Inputs
+- If not otherwise specified above, use the invoking user request and current project context.
+
+## Boundaries
+This section is required by contract. Keep behavior declarative and avoid runtime orchestration changes.
+
+## Result Envelope
+Return status, executive summary, artifacts, next recommended, risks, and skill resolution when applicable.
+
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
+
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.

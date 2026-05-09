@@ -32,7 +32,7 @@ Convert a raw research intent into a deterministic SDR session. It establishes t
 - **Category (Optional)**: `HomeLab`, `Cybersecurity`, `DevOps`, etc.
 - **Initial Context**: Why this topic is relevant now.
 
-## Workflow: The "Seed Protocol"
+## Workflow
 1.  **Slug Generation**: Create a deterministic kebab-case `slug` based on the topic (e.g., `proxmox-zfs-best-practices`).
 2.  **Metadata Pre-filling**: Initialize the Blog Frontmatter fields:
     - `title`: A working title.
@@ -103,3 +103,5 @@ Captured topic `{slug}`. Identity and blog metadata initialized. Ready for `sdr-
 - [ ] Non-goals are explicit to keep research focused.
 ```
 
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.

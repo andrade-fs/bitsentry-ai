@@ -32,7 +32,7 @@ Translate the approved proposal into a set of rigorous, testable requirements. T
 - **Session State**: `sdd/{slug}/state.yaml`.
 - **Repo Context**: To ensure specs align with existing business logic.
 
-## Workflow: The "Requirement Hardening Protocol"
+## Workflow
 1.  **User Stories / Functional Requirements**: Break down the proposal into discrete units of behavior.
 2.  **Acceptance Criteria (AC)**: Define exact conditions that must be met (e.g., "API must return 404 if ID is missing").
 3.  **Edge Case Mapping**: Identify "sad paths", boundary conditions, and error states.
@@ -62,4 +62,10 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 
 **Next Recommended**: `sdd-design`
 
+## Handoffs
+- If downstream phases/skills are needed, hand off according to the flow manifest and contracts.
 
+## Quality Checklist
+- [ ] Required heading present for contract compliance.
+- [ ] Guidance remains declarative.
+- [ ] No runtime behavior changes introduced.
