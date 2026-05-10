@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"bitsentry-ai/internal/capabilities"
 	"bitsentry-ai/internal/components"
 	"bitsentry-ai/internal/workflows"
 )
@@ -61,33 +62,150 @@ func renderHome(m model) string {
 }
 
 func renderInstall(m model) string {
-	cfgDir, cfgPath := configPaths()
-	openCodeStatus := "not detected"
-	for _, a := range m.agents {
-		if a.ID == "opencode" {
-			if a.Found {
-				openCodeStatus = "detected"
-				if a.Path != "" {
-					openCodeStatus = fmt.Sprintf("detected (%s)", a.Path)
-				}
-			} else if a.Hint != "" {
-				openCodeStatus = "not detected"
+	stepTitle := []string{
+		"Step 1 of 6 — Select target agent",
+		"Step 2 of 6 — Select capabilities",
+		"Step 3 of 6 — Select MCPs/components",
+		"Step 4 of 6 — Review install plan",
+		"Step 5 of 6 — Install / Update",
+		"Step 6 of 6 — Done / Next OpenCode prompt",
+	}
+	preset, _ := capabilities.PresetByID(m.install.Preset, capabilities.DefaultPresets())
+	lines := []string{stepTitle[m.install.CurrentStep], ""}
+
+	switch m.install.CurrentStep {
+	case installStepTarget:
+		targetLabel := "[ ] OpenCode"
+		if m.install.TargetSelected {
+			targetLabel = "[x] OpenCode"
+		}
+		cursor := "  "
+		if m.install.Cursor == 0 {
+			cursor = "➜ "
+		}
+		lines = append(lines,
+			"Detected agents:",
+			cursor+targetLabel,
+			fmt.Sprintf("     binary: %s", valueOrDefault(m.install.OpenCodeBinary, "not found")),
+			fmt.Sprintf("     config root: %s", valueOrDefault(m.install.OpenCodeConfig, "not resolved")),
+			fmt.Sprintf("     pack root: %s", valueOrDefault(m.install.BitsentryPackRoot, "not resolved")),
+			fmt.Sprintf("     pack installed: %s", openCodeStatusLine(m.install.PackInstalled)),
+			"",
+			"Enter: continue • Space: toggle • r: refresh • Esc: back",
+		)
+	case installStepCapabilities:
+		lines = append(lines,
+			"Preset:",
+			fmt.Sprintf("➜ [x] %s", valueOrDefault(m.install.Preset, "bitsentry-dev")),
+			fmt.Sprintf("     flows: %s", valueOrDefault(strings.Join(preset.Flows, ", "), "none")),
+			fmt.Sprintf("     skills: %s", valueOrDefault(strings.Join(preset.Skills, ", "), "none")),
+			"",
+			"Enter: continue • [ / ] change preset • Space: cycle preset • Esc: back",
+		)
+	case installStepComponents:
+		engramCursor := "  "
+		contextCursor := "  "
+		if m.install.Cursor == 0 {
+			engramCursor = "➜ "
+		} else {
+			contextCursor = "➜ "
+		}
+		engramSel := "[ ]"
+		if m.install.SelectedMCPs["engram"] {
+			engramSel = "[x]"
+		}
+		contextSel := "[ ]"
+		if m.install.SelectedMCPs["context7"] {
+			contextSel = "[x]"
+		}
+		lines = append(lines,
+			fmt.Sprintf("%s%s Engram    %s", engramCursor, engramSel, valueOrDefault(m.install.MCPStatus["engram"], "unknown")),
+			fmt.Sprintf("%s%s Context7  %s", contextCursor, contextSel, valueOrDefault(m.install.MCPStatus["context7"], "unknown")),
+			"",
+			"Enter: continue • Space: toggle • up/down: move • Esc: back",
+		)
+	case installStepReview:
+		targets := "none"
+		if m.install.TargetSelected {
+			targets = "OpenCode"
+		}
+		lines = append(lines,
+			"Target agents:",
+			fmt.Sprintf("- %s", targets),
+			fmt.Sprintf("- config root: %s", valueOrDefault(m.install.OpenCodeConfig, "not resolved")),
+			fmt.Sprintf("- managed pack path: %s", valueOrDefault(m.install.BitsentryPackRoot, "not resolved")),
+			"",
+			"Capabilities:",
+			fmt.Sprintf("- preset: %s", m.install.Preset),
+			fmt.Sprintf("- flows: %s", valueOrDefault(strings.Join(preset.Flows, ", "), "none")),
+			fmt.Sprintf("- skills: %s", valueOrDefault(strings.Join(preset.Skills, ", "), "none")),
+			"",
+			"Components:",
+			fmt.Sprintf("- Engram: %s, %s", boolLabel(m.install.SelectedMCPs["engram"], "selected", "not selected"), valueOrDefault(m.install.MCPStatus["engram"], "unknown")),
+			fmt.Sprintf("- Context7: %s, %s", boolLabel(m.install.SelectedMCPs["context7"], "selected", "not selected"), valueOrDefault(m.install.MCPStatus["context7"], "unknown")),
+			fmt.Sprintf("- Register Bitsentry agent in opencode.json: %s", boolLabel(m.install.RegisterAgent, "yes", "no")),
+			fmt.Sprintf("- Install /bit-* commands: %s", boolLabel(m.install.InstallCommands, "yes", "no")),
+			fmt.Sprintf("- Install vital native OpenCode skills: %s", boolLabel(m.install.InstallNativeSkills, "yes", "no")),
+			fmt.Sprintf("- Configure MCPs in opencode.json: %s", boolLabel(m.install.ConfigureMCP, "yes", "no")),
+			"",
+			"Will do:",
+			"- export Bitsentry capability pack",
+			"- verify OPENCODE_USAGE.md",
+			"- verify skill-registry.md",
+			"- write bitsentry/agents/bitsentry.md",
+			"- write bitsentry/opencode-entrypoint.md",
+			"- merge opencode.json instructions + agent.bitsentry + /bit-* commands",
+			"- install native skills under skills/<name>/SKILL.md",
+			"- create backups before overwrite",
+			"",
+			"Will NOT do:",
+			"- delete user config",
+			"- mutate MCP config unless explicitly selected and supported",
+			"- execute flows",
+			"- run autonomous agents",
+		)
+		if !m.install.TargetSelected {
+			lines = append(lines,
+				"",
+				"Cannot install yet:",
+				"- Select at least one target agent.",
+			)
+		}
+		lines = append(lines, "", "Enter: continue • Esc: back")
+	case installStepInstall:
+		action := "Install Bitsentry pack"
+		if m.install.PackInstalled {
+			action = "Update / Reinstall Bitsentry pack"
+		}
+		lines = append(lines,
+			action,
+			"",
+			"Press Enter to run.",
+			"Esc: back",
+		)
+	case installStepDone:
+		prompt := valueOrDefault(m.install.NextPrompt, "Install did not complete.")
+		lines = append(lines,
+			fmt.Sprintf("Result: %s", valueOrDefault(m.install.ResultStatus, "FAIL")),
+		)
+		if len(m.install.ResultNotes) > 0 {
+			lines = append(lines, "", "Notes:")
+			for _, n := range m.install.ResultNotes {
+				lines = append(lines, fmt.Sprintf("- %s", n))
 			}
 		}
+		lines = append(lines,
+			"",
+			"OpenCode prompt:",
+		)
+		lines = append(lines, strings.Split(prompt, "\n")...)
+		lines = append(lines,
+			"",
+			"Esc: back",
+		)
 	}
-	return frame(m, "Install / Setup",
-		fmt.Sprintf("- OS: %s", m.system.OS),
-		fmt.Sprintf("- Arch: %s", m.system.Arch),
-		fmt.Sprintf("- Shell: %s", m.shell),
-		fmt.Sprintf("- Package manager: %s", packageManager(m.deps)),
-		fmt.Sprintf("- Config path: %s", cfgPath),
-		fmt.Sprintf("- Config dir: %s", cfgDir),
-		fmt.Sprintf("- Active profile: %s", m.active),
-		fmt.Sprintf("- Dependency summary: %s", dependencySummary(m.deps)),
-		fmt.Sprintf("- OpenCode: %s", openCodeStatus),
-		"",
-		"Component installation is not implemented yet. This screen is prepared for Phase 5+.",
-	)
+
+	return frame(m, "Install / Setup", lines...)
 }
 
 func renderSystem(m model) string {

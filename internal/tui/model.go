@@ -60,6 +60,8 @@ type model struct {
 	capLastPlan     string
 	capLastValidate string
 	capDirty        bool
+
+	install installWizardState
 }
 
 func newModel(a *app.App, dryRun bool) model {
@@ -109,11 +111,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		case "esc", "backspace":
+			if m.screen == screenInstall {
+				if m.install.CurrentStep > installStepTarget {
+					m.install.CurrentStep--
+					m.install.Cursor = 0
+					m.message = ""
+					m.errMsg = ""
+					return m, nil
+				}
+			}
+			if m.screen == screenCapabilities && m.capAwaitConfirm {
+				m.capAwaitConfirm = false
+				m.message = "Apply confirmation cancelled."
+				return m, nil
+			}
+			if m.screen != screenHome {
+				m.screen = screenHome
+				m.selected = 0
+				m.refreshData()
+			}
 		case "up", "k":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
+				return m, nil
+			}
 			if (m.screen == screenHome || m.screen == screenProfiles) && m.selected > 0 {
 				m.selected--
 			}
 		case "down", "j":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
+				return m, nil
+			}
 			limit := len(m.menu) - 1
 			if m.screen == screenProfiles {
 				limit = len(m.profiles) - 1
@@ -121,7 +149,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if (m.screen == screenHome || m.screen == screenProfiles) && m.selected < limit {
 				m.selected++
 			}
+		case "space", " ":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
+				return m, nil
+			}
 		case "enter":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
+				return m, nil
+			}
 			if m.screen == screenHome {
 				next := m.menu[m.selected].Screen
 				if next == screenExit {
@@ -131,6 +166,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selected = 0
 				m.message = ""
 				m.refreshData()
+				if m.screen == screenInstall {
+					m.loadInstallWizard()
+				}
 				if m.screen == screenCapabilities {
 					m.loadCapabilityState()
 				}
@@ -152,22 +190,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.message = fmt.Sprintf("Active profile set to %q", chosen)
 				m.refreshData()
 			}
-		case "esc", "backspace":
-			if m.screen == screenCapabilities && m.capAwaitConfirm {
-				m.capAwaitConfirm = false
-				m.message = "Apply confirmation cancelled."
+		case "r":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
 				return m, nil
 			}
-			if m.screen != screenHome {
-				m.screen = screenHome
-				m.selected = 0
-				m.refreshData()
-			}
 		case "[":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
+				return m, nil
+			}
 			if m.screen == screenCapabilities {
 				m.shiftCapabilityPreset(-1)
 			}
 		case "]":
+			if m.screen == screenInstall && m.handleInstallKey(msg.String()) {
+				return m, nil
+			}
 			if m.screen == screenCapabilities {
 				m.shiftCapabilityPreset(1)
 			}

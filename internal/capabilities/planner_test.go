@@ -11,10 +11,10 @@ func TestBuildPlanFromSelection_DeduplicatesAndSorts(t *testing.T) {
 	catalog := Catalog{
 		MCPs:   []Entry{{ID: "engram"}, {ID: "context7"}, {ID: "postgres"}},
 		Skills: []Entry{{ID: "bitsentry-sdd"}},
-		Flows:  []Entry{{ID: "sdd"}, {ID: "notes"}},
+		Flows:  []Entry{{ID: "sdd"}, {ID: "support"}},
 	}
 
-	plan, err := BuildPlanFromSelection(catalog, "opencode", "custom", []string{"context7", "engram", "engram"}, []string{"bitsentry-sdd"}, []string{"notes", "sdd", "notes"})
+	plan, err := BuildPlanFromSelection(catalog, "opencode", "custom", []string{"context7", "engram", "engram"}, []string{"bitsentry-sdd"}, []string{"support", "sdd", "support"})
 	if err != nil {
 		t.Fatalf("BuildPlanFromSelection returned error: %v", err)
 	}
@@ -25,7 +25,7 @@ func TestBuildPlanFromSelection_DeduplicatesAndSorts(t *testing.T) {
 	if plan.MCPs[0] != "context7" || plan.MCPs[1] != "engram" {
 		t.Fatalf("MCP list not sorted/deduped: %#v", plan.MCPs)
 	}
-	if plan.Flows[0] != "notes" || plan.Flows[1] != "sdd" {
+	if plan.Flows[0] != "sdd" || plan.Flows[1] != "support" {
 		t.Fatalf("Flow list not sorted/deduped: %#v", plan.Flows)
 	}
 }
@@ -54,7 +54,7 @@ func TestBuildCatalog_FlowSelectionFromConfig(t *testing.T) {
 	cfg := config.Config{}
 	cfg.Components.Flows.Enabled = true
 	cfg.Components.Flows.Configured = true
-	cfg.Components.Flows.Selected = []string{"sdd", "notes"}
+	cfg.Components.Flows.Selected = []string{"sdd", "support"}
 
 	catalog := BuildCatalog(cfg, []components.MCP{}, []components.Skill{})
 
@@ -63,8 +63,8 @@ func TestBuildCatalog_FlowSelectionFromConfig(t *testing.T) {
 		selected[f.ID] = f.Selected
 	}
 
-	if !selected["sdd"] || !selected["notes"] {
-		t.Fatalf("expected sdd and notes selected, got %#v", selected)
+	if !selected["sdd"] || !selected["support"] {
+		t.Fatalf("expected sdd and support selected, got %#v", selected)
 	}
 }
 
@@ -98,7 +98,7 @@ func TestValidateSavedConfig(t *testing.T) {
 	catalog := Catalog{
 		MCPs:    []Entry{{ID: "engram"}, {ID: "context7"}},
 		Skills:  []Entry{{ID: "bitsentry-sdd"}},
-		Flows:   []Entry{{ID: "sdd"}, {ID: "notes"}},
+		Flows:   []Entry{{ID: "sdd"}, {ID: "support"}},
 		Targets: []Entry{{ID: "opencode"}},
 		Presets: []Preset{{ID: "custom"}, {ID: "bitsentry-dev"}},
 	}
@@ -122,5 +122,22 @@ func TestValidateSavedConfig(t *testing.T) {
 	issues := ValidateSavedConfig(catalog, invalid)
 	if len(issues) < 3 {
 		t.Fatalf("expected at least 3 validation issues, got %#v", issues)
+	}
+}
+
+func TestValidatePresetSelections_Strict(t *testing.T) {
+	catalog := Catalog{
+		MCPs:    []Entry{{ID: "engram"}, {ID: "context7"}},
+		Skills:  []Entry{{ID: "bitsentry-sdd"}, {ID: "bitsentry-support"}},
+		Flows:   []Entry{{ID: "sdd"}, {ID: "support"}},
+		Targets: []Entry{{ID: "opencode"}},
+	}
+	valid := Preset{ID: "bitsentry-dev", MCPs: []string{"engram"}, Skills: []string{"bitsentry-sdd"}, Flows: []string{"sdd"}, Targets: []string{"opencode"}}
+	if err := ValidatePresetSelections(catalog, valid); err != nil {
+		t.Fatalf("expected valid preset, got %v", err)
+	}
+	invalid := Preset{ID: "broken", MCPs: []string{"engram"}, Skills: []string{"unknown-skill"}, Flows: []string{"sdd"}, Targets: []string{"opencode"}}
+	if err := ValidatePresetSelections(catalog, invalid); err == nil {
+		t.Fatalf("expected strict validation error for invalid preset")
 	}
 }

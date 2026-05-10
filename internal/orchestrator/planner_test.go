@@ -34,7 +34,7 @@ func TestBuildExecutionPlanFromFlowManifest(t *testing.T) {
 func TestExecutionPlanDoesNotExecuteAgents(t *testing.T) {
 	p := NewPlanner()
 	flow := capabilities.DiscoveredFlow{
-		ID: "support",
+		ID:     "support",
 		Stages: []map[string]any{{"id": "quality", "skill": "support/judgment-day", "description": "review"}},
 	}
 

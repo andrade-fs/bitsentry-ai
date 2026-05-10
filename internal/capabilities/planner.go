@@ -36,6 +36,9 @@ func BuildPlan(catalog Catalog, targetAgent string, presetID string) (Plan, erro
 	if !found {
 		return Plan{}, fmt.Errorf("unknown preset %q", selectedPreset)
 	}
+	if err := ValidatePresetSelections(catalog, preset); err != nil {
+		return Plan{}, err
+	}
 
 	plan := basePlan(targetAgent, preset.ID)
 	plan.MCPs = append([]string{}, preset.MCPs...)

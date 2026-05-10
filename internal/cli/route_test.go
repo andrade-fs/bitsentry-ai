@@ -328,7 +328,7 @@ func TestRouteCommandSupportsJSON(t *testing.T) {
 			Flow   string `json:"flow"`
 			Stages []any  `json:"stages"`
 		} `json:"plan"`
-		Warnings []string `json:"warnings"`
+		Warnings       []string `json:"warnings"`
 		SessionPreview struct {
 			WouldCreateSession bool `json:"would_create_session"`
 			WouldPersist       bool `json:"would_persist"`
@@ -480,8 +480,8 @@ func TestRoutePreviewSupportsJSON(t *testing.T) {
 	}
 
 	var payload struct {
-		Intent string `json:"intent"`
-		Flow   string `json:"flow"`
+		Intent         string `json:"intent"`
+		Flow           string `json:"flow"`
 		SessionPreview struct {
 			WouldCreateSession bool `json:"would_create_session"`
 			WouldPersist       bool `json:"would_persist"`
@@ -2552,7 +2552,11 @@ func TestRouteCleanupFiltersByFlow(t *testing.T) {
 	setupRouteTestRepo(t)
 	_ = startRouteSessionForTest(t)
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--flow", "support", "--json"})
-	var payload struct{ Counts struct{ Candidates int `json:"candidates"` } `json:"counts"` }
+	var payload struct {
+		Counts struct {
+			Candidates int `json:"candidates"`
+		} `json:"counts"`
+	}
 	_ = json.Unmarshal(out.Bytes(), &payload)
 	if payload.Counts.Candidates != 0 {
 		t.Fatalf("expected zero candidates for unmatched flow")
@@ -2563,7 +2567,11 @@ func TestRouteCleanupFiltersByStatus(t *testing.T) {
 	setupRouteTestRepo(t)
 	_ = startRouteSessionForTest(t)
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--status", "done", "--json"})
-	var payload struct{ Counts struct{ Candidates int `json:"candidates"` } `json:"counts"` }
+	var payload struct {
+		Counts struct {
+			Candidates int `json:"candidates"`
+		} `json:"counts"`
+	}
 	_ = json.Unmarshal(out.Bytes(), &payload)
 	if payload.Counts.Candidates != 0 {
 		t.Fatalf("expected zero candidates for unmatched status")
@@ -2575,7 +2583,11 @@ func TestRouteCleanupOlderThanFilter(t *testing.T) {
 	sessionID := startRouteSessionForTest(t)
 	setSessionUpdatedAtForTest(t, repo, sessionID, time.Now().UTC().Add(-2*time.Hour))
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--older-than", "1h", "--json"})
-	var payload struct{ Counts struct{ Candidates int `json:"candidates"` } `json:"counts"` }
+	var payload struct {
+		Counts struct {
+			Candidates int `json:"candidates"`
+		} `json:"counts"`
+	}
 	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
 		t.Fatalf("invalid cleanup json: %v", err)
 	}
@@ -2590,7 +2602,11 @@ func TestRouteCleanupCompletedOnly(t *testing.T) {
 	markDone(t, sessionID, "apply")
 	markDone(t, sessionID, "verify")
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--completed-only", "--json"})
-	var payload struct{ Counts struct{ Candidates int `json:"candidates"` } `json:"counts"` }
+	var payload struct {
+		Counts struct {
+			Candidates int `json:"candidates"`
+		} `json:"counts"`
+	}
 	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
 		t.Fatalf("invalid cleanup json: %v", err)
 	}
@@ -2604,7 +2620,11 @@ func TestRouteCleanupExcludesArchivedByDefault(t *testing.T) {
 	sessionID := startRouteSessionForTest(t)
 	archiveSessionForTest(t, sessionID, false)
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--flow", "sdd", "--json"})
-	var payload struct{ Counts struct{ Candidates int `json:"candidates"` } `json:"counts"` }
+	var payload struct {
+		Counts struct {
+			Candidates int `json:"candidates"`
+		} `json:"counts"`
+	}
 	_ = json.Unmarshal(out.Bytes(), &payload)
 	if payload.Counts.Candidates != 0 {
 		t.Fatalf("expected archived session excluded by default")
@@ -2616,7 +2636,11 @@ func TestRouteCleanupIncludeArchived(t *testing.T) {
 	sessionID := startRouteSessionForTest(t)
 	archiveSessionForTest(t, sessionID, false)
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--flow", "sdd", "--include-archived", "--json"})
-	var payload struct{ Counts struct{ Candidates int `json:"candidates"` } `json:"counts"` }
+	var payload struct {
+		Counts struct {
+			Candidates int `json:"candidates"`
+		} `json:"counts"`
+	}
 	_ = json.Unmarshal(out.Bytes(), &payload)
 	if payload.Counts.Candidates != 1 {
 		t.Fatalf("expected archived session included with --include-archived")
@@ -2635,7 +2659,10 @@ func TestRouteCleanupHandlesCorruptSessionSafely(t *testing.T) {
 	}
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--flow", "sdd", "--json"})
 	var payload struct {
-		Counts struct{ Candidates int `json:"candidates"`; Skipped int `json:"skipped"` } `json:"counts"`
+		Counts struct {
+			Candidates int `json:"candidates"`
+			Skipped    int `json:"skipped"`
+		} `json:"counts"`
 	}
 	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
 		t.Fatalf("invalid cleanup json: %v", err)
@@ -2661,7 +2688,9 @@ func TestRouteCleanupDoesNotExecuteAgents(t *testing.T) {
 	setupRouteTestRepo(t)
 	_ = startRouteSessionForTest(t)
 	out := runRouteCleanupCmd(t, []string{"--dry-run", "--flow", "sdd", "--json"})
-	var payload struct{ WouldExecute bool `json:"would_execute"` }
+	var payload struct {
+		WouldExecute bool `json:"would_execute"`
+	}
 	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
 		t.Fatalf("invalid cleanup json: %v", err)
 	}
@@ -2891,7 +2920,9 @@ func TestRouteRepairDoesNotExecuteAgents(t *testing.T) {
 	setupRouteTestRepo(t)
 	sessionID := startRouteSessionForTest(t)
 	out := runRouteRepairCmd(t, []string{"--session", sessionID, "--dry-run", "--json"})
-	var payload struct{ WouldExecute bool `json:"would_execute"` }
+	var payload struct {
+		WouldExecute bool `json:"would_execute"`
+	}
 	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
 		t.Fatalf("invalid repair json: %v", err)
 	}

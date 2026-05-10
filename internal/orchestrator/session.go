@@ -12,26 +12,26 @@ const SessionStatusPlanned = "planned"
 const SessionSchemaVersionV1 = "route-session/v1"
 
 type Session struct {
-	ID           string        `json:"id"`
-	Intent       string        `json:"intent"`
-	Flow         string        `json:"flow"`
-	InitialSkill string        `json:"initial_skill"`
-	Status       string        `json:"status"`
-	SchemaVersion string       `json:"schema_version,omitempty"`
-	Archived     bool          `json:"archived,omitempty"`
-	ArchivedAt   *time.Time    `json:"archived_at,omitempty"`
-	RestoredAt   *time.Time    `json:"restored_at,omitempty"`
-	CreatedAt    time.Time     `json:"created_at"`
-	UpdatedAt    time.Time     `json:"updated_at"`
-	Plan         ExecutionPlan `json:"plan"`
-	Progress     *SessionProgress `json:"progress,omitempty"`
-	Brief        Brief         `json:"brief"`
-	Handoff      Handoff       `json:"handoff"`
+	ID            string           `json:"id"`
+	Intent        string           `json:"intent"`
+	Flow          string           `json:"flow"`
+	InitialSkill  string           `json:"initial_skill"`
+	Status        string           `json:"status"`
+	SchemaVersion string           `json:"schema_version,omitempty"`
+	Archived      bool             `json:"archived,omitempty"`
+	ArchivedAt    *time.Time       `json:"archived_at,omitempty"`
+	RestoredAt    *time.Time       `json:"restored_at,omitempty"`
+	CreatedAt     time.Time        `json:"created_at"`
+	UpdatedAt     time.Time        `json:"updated_at"`
+	Plan          ExecutionPlan    `json:"plan"`
+	Progress      *SessionProgress `json:"progress,omitempty"`
+	Brief         Brief            `json:"brief"`
+	Handoff       Handoff          `json:"handoff"`
 }
 
 type SessionProgress struct {
-	CurrentStageID    string   `json:"current_stage_id,omitempty"`
-	CompletedStageIDs []string `json:"completed_stage_ids,omitempty"`
+	CurrentStageID    string    `json:"current_stage_id,omitempty"`
+	CompletedStageIDs []string  `json:"completed_stage_ids,omitempty"`
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
@@ -93,18 +93,18 @@ func NewSession(intentOriginal string, route RouteResult) Session {
 	handoff.SessionID = id
 
 	return Session{
-		ID:           id,
-		Intent:       normalized,
-		Flow:         flow,
-		InitialSkill: initialSkill,
-		Status:       SessionStatusPlanned,
+		ID:            id,
+		Intent:        normalized,
+		Flow:          flow,
+		InitialSkill:  initialSkill,
+		Status:        SessionStatusPlanned,
 		SchemaVersion: SessionSchemaVersionV1,
-		CreatedAt:    now,
-		UpdatedAt:    now,
-		Plan:         route.Plan,
-		Progress:     defaultSessionProgress(route.Plan.Stages, now),
-		Brief:        brief,
-		Handoff:      handoff,
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		Plan:          route.Plan,
+		Progress:      defaultSessionProgress(route.Plan.Stages, now),
+		Brief:         brief,
+		Handoff:       handoff,
 	}
 }
 

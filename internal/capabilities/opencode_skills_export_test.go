@@ -57,6 +57,9 @@ func TestExecuteOpenCodeSkillsExport_RealWritesManagedAreaOnly(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(target, "bitsentry", "skill-registry.md")); err != nil {
 		t.Fatalf("expected generated skill-registry.md: %v", err)
 	}
+	if _, err := os.Stat(filepath.Join(target, "bitsentry", "OPENCODE_USAGE.md")); err != nil {
+		t.Fatalf("expected generated OPENCODE_USAGE.md: %v", err)
+	}
 	if !strings.Contains(res.BackupPath, ".bitsentry-ai/backups/opencode-skills/") {
 		t.Fatalf("expected backup path, got %s", res.BackupPath)
 	}

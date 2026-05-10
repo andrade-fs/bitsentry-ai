@@ -33,8 +33,10 @@ func ValidateSavedConfig(catalog Catalog, cfg config.Config) []string {
 	issues := make([]string, 0)
 
 	if strings.TrimSpace(cfg.Components.Preset) != "" {
-		if _, ok := PresetByID(strings.TrimSpace(cfg.Components.Preset), catalog.Presets); !ok {
+		if p, ok := PresetByID(strings.TrimSpace(cfg.Components.Preset), catalog.Presets); !ok {
 			issues = append(issues, fmt.Sprintf("components.preset %q is not a modeled preset", cfg.Components.Preset))
+		} else if err := ValidatePresetSelections(catalog, p); err != nil {
+			issues = append(issues, err.Error())
 		}
 	}
 
@@ -53,6 +55,24 @@ func ValidateSavedConfig(catalog Catalog, cfg config.Config) []string {
 	}
 
 	return uniqueSortedStrings(issues)
+}
+
+func ValidatePresetSelections(catalog Catalog, preset Preset) error {
+	if err := validateIDs("MCP", preset.MCPs, makeSet(catalog.MCPs)); err != nil {
+		return fmt.Errorf("preset %q invalid: %w", preset.ID, err)
+	}
+	if err := validateIDs("Skill", preset.Skills, makeSet(catalog.Skills)); err != nil {
+		return fmt.Errorf("preset %q invalid: %w", preset.ID, err)
+	}
+	if err := validateIDs("Flow", preset.Flows, makeSet(catalog.Flows)); err != nil {
+		return fmt.Errorf("preset %q invalid: %w", preset.ID, err)
+	}
+	if len(preset.Targets) > 0 {
+		if err := validateIDs("Target", preset.Targets, makeSet(catalog.Targets)); err != nil {
+			return fmt.Errorf("preset %q invalid: %w", preset.ID, err)
+		}
+	}
+	return nil
 }
 
 func validateIDs(kind string, selected []string, known map[string]bool) error {

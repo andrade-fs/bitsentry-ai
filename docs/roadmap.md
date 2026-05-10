@@ -56,6 +56,50 @@
 ### Phase 4.0 — Orchestrator MVP (next)
 - Introduce minimal runtime flow routing with strict safety checkpoints
 
+### Phase 4.0.1 — OpenCode Dogfooding Readiness Fixes (completed)
+- Align capability presets with valid discovered/exportable flow-pack aliases
+- Enforce strict validation for preset references and export selection aliases
+- Improve export-preview/export visibility for selected flows and skills
+- Generate `bitsentry/OPENCODE_USAGE.md` in exported managed area
+- Clarify docs that OpenCode export is a Bitsentry capability pack, not runtime integration
+
+### Phase 4.0.2 — Local OpenCode Install/Smoke Script (completed)
+- Add `scripts/install-opencode-local.sh` for one-command local dogfooding validation
+- Run format/test/build/capability-config/export preview/dry-run/real export sequence
+- Verify exported managed files (`OPENCODE_USAGE.md`, `skill-registry.md`) under `~/.opencode/bitsentry`
+
+### Phase 4.0.3 — TUI Install / Setup Wizard MVP (completed)
+- Replace Install/Setup placeholder with guided wizard flow for OpenCode
+- Detect OpenCode + config root + Bitsentry pack status and verification files
+- Allow target selection, preset selection, MCP toggles (Engram/Context7), plan review, and confirmed install
+- Export capability pack using existing safe export logic (no `opencode.json` mutation)
+- Verify `OPENCODE_USAGE.md` and `skill-registry.md` and print next dogfooding prompt
+
+### Phase 4.0.3A — TUI Wizard UX Fixes (completed)
+- Move wizard to step-by-step navigation (one step visible at a time)
+- Add cursor/toggle persistence and install readiness checks
+
+### Phase 4.0.3B — Final Prompt Rendering Fix (completed)
+- Render a complete multiline OpenCode dogfooding prompt in Step 6
+
+### Phase 4.0.4 — Native OpenCode Bitsentry Integration (completed)
+- Keep managed pack export under `bitsentry/`
+- Register native `agent.bitsentry` and `instructions` entrypoint
+- Install native `/bit-*` command entries and projected actionable native skills
+- Merge/create `opencode.json` safely with backups and key preservation
+
+### Phase 4.0.4C — OpenCode command/native schema bugfix (completed)
+- Normalize command schema to top-level `command` (singular)
+- Use `bit-*` keys (no slash) and `template` file references
+- Add repair/migration for legacy Bitsentry command entries
+
+### Phase 4.0.4D — agent.bitsentry schema normalization (completed)
+- Normalize/repair `agent.bitsentry` to `mode: primary`, file prompt and ask permissions
+- Remove legacy unsupported `name` field and preserve unrelated config
+
+## Phase 4 — OpenCode Integration Foundation (final)
+- Status: PASS (pending only optional/manual final validation in OpenCode)
+
 ## Phase 3 — SDR MVP (future)
 - Implement real SDR workflow primitives
 - Guided research flow and artifact conventions
@@ -66,10 +110,27 @@
 - Improve traceability across artifacts
 - Better workflow state visibility in CLI/TUI
 
-## Phase 5 — Red Team / Bug Bounty workflows (future)
-- Structured, authorized workflow templates
-- Reporting pipelines and evidence tracking
-- Safer operational guardrails in execution
+## Phase 5 — Bitsentry Runtime Experience & Capability Optimization (next)
+
+### Phase 5.1 — Agent Behavior Polish
+- Make bitsentry behave as a true Bitsentry orchestrator (SDD/SDR/support first)
+- Avoid generic coding-agent defaults and preserve explicit implementation consent
+
+### Phase 5.2 — Commands QA & Optimization
+- Validate and polish all `/bit-*` commands
+- Keep structured outputs and reduce unnecessary token usage
+
+### Phase 5.3 — Native Skills Quality Pass
+- Compact and harden projected native skills (safe, actionable, bounded)
+
+### Phase 5.4 — MCP Install Center MVP
+- Controlled MCP registry/detection/configuration with safe preservation of user config
+
+### Phase 5.5 — Token-aware Capability Loading
+- Keep entrypoint/registry minimal and load only task-relevant context
+
+### Phase 5.6 — OpenCode QA Matrix
+- Validate startup, agent registration, commands, native skills, backups/restore and config preservation
 
 ## Phase 6 — Advanced profiles and model routing (future)
 - Profile composition and inheritance

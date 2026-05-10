@@ -180,4 +180,14 @@ else
   "$TARGET_BIN_PATH" doctor
 fi
 
+log "➡️  Configuring bitsentry-dev preset"
+"$TARGET_BIN_PATH" capabilities configure --preset bitsentry-dev
+
+log "➡️  Exporting capability pack to OpenCode"
+"$TARGET_BIN_PATH" capabilities export --target-agent opencode
+
 ok "bitsentry-ai installation complete"
+ok "OpenCode capability pack exported to:"
+ok "  ~/.config/opencode/bitsentry/"
+ok "  (or ~/.opencode/bitsentry/ if .config/opencode does not exist)"
+log "Run 'bitsentry-ai' (no arguments) for TUI menu with full capability management."

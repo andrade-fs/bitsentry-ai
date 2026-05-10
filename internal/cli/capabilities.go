@@ -87,6 +87,9 @@ func runCapabilitiesExport(rt *Runtime, cmd *cobra.Command, preview bool, target
 	if err != nil {
 		return fmt.Errorf("discover assets: %w", err)
 	}
+	if err := capabilities.ValidateOpenCodeSelectionIDs(catalog, resolved); err != nil {
+		return err
+	}
 	projection, err := capabilities.BuildOpenCodeExportProjection(catalog, resolved)
 	if err != nil {
 		return fmt.Errorf("build export projection: %w", err)
@@ -113,6 +116,8 @@ func runCapabilitiesExport(rt *Runtime, cmd *cobra.Command, preview bool, target
 	fmt.Fprintf(out, "Capabilities %s\n", mode)
 	fmt.Fprintf(out, "- target-agent: %s\n", targetAgent)
 	fmt.Fprintf(out, "- selected IDs: %s\n", fallback(strings.Join(result.SelectedIDs, ", "), "none"))
+	fmt.Fprintf(out, "- selected flows: %s\n", fallback(strings.Join(sortedProjectedFlowIDs(projection.IncludedFlows), ", "), "none"))
+	fmt.Fprintf(out, "- selected skills: %s\n", fallback(strings.Join(sortedProjectedSkillIDs(projection.IncludedSkills), ", "), "none"))
 	fmt.Fprintf(out, "- managed target root: %s\n", result.TargetRoot)
 	fmt.Fprintf(out, "- included flows: %s\n", fallback(strings.Join(result.IncludedFlows, ", "), "none"))
 	fmt.Fprintf(out, "- included skill packs: %s\n", fallback(strings.Join(result.IncludedPacks, ", "), "none"))
@@ -396,6 +401,16 @@ func newCapabilitiesConfigureCmd(rt *Runtime) *cobra.Command {
 				if !ok {
 					return fmt.Errorf("unknown preset %q", resolvedPreset)
 				}
+				if err := capabilities.ValidatePresetSelections(catalog, preset); err != nil {
+					return err
+				}
+				assetCatalog, err := capabilities.DiscoverAssets(".")
+				if err != nil {
+					return fmt.Errorf("discover assets for preset validation: %w", err)
+				}
+				if err := capabilities.ValidateOpenCodeSelectionIDs(assetCatalog, append(append([]string{}, preset.Flows...), preset.Skills...)); err != nil {
+					return fmt.Errorf("preset %q cannot be exported to opencode: %w", preset.ID, err)
+				}
 				nextCfg.Components.Preset = preset.ID
 				nextCfg.Components.MCPs.Enabled = true
 				nextCfg.Components.MCPs.Configured = true
@@ -629,6 +644,24 @@ func firstNonEmpty(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func sortedProjectedFlowIDs(flows []capabilities.ProjectedFlow) []string {
+	out := make([]string, 0, len(flows))
+	for _, f := range flows {
+		out = append(out, f.ID)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func sortedProjectedSkillIDs(skills []capabilities.ProjectedSkill) []string {
+	out := make([]string, 0, len(skills))
+	for _, s := range skills {
+		out = append(out, s.ID)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func trimNote(v string) string {

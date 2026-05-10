@@ -101,6 +101,34 @@ func TestBuildOpenCodeExportProjection_UnknownSelectionWarning(t *testing.T) {
 	}
 }
 
+func TestValidateOpenCodeSelectionIDs_Strict(t *testing.T) {
+	catalog, err := DiscoverAssets("../..")
+	if err != nil {
+		t.Fatalf("discover assets: %v", err)
+	}
+	if err := ValidateOpenCodeSelectionIDs(catalog, []string{"bitsentry-sdd", "sdr"}); err != nil {
+		t.Fatalf("expected valid selection ids, got: %v", err)
+	}
+	if err := ValidateOpenCodeSelectionIDs(catalog, []string{"bitsentry-unknown"}); err == nil {
+		t.Fatalf("expected strict error for unknown alias")
+	}
+}
+
+func TestDefaultPresetBitsentryDev_IsExportable(t *testing.T) {
+	catalog, err := DiscoverAssets("../..")
+	if err != nil {
+		t.Fatalf("discover assets: %v", err)
+	}
+	preset, ok := PresetByID("bitsentry-dev", DefaultPresets())
+	if !ok {
+		t.Fatalf("bitsentry-dev preset not found")
+	}
+	selected := append(append([]string{}, preset.Flows...), preset.Skills...)
+	if err := ValidateOpenCodeSelectionIDs(catalog, selected); err != nil {
+		t.Fatalf("bitsentry-dev must be exportable, got %v", err)
+	}
+}
+
 func TestGenerateSkillRegistryContainsCoreSections(t *testing.T) {
 	p := OpenCodeExportProjection{
 		IncludedFlows:           []ProjectedFlow{{ID: "sdd", Name: "Spec Driven Development"}},
@@ -113,6 +141,21 @@ func TestGenerateSkillRegistryContainsCoreSections(t *testing.T) {
 	for _, c := range checks {
 		if !strings.Contains(content, c) {
 			t.Fatalf("generated registry missing %q", c)
+		}
+	}
+}
+
+func TestGenerateOpenCodeUsageContainsBoundaries(t *testing.T) {
+	p := OpenCodeExportProjection{
+		IncludedFlows:      []ProjectedFlow{{ID: "sdd", Name: "Spec Driven Development"}},
+		IncludedSkillPacks: []ProjectedSkillPack{{ID: "sdd"}},
+		IncludedSkills:     []ProjectedSkill{{ID: "sdd/sdd-init"}},
+	}
+	content := GenerateOpenCodeUsage(p)
+	checks := []string{"Bitsentry capability pack export", "native runtime integration", "is not modified automatically", "sdd/sdd-init"}
+	for _, c := range checks {
+		if !strings.Contains(content, c) {
+			t.Fatalf("usage content missing %q", c)
 		}
 	}
 }

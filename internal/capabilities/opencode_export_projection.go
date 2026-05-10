@@ -152,14 +152,43 @@ func BuildOpenCodeExportProjection(catalog AssetCatalog, selectedIDs []string) (
 	projection.IncludedOrchestrators = projectOrchestrators(catalog.Orchestrators, len(projection.IncludedFlows) > 0)
 
 	registry := GenerateSkillRegistry(projection)
+	usage := GenerateOpenCodeUsage(projection)
 	projection.GeneratedFiles = []ProjectedGeneratedFile{{
 		Path:           "bitsentry/skill-registry.md",
 		ContentSummary: fmt.Sprintf("Generated registry for %d flows, %d packs, %d skills", len(projection.IncludedFlows), len(projection.IncludedSkillPacks), len(projection.IncludedSkills)),
 		Content:        registry,
+	}, {
+		Path:           "bitsentry/OPENCODE_USAGE.md",
+		ContentSummary: "How to use exported Bitsentry capability pack in OpenCode",
+		Content:        usage,
 	}}
 	sort.Strings(projection.Warnings)
 	sort.Strings(projection.Skipped)
 	return projection, nil
+}
+
+func ValidateOpenCodeSelectionIDs(catalog AssetCatalog, selectedIDs []string) error {
+	flowByID := map[string]bool{}
+	for _, f := range catalog.Flows {
+		flowByID[f.ID] = true
+	}
+	packByID := map[string]bool{}
+	for _, p := range catalog.SkillPacks {
+		packByID[p.ID] = true
+	}
+
+	invalid := []string{}
+	for _, raw := range normalizeIDs(selectedIDs) {
+		id := resolveSelectionAlias(raw)
+		if flowByID[id] || packByID[id] {
+			continue
+		}
+		invalid = append(invalid, fmt.Sprintf("%q (resolved: %q)", raw, id))
+	}
+	if len(invalid) == 0 {
+		return nil
+	}
+	return fmt.Errorf("invalid export selections: %s. Valid flows: %s. Valid packs: %s", strings.Join(invalid, ", "), strings.Join(sortedMapKeys(flowByID), ", "), strings.Join(sortedMapKeys(packByID), ", "))
 }
 
 func GenerateSkillRegistry(p OpenCodeExportProjection) string {
@@ -219,6 +248,53 @@ func resolveSelectionAlias(id string) string {
 	default:
 		return strings.TrimSpace(id)
 	}
+}
+
+func GenerateOpenCodeUsage(p OpenCodeExportProjection) string {
+	b := &strings.Builder{}
+	b.WriteString("# OpenCode Usage — Bitsentry Capability Pack\n\n")
+	b.WriteString("This directory is a **Bitsentry capability pack export**.\n")
+	b.WriteString("It is **not** native runtime integration and does not execute flows by itself.\n\n")
+	b.WriteString("## What was exported\n")
+	b.WriteString(fmt.Sprintf("- Flows: %d\n", len(p.IncludedFlows)))
+	b.WriteString(fmt.Sprintf("- Skill packs: %d\n", len(p.IncludedSkillPacks)))
+	b.WriteString(fmt.Sprintf("- Skills: %d\n", len(p.IncludedSkills)))
+	b.WriteString("- Registry: `bitsentry/skill-registry.md`\n\n")
+	b.WriteString("## Boundaries\n")
+	b.WriteString("- No flow runtime/orchestrator execution is provided in this phase.\n")
+	b.WriteString("- `opencode.json` is not modified automatically.\n")
+	b.WriteString("- Export is limited to the managed `bitsentry/` area.\n\n")
+	b.WriteString("## Recommended dogfooding steps\n")
+	b.WriteString("1. Run `bitsentry-ai capabilities configure --preset bitsentry-dev`.\n")
+	b.WriteString("2. Preview with `bitsentry-ai capabilities export-preview --target-agent opencode`.\n")
+	b.WriteString("3. Export with `bitsentry-ai capabilities export --target-agent opencode`.\n")
+	b.WriteString("4. Open your real repository in OpenCode and reference exported contracts/skills as capability docs.\n\n")
+	b.WriteString("## Included flow IDs\n")
+	if len(p.IncludedFlows) == 0 {
+		b.WriteString("- none\n")
+	} else {
+		for _, f := range p.IncludedFlows {
+			b.WriteString(fmt.Sprintf("- %s\n", f.ID))
+		}
+	}
+	b.WriteString("\n## Included skill IDs\n")
+	if len(p.IncludedSkills) == 0 {
+		b.WriteString("- none\n")
+	} else {
+		for _, s := range p.IncludedSkills {
+			b.WriteString(fmt.Sprintf("- %s\n", s.ID))
+		}
+	}
+	return b.String()
+}
+
+func sortedMapKeys(in map[string]bool) []string {
+	out := make([]string, 0, len(in))
+	for k := range in {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
 }
 
 func supportRefsFromFlow(f DiscoveredFlow) []string {

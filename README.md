@@ -25,7 +25,7 @@ Implemented now (Phase 2.5):
 - Capability selection persistence + staged apply MVP: `capabilities configure ...`, `capabilities apply [--dry-run]`
 
 Not implemented yet:
-- Real Skills apply (skills metadata is tracked but not installed to OpenCode)
+- Native OpenCode runtime integration for Bitsentry flows/skills (export produces a managed capability pack)
 - Real SDR workflows
 - Real SDD workflows
 - Real Red Team / Bug Bounty workflow execution
@@ -68,6 +68,46 @@ go build -o bitsentry-ai ./cmd/bitsentry-ai
 ./bitsentry-ai doctor
 go test ./...
 ```
+
+## Local OpenCode dogfooding smoke script (Phase 4.0.2)
+
+Run the one-command local installer/smoke flow:
+
+```bash
+./scripts/install-opencode-local.sh
+```
+
+What it does:
+- checks `go` and `gofmt`
+- formats Go files and runs `go test ./...`
+- builds `./bin/bitsentry-ai`
+- configures `bitsentry-dev`
+- runs OpenCode export preview, dry-run, and real export
+- detects the actual managed OpenCode export root (`~/.opencode/bitsentry` or `~/.config/opencode/bitsentry`)
+- verifies `OPENCODE_USAGE.md` and `skill-registry.md` in the detected export root
+- prints the resolved export path in the final PASS summary
+
+If needed, make it executable once:
+
+```bash
+chmod +x ./scripts/install-opencode-local.sh
+```
+
+## TUI Install / Setup Wizard (Phase 4.0.3)
+
+Launch the TUI and open `Install / Setup`:
+
+```bash
+bitsentry-ai
+```
+
+Wizard MVP capabilities:
+- Detect OpenCode status, config root, and Bitsentry pack status
+- Select install target (OpenCode), preset (`bitsentry-dev` default), and MCP toggles (Engram/Context7)
+- Review install plan and explicit non-actions (no `opencode.json` mutation, no runtime flow execution)
+- Confirm install and export capability pack
+- Verify `OPENCODE_USAGE.md` and `skill-registry.md`
+- Show next OpenCode dogfooding prompt with detected real paths
 
 ## CLI command list
 
@@ -113,7 +153,7 @@ bitsentry-ai
 bitsentry-ai capabilities configure --target-agent opencode --preset bitsentry-dev
 
 # Configure custom selection
-bitsentry-ai capabilities configure --target-agent opencode --mcp engram --mcp context7 --flow sdd --flow notes
+bitsentry-ai capabilities configure --target-agent opencode --mcp engram --mcp context7 --flow sdd --flow support
 
 # Clear selections
 bitsentry-ai capabilities configure --clear-mcps
@@ -218,7 +258,26 @@ Behavior:
 - Dry-run previews written paths without modifying OpenCode files.
 - Real export writes only under managed area: `<opencode-config-root>/bitsentry/`.
 - Generated registry always included when assets are exported: `bitsentry/skill-registry.md`.
+- OpenCode usage guide is generated on export: `bitsentry/OPENCODE_USAGE.md`.
 - Export reports are persisted to `~/.bitsentry-ai/exports/opencode-skills/` with `latest.yaml`.
+
+Important boundary:
+- This export creates a **Bitsentry capability pack** for OpenCode-managed files.
+- It does **not** provide native runtime orchestration/execution in OpenCode yet.
+- It does **not** modify `opencode.json` automatically.
+
+## Native OpenCode integration (Phase 4.0.4+)
+
+When using the TUI `Install / Setup` wizard with native integration enabled, bitsentry-ai can also:
+- register `agent.bitsentry`
+- install `/bit-*` native command entries
+- project selected actionable native skills under `<opencode-config-root>/skills/`
+- merge/create `opencode.json` safely with backups while preserving unrelated user config keys
+
+Safety notes:
+- Managed pack export under `<opencode-config-root>/bitsentry/` remains unchanged.
+- Runtime flow execution is still out of scope.
+- MCP config mutation remains disabled unless explicitly supported by a future safe registry.
 
 
 ## Default profiles (8)

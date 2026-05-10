@@ -24,13 +24,13 @@ type RouteReport struct {
 }
 
 type RouteReportSession struct {
-	ID           string `json:"id"`
-	Intent       string `json:"intent"`
-	Flow         string `json:"flow"`
-	Status       string `json:"status"`
-	InitialSkill string `json:"initial_skill"`
+	ID            string `json:"id"`
+	Intent        string `json:"intent"`
+	Flow          string `json:"flow"`
+	Status        string `json:"status"`
+	InitialSkill  string `json:"initial_skill"`
 	SchemaVersion string `json:"schema_version,omitempty"`
-	Path         string `json:"path"`
+	Path          string `json:"path"`
 }
 
 type RouteReportBrief struct {
@@ -56,11 +56,11 @@ type RouteReportProgress struct {
 
 type RouteReportLifecycle struct {
 	SchemaVersion string `json:"schema_version,omitempty"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
-	Archived   bool   `json:"archived"`
-	ArchivedAt string `json:"archived_at,omitempty"`
-	RestoredAt string `json:"restored_at,omitempty"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+	Archived      bool   `json:"archived"`
+	ArchivedAt    string `json:"archived_at,omitempty"`
+	RestoredAt    string `json:"restored_at,omitempty"`
 }
 
 type RouteReportSafety struct {
@@ -109,17 +109,17 @@ func BuildRouteReport(session Session, sessionPath string) (RouteReport, error) 
 
 	report := RouteReport{
 		Session: RouteReportSession{
-			ID:           session.ID,
-			Intent:       session.Intent,
-			Flow:         session.Flow,
-			Status:       session.Status,
-			InitialSkill: session.InitialSkill,
+			ID:            session.ID,
+			Intent:        session.Intent,
+			Flow:          session.Flow,
+			Status:        session.Status,
+			InitialSkill:  session.InitialSkill,
 			SchemaVersion: strings.TrimSpace(session.SchemaVersion),
-			Path:         sessionPath,
+			Path:          sessionPath,
 		},
-		Brief: RouteReportBrief{Path: briefPath, Markdown: string(briefRaw)},
+		Brief:   RouteReportBrief{Path: briefPath, Markdown: string(briefRaw)},
 		Handoff: RouteReportHandoff{Path: handoffPath, Markdown: string(handoffRaw)},
-		Plan: RouteReportPlan{Flow: session.Plan.FlowID, Stages: append([]ExecutionStage{}, session.Plan.Stages...)},
+		Plan:    RouteReportPlan{Flow: session.Plan.FlowID, Stages: append([]ExecutionStage{}, session.Plan.Stages...)},
 		Progress: RouteReportProgress{
 			CurrentStageID:    strings.TrimSpace(progress.CurrentStageID),
 			CompletedStageIDs: append([]string{}, progress.CompletedStageIDs...),
@@ -127,11 +127,11 @@ func BuildRouteReport(session Session, sessionPath string) (RouteReport, error) 
 		},
 		Lifecycle: RouteReportLifecycle{
 			SchemaVersion: strings.TrimSpace(session.SchemaVersion),
-			CreatedAt:  formatReportTime(session.CreatedAt),
-			UpdatedAt:  formatReportTime(session.UpdatedAt),
-			Archived:   session.Archived,
-			ArchivedAt: formatReportOptionalTime(session.ArchivedAt),
-			RestoredAt: formatReportOptionalTime(session.RestoredAt),
+			CreatedAt:     formatReportTime(session.CreatedAt),
+			UpdatedAt:     formatReportTime(session.UpdatedAt),
+			Archived:      session.Archived,
+			ArchivedAt:    formatReportOptionalTime(session.ArchivedAt),
+			RestoredAt:    formatReportOptionalTime(session.RestoredAt),
 		},
 		Safety:                 safety,
 		WouldExecute:           false,

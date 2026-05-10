@@ -56,9 +56,9 @@ func TestAllSkillFilesContainRequiredSections(t *testing.T) {
 
 func TestHasExactHeadingLine(t *testing.T) {
 	tests := []struct {
-		name    string
-		line    string
-		wantOK  bool
+		name   string
+		line   string
+		wantOK bool
 	}{
 		{name: "exact", line: "## Handoffs", wantOK: true},
 		{name: "trimmed exact", line: "  ## Handoffs  ", wantOK: true},

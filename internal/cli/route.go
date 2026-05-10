@@ -16,11 +16,11 @@ import (
 )
 
 type routePreviewJSONOutput struct {
-	Intent         string                 `json:"intent"`
-	Flow         string                     `json:"flow"`
-	InitialSkill string                     `json:"initial_skill"`
-	Plan         routePlanJSONOutput        `json:"plan"`
-	Warnings     []string                   `json:"warnings"`
+	Intent         string                    `json:"intent"`
+	Flow           string                    `json:"flow"`
+	InitialSkill   string                    `json:"initial_skill"`
+	Plan           routePlanJSONOutput       `json:"plan"`
+	Warnings       []string                  `json:"warnings"`
 	SessionPreview routeSessionPreviewOutput `json:"session_preview"`
 }
 
@@ -82,13 +82,13 @@ type routeValidationCheckJSONOutput struct {
 }
 
 type routeValidateJSONOutput struct {
-	SessionID    string                               `json:"session_id"`
-	Path         string                               `json:"path"`
-	Valid        bool                                 `json:"valid"`
-	Errors       []string                             `json:"errors"`
-	Warnings     []string                             `json:"warnings"`
-	Checks       []routeValidationCheckJSONOutput     `json:"checks"`
-	WouldExecute bool                                 `json:"would_execute"`
+	SessionID    string                           `json:"session_id"`
+	Path         string                           `json:"path"`
+	Valid        bool                             `json:"valid"`
+	Errors       []string                         `json:"errors"`
+	Warnings     []string                         `json:"warnings"`
+	Checks       []routeValidationCheckJSONOutput `json:"checks"`
+	WouldExecute bool                             `json:"would_execute"`
 }
 
 type routeAuditJSONOutput struct {
@@ -113,14 +113,14 @@ type routeRepairJSONOutput struct {
 }
 
 type routeMigrateJSONOutput struct {
-	SessionID     string   `json:"session_id"`
-	DryRun        bool     `json:"dry_run"`
-	Applied       bool     `json:"applied"`
-	FromVersion   string   `json:"from_version,omitempty"`
-	ToVersion     string   `json:"to_version"`
-	Changes       []string `json:"changes"`
-	Warnings      []string `json:"warnings"`
-	WouldExecute  bool     `json:"would_execute"`
+	SessionID    string   `json:"session_id"`
+	DryRun       bool     `json:"dry_run"`
+	Applied      bool     `json:"applied"`
+	FromVersion  string   `json:"from_version,omitempty"`
+	ToVersion    string   `json:"to_version"`
+	Changes      []string `json:"changes"`
+	Warnings     []string `json:"warnings"`
+	WouldExecute bool     `json:"would_execute"`
 }
 
 type routeCleanupPolicyJSONOutput struct {
@@ -150,11 +150,11 @@ type routeCleanupCountsJSONOutput struct {
 }
 
 type routeCleanupJSONOutput struct {
-	Policy       routeCleanupPolicyJSONOutput            `json:"policy"`
-	Counts       routeCleanupCountsJSONOutput            `json:"counts"`
-	Warnings     []string                                `json:"warnings"`
-	Candidates   []routeCleanupCandidateJSONOutput       `json:"candidates"`
-	WouldExecute bool                                    `json:"would_execute"`
+	Policy       routeCleanupPolicyJSONOutput      `json:"policy"`
+	Counts       routeCleanupCountsJSONOutput      `json:"counts"`
+	Warnings     []string                          `json:"warnings"`
+	Candidates   []routeCleanupCandidateJSONOutput `json:"candidates"`
+	WouldExecute bool                              `json:"would_execute"`
 }
 
 type routeHandoffJSONOutput struct {
@@ -167,17 +167,17 @@ type routeHandoffJSONOutput struct {
 }
 
 type routeResumeJSONOutput struct {
-	SessionID       string                   `json:"session_id"`
-	Intent          string                   `json:"intent"`
-	Flow            string                   `json:"flow"`
-	Status          string                   `json:"status"`
-	InitialSkill    string                   `json:"initial_skill"`
-	TotalStages     int                      `json:"total_stages"`
-	CurrentStage    *routePlanStageJSONOutput `json:"current_stage,omitempty"`
-	NextStage       *routePlanStageJSONOutput `json:"next_stage,omitempty"`
-	Path            string                   `json:"path"`
-	SafetyReminder  string                   `json:"safety_reminder"`
-	WouldExecute    bool                     `json:"would_execute"`
+	SessionID      string                    `json:"session_id"`
+	Intent         string                    `json:"intent"`
+	Flow           string                    `json:"flow"`
+	Status         string                    `json:"status"`
+	InitialSkill   string                    `json:"initial_skill"`
+	TotalStages    int                       `json:"total_stages"`
+	CurrentStage   *routePlanStageJSONOutput `json:"current_stage,omitempty"`
+	NextStage      *routePlanStageJSONOutput `json:"next_stage,omitempty"`
+	Path           string                    `json:"path"`
+	SafetyReminder string                    `json:"safety_reminder"`
+	WouldExecute   bool                      `json:"would_execute"`
 }
 
 type routeNextJSONOutput struct {
@@ -192,13 +192,13 @@ type routeNextJSONOutput struct {
 }
 
 type routeProgressJSONOutput struct {
-	SessionID    string                   `json:"session_id"`
-	Flow         string                   `json:"flow"`
-	Status       string                   `json:"status"`
-	CurrentStage *routePlanStageJSONOutput `json:"current_stage,omitempty"`
+	SessionID    string                         `json:"session_id"`
+	Flow         string                         `json:"flow"`
+	Status       string                         `json:"status"`
+	CurrentStage *routePlanStageJSONOutput      `json:"current_stage,omitempty"`
 	Stages       []routeProgressStageJSONOutput `json:"stages"`
-	UpdatedAt    string                   `json:"updated_at"`
-	WouldExecute bool                     `json:"would_execute"`
+	UpdatedAt    string                         `json:"updated_at"`
+	WouldExecute bool                           `json:"would_execute"`
 }
 
 type routeProgressStageJSONOutput struct {
@@ -224,8 +224,8 @@ type routeInspectFlowJSONOutput struct {
 }
 
 type routePlanJSONOutput struct {
-	Flow   string                             `json:"flow"`
-	Stages []orchestrator.ExecutionStage      `json:"stages"`
+	Flow   string                        `json:"flow"`
+	Stages []orchestrator.ExecutionStage `json:"stages"`
 }
 
 type routePlanStageJSONOutput struct {
@@ -1544,7 +1544,7 @@ func newRoutePreviewCmd(rt *Runtime) *cobra.Command {
 
 			if jsonOut {
 				payload := routePreviewJSONOutput{
-					Intent: normalizedIntent,
+					Intent:       normalizedIntent,
 					Flow:         result.Flow,
 					InitialSkill: result.InitialSkill,
 					Plan: routePlanJSONOutput{
