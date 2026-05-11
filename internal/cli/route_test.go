@@ -32,6 +32,94 @@ func TestRouteCommandPrintsHumanPlan(t *testing.T) {
 	}
 }
 
+func TestRouteDecidePrintsHumanEnvelope(t *testing.T) {
+	cmd := newRouteCmd(&Runtime{})
+	out := &bytes.Buffer{}
+	errOut := &bytes.Buffer{}
+	cmd.SetOut(out)
+	cmd.SetErr(errOut)
+	cmd.SetArgs([]string{"decide", "Quiero mejorar el wizard del TUI"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute route decide: %v", err)
+	}
+
+	got := out.String()
+	for _, token := range []string{
+		"Route decision preview",
+		"Matched intent:",
+		"Matched signals:",
+		"frontend-ux-change",
+		"Decision:",
+		"use_flow_sdd",
+		"Gates:",
+		"no_edits_in_preview",
+		"no_persistence_in_preview",
+		"no_flow_execution_in_preview",
+	} {
+		if !strings.Contains(got, token) {
+			t.Fatalf("route decide output missing %q\n%s", token, got)
+		}
+	}
+}
+
+func TestRouteDecideJSONOutput(t *testing.T) {
+	cmd := newRouteCmd(&Runtime{})
+	out := &bytes.Buffer{}
+	cmd.SetOut(out)
+	cmd.SetErr(out)
+	cmd.SetArgs([]string{"decide", "--json", "Revisa este flujo de appsec y threat model"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute route decide --json: %v", err)
+	}
+	var payload struct {
+		MatchedIntent  string   `json:"matched_intent"`
+		MatchedSignals []string `json:"matched_signals"`
+		Decision       string   `json:"decision"`
+		WouldPersist   bool     `json:"would_persist"`
+		WouldExecute   bool     `json:"would_execute"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
+		t.Fatalf("route decide json invalid: %v", err)
+	}
+	if payload.MatchedIntent != "security-review" {
+		t.Fatalf("expected security-review, got %s", payload.MatchedIntent)
+	}
+	if len(payload.MatchedSignals) == 0 {
+		t.Fatalf("expected matched signals in json output")
+	}
+	if payload.WouldPersist || payload.WouldExecute {
+		t.Fatalf("route decide must be read-only/non-executing: %+v", payload)
+	}
+}
+
+func TestRouteDecideDoesNotPersistSessionsOrMutateOpenCode(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	cmd := newRouteCmd(&Runtime{})
+	out := &bytes.Buffer{}
+	cmd.SetOut(out)
+	cmd.SetErr(out)
+	cmd.SetArgs([]string{"decide", "--json", "Hay un bug de seguridad en export"})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("execute route decide: %v", err)
+	}
+	var payload struct {
+		WouldPersist bool `json:"would_persist"`
+		WouldExecute bool `json:"would_execute"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
+		t.Fatalf("route decide json invalid: %v", err)
+	}
+	if payload.WouldPersist || payload.WouldExecute {
+		t.Fatalf("expected read-only preview semantics, got %+v", payload)
+	}
+	opencodeConfig := filepath.Join(home, ".config", "opencode")
+	if _, err := os.Stat(opencodeConfig); !os.IsNotExist(err) {
+		t.Fatalf("expected route decide not to mutate opencode path %s", opencodeConfig)
+	}
+}
+
 func TestRouteStartSetsSessionSchemaVersion(t *testing.T) {
 	repo := setupRouteTestRepo(t)
 	sessionID := startRouteSessionForTest(t)

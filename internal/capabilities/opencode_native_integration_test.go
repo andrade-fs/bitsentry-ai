@@ -73,7 +73,7 @@ func TestExecuteOpenCodeNativeIntegration_CreatesConfigAndFiles(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected permission block")
 	}
-	if perm["edit"] != "ask" || perm["bash"] != "ask" {
+	if perm["edit"] != "deny" || perm["bash"] != "ask" {
 		t.Fatalf("unexpected permission block: %#v", perm)
 	}
 	for _, role := range knownRoleIDs() {
@@ -172,7 +172,7 @@ func TestExecuteOpenCodeNativeIntegration_PreservesExistingConfigAndNoDupInstruc
 		t.Fatalf("expected bitsentry file prompt")
 	}
 	bPerm, ok := b["permission"].(map[string]any)
-	if !ok || bPerm["edit"] != "ask" || bPerm["bash"] != "ask" {
+	if !ok || bPerm["edit"] != "deny" || bPerm["bash"] != "ask" {
 		t.Fatalf("expected bitsentry permission block repaired: %#v", b["permission"])
 	}
 	if role, ok := a["software-architect"].(map[string]any); !ok || role["mode"] != "subagent" {
@@ -248,6 +248,9 @@ func TestBitsentryPromptContainsPhase5OrchestrationContract(t *testing.T) {
 		"SDD:",
 		"SDR:",
 		"Support:",
+		"bitsentry is a non-mutating orchestrator by default",
+		"bitsentry must not edit files directly",
+		"implementation/apply requires an explicit approved apply path",
 		"no internal Bitsentry runtime/session execution",
 		"do not modify code unless explicitly requested",
 		"Tool/MCP honesty:",
@@ -261,9 +264,11 @@ func TestBitsentryPromptContainsPhase5OrchestrationContract(t *testing.T) {
 		"Persistence modes:",
 		"none: conversation only, no files/folders/memory writes",
 		"do not auto-advance beyond init by default",
-		"never expose raw 'Thinking:'",
+		"Never expose raw Thinking:",
 		"treat SDD phases as delegated capabilities/subagents",
 		"Route decision first (when no flow active):",
+		"OpenCode-native route decision preview is the PRIMARY route-selection UX",
+		"CLI `bitsentry-ai route decide` is debug/plumbing parity, not the primary end-user workflow",
 		"do NOT force SDD automatically",
 		"Direct reasoning: trivial/small tasks where formal flow is overkill",
 		"Compact interactive SDD envelope (default):",
@@ -287,6 +292,7 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 		"Questions simples/explanations => direct_answer (NO SDD by default).",
 		"do NOT activate any formal flow silently; announce selected flow first",
 		"ask_clarifying_question is allowed only when route cannot be decided with high confidence",
+		"include matched_signals in route preview reasoning when available",
 		"## Intent-to-Route Matrix (Phase 6 MVP)",
 		"architecture/system/refactor/integration",
 		"frontend/UI/TUI/wizard/layout",
@@ -297,12 +303,13 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 		"Support:",
 		"Direct reasoning:",
 		"if ambiguous, ask user to choose before entering a flow",
-		"bounded context discovery is allowed before route confirmation",
+		"bounded context discovery is allowed only AFTER a visible Route Decision Preview",
 		"bounded discovery limits: read-only only",
 		"for narrow direct requests",
 		"open file X and show Y",
 		"SDR brief audit -> compact SDD corrections",
-		"after any discovery, route decision MUST be visible in chat",
+		"Route decision MUST be visible in chat BEFORE any non-trivial discovery",
+		"updated route decision only if findings change",
 		"separate permission before apply/edit planning and before persistence",
 		"do not create tasks/todos before route confirmation on broad requests",
 	} {
@@ -315,9 +322,9 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 func TestBitsentryPromptBroadRequestGatesToolUseBeforeRouteConfirmation(t *testing.T) {
 	prompt := buildBitsentryAgentPrompt()
 	checks := []string{
-		"bounded context discovery is allowed before route confirmation",
+		"bounded context discovery is allowed only AFTER a visible Route Decision Preview",
 		"read-only only, no edits, no todos/tasks, no persistence writes, no implementation decisions",
-		"after any discovery, route decision MUST be visible in chat",
+		"Route decision MUST be visible in chat BEFORE any non-trivial discovery",
 		"Engram/OpenSpec discovery is allowed read-only; persistence requires explicit confirmation",
 	}
 	for _, c := range checks {
@@ -330,11 +337,12 @@ func TestBitsentryPromptBroadRequestGatesToolUseBeforeRouteConfirmation(t *testi
 func TestBitsentryPromptRequiresVisibleRouteAfterDiscovery(t *testing.T) {
 	prompt := buildBitsentryAgentPrompt()
 	for _, token := range []string{
-		"after any discovery, route decision MUST be visible in chat",
+		"Route decision MUST be visible in chat BEFORE any non-trivial discovery",
+		"updated route decision only if findings change",
 		"post-discovery gate is mandatory: STOP after discovery and ask confirmation",
 		"before route selection, edit planning, apply, or persistence",
 		"forbidden without approval: statements like 'procedo directamente con las ediciones'",
-		"never hidden-only reasoning",
+		"Never expose raw Thinking:",
 		"do not say only 'need more context' if a probable route is already detected; show probable route first",
 	} {
 		if !strings.Contains(prompt, token) {
@@ -362,6 +370,14 @@ func TestBitsentryPromptContainsRequiredVisibleOutputShape(t *testing.T) {
 	prompt := buildBitsentryAgentPrompt()
 	for _, token := range []string{
 		"Detected route",
+		"route decision preview envelope",
+		"matched_intent",
+		"matched_signals",
+		"recommended_flow",
+		"recommended_roles",
+		"recommended_skills",
+		"requires_bounded_discovery",
+		"gates",
 		"Current phase",
 		"Execution mode",
 		"Persistence mode",
@@ -372,6 +388,123 @@ func TestBitsentryPromptContainsRequiredVisibleOutputShape(t *testing.T) {
 	} {
 		if !strings.Contains(prompt, token) {
 			t.Fatalf("prompt missing visible output field %q", token)
+		}
+	}
+}
+
+func TestBitsentryAgentPrompt_OpenCodeFirstRoutePreviewContract(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"opencode-native route decision preview is the primary route-selection ux",
+		"cli `bitsentry-ai route decide` is debug/plumbing parity, not the primary end-user workflow",
+		"route decision preview envelope",
+		"matched_signals",
+		"requires_confirmation",
+		"requires_bounded_discovery",
+		"no_flow_execution_in_preview",
+		"no persistence",
+		"no edits",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected prompt to contain %q", token)
+		}
+	}
+}
+
+func TestBitsentryAgentPrompt_DoesNotPresentCLIAsPrimaryUX(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	forbidden := []string{
+		"users should run bitsentry-ai route decide",
+		"ask the user to run bitsentry-ai route decide",
+		"primary workflow is bitsentry-ai route decide",
+		"use the cli as the main workflow",
+		"run bitsentry-ai route decide manually",
+	}
+	for _, phrase := range forbidden {
+		if strings.Contains(prompt, phrase) {
+			t.Fatalf("prompt must not present CLI as primary UX: found %q", phrase)
+		}
+	}
+}
+
+func TestBitsentryAgentPrompt_RequiresVisibleRoutePreviewBeforeDiscovery(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"before any non-trivial repository discovery",
+		"must show a concise route decision preview",
+		"visible to the user",
+		"only after a visible route decision preview",
+		"requires_bounded_discovery=true",
+		"before any non-trivial discovery",
+		"updated route decision only if findings change",
+		"never expose raw thinking:",
+		"matched_intent",
+		"decision",
+		"matched_signals",
+		"requires_confirmation",
+		"requires_bounded_discovery",
+		"gates",
+		"no_edits_in_preview",
+		"no_persistence_in_preview",
+		"no_flow_execution_in_preview",
+		"bounded read-only discovery",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected prompt to contain %q", token)
+		}
+	}
+}
+
+func TestBitsentryAgentPrompt_DoesNotAllowDiscoveryBeforeRouteConfirmation(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	forbidden := []string{
+		"discovery is allowed before route confirmation",
+		"bounded context discovery is allowed before route confirmation",
+	}
+	for _, token := range forbidden {
+		if strings.Contains(prompt, token) {
+			t.Fatalf("prompt must not contain contradictory discovery-before-preview rule %q", token)
+		}
+	}
+}
+
+func TestBitsentryAgentPrompt_FrontloadsFirstResponseRulesBeforeMatrices(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	first := strings.Index(prompt, "## Non-negotiable first response rules")
+	intentRouting := strings.Index(prompt, "Intent routing:")
+	routeDecisionFirst := strings.Index(prompt, "Route decision first (when no flow active):")
+	intentMatrix := strings.Index(prompt, "## Intent-to-Route Matrix (Phase 6 MVP)")
+	phase5Matrix := strings.Index(prompt, "## Phase 5 Behavior Matrix")
+	if first < 0 || intentRouting < 0 || routeDecisionFirst < 0 || intentMatrix < 0 || phase5Matrix < 0 {
+		t.Fatalf("expected key prompt sections present")
+	}
+	if !(first < intentRouting && first < routeDecisionFirst && first < intentMatrix && first < phase5Matrix) {
+		t.Fatalf("first response rules must appear before routing and matrices")
+	}
+}
+
+func TestBitsentryAgentPrompt_ContainsFirstResponseRoutePreviewTemplate(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	required := []string{
+		"Route Decision Preview",
+		"- matched_intent:",
+		"- decision:",
+		"- matched_signals:",
+		"- reason:",
+		"- requires_bounded_discovery:",
+		"- requires_confirmation:",
+		"- gates:",
+		"- no_edits_in_preview",
+		"- no_persistence_in_preview",
+		"- no_flow_execution_in_preview",
+		"Only AFTER showing that preview may you inspect files",
+		"small copy/product-messaging/UX changes may still require compact SDD",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected first response template token %q", token)
 		}
 	}
 }

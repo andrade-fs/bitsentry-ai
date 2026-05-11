@@ -148,9 +148,39 @@
 Non-blocking note:
 - `export-preview` / report YAML summary does not yet expose intents/roles explicitly.
 
-### Phase 6.1 — Route Decision Preview MVP (next)
-- Add lightweight read-only intent classifier and route decision preview envelope.
-- Keep behavior non-mutating and OpenCode-only.
+### Phase 6.1 — Route Decision Preview MVP (completed)
+- Added lightweight read-only intent classifier and route decision preview envelope.
+- Kept behavior non-mutating and OpenCode-only.
+
+### Phase 6.1B — OpenCode Agent Route Preview Wiring (completed)
+- Updated native `bitsentry` prompt contract to frame route preview as OpenCode-native agent behavior.
+- Added `matched_signals` to route preview output contract in prompt guidance.
+- Kept `bitsentry-ai route decide` as debug/plumbing parity, not primary end-user UX.
+
+### Phase 6.1C — OpenCode Prompt Contract Snapshot QA (completed)
+- Added prompt anti-regression tests for OpenCode-first route preview semantics.
+- Added guardrails so prompt does not present CLI `route decide` as primary UX.
+- Added manual QA checklist for OpenCode route preview contract validation.
+
+### Phase 6.1E — Visible Route Preview Enforcement (completed)
+- Enforced visible Route Decision Preview before non-trivial discovery/analysis/planning/recommendation requests.
+- Enforced required preview gates (`no_edits_in_preview`, `no_persistence_in_preview`, `no_flow_execution_in_preview`) in prompt contract.
+- Added anti-regression tests and documented landing QA outcome as PASS WITH NOTES.
+
+### Phase 6.1E.1 — Route Preview Prompt Conflict Cleanup (completed)
+- Removed contradictory prompt wording that allowed interpreting discovery-before-preview.
+- Enforced explicit ordering: preview first, bounded discovery second (only when required), update decision only when findings change.
+- Reinforced no-`Thinking:` exposure rule and added anti-regression tests.
+
+### Phase 6.1F — Bitsentry Orchestrator No-Edit Guardrail (completed)
+- Enforced `agent.bitsentry.permission.edit = deny` in native OpenCode integration/repair path.
+- Hardened prompt contract: bitsentry is orchestrator-only and non-mutating by default.
+- Captured critical landing re-test FAIL and applied permission-layer mitigation.
+
+### Phase 6.1G — Prompt Priority / Frontload Contract (completed)
+- Reordered prompt to frontload non-negotiable first-response Route Decision Preview contract before secondary matrices/rules.
+- Added formal first-response preview template and mandatory gates.
+- Captured QA routing learning: small copy/product-messaging/UX changes may still route to compact SDD when core narrative/perception is affected.
 
 ## Phase 7 — Advanced profiles and model routing (future)
 - Profile composition and inheritance

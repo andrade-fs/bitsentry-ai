@@ -57,6 +57,56 @@ Implemented now (Phase 6 MVP):
 Notes:
 - Non-blocking: export-preview/report YAML summary does not yet expose intents/roles explicitly.
 
+## Phase 6.1B status (OpenCode Agent Route Preview Wiring)
+
+Implemented now (Phase 6.1B):
+- Native `bitsentry` prompt now frames route decision preview as an **OpenCode-native agent capability** (primary UX in `@bitsentry` chat)
+- Prompt contract explicitly includes `matched_signals` in route decision preview reasoning/output
+- Structured route preview envelope fields documented in prompt output contract (input, matched_intent, matched_signals, decision, recommended_flow/roles/skills, confidence, gates)
+- `bitsentry-ai route decide` remains available as **debug/plumbing parity**, not primary end-user UX
+
+Boundaries preserved:
+- No runtime flow execution
+- No autonomous orchestration runtime
+- No MCP credential mutation
+- No new target agents
+
+## Phase 6.1C status (OpenCode Prompt Contract Snapshot QA)
+
+Implemented now (Phase 6.1C):
+- Added anti-regression prompt contract tests for OpenCode-first route preview behavior.
+- Added explicit tests ensuring CLI `route decide` is not presented as primary user workflow.
+- Added manual QA checklist: `docs/opencode-phase6-route-preview-qa.md`.
+
+## Phase 6.1E status (Visible Route Preview Enforcement)
+
+Implemented now (Phase 6.1E):
+- Prompt contract now enforces a visible Route Decision Preview before non-trivial discovery/analysis/planning/recommendation work.
+- Required preview fields and mandatory preview gates are explicitly enforced in prompt contract.
+- Added anti-regression test coverage for visible route preview before discovery.
+- Recorded landing QA result as **PASS WITH NOTES** and documented corrective enforcement.
+
+## Phase 6.1E.1 status (Route Preview Prompt Conflict Cleanup)
+
+Implemented now (Phase 6.1E.1):
+- Removed conflicting prompt wording that could imply discovery before route preview.
+- Enforced sequence: user request -> visible route decision preview -> bounded read-only discovery (only if `requires_bounded_discovery=true`) -> updated decision only if findings change -> confirmation.
+- Added anti-regression tests to prevent reintroducing discovery-before-preview prompt conflicts.
+
+## Phase 6.1F status (Bitsentry Orchestrator No-Edit Guardrail)
+
+Implemented now (Phase 6.1F):
+- Native OpenCode `agent.bitsentry.permission.edit` is enforced as `deny`.
+- `bitsentry` contract explicitly states orchestrator-only, non-mutating behavior (route/discovery/planning/gates) and no direct file edits.
+- Documented critical landing re-test failure and the permission-layer corrective action.
+
+## Phase 6.1G status (Prompt Priority / Frontload Contract)
+
+Implemented now (Phase 6.1G):
+- Frontloaded a non-negotiable first-response contract so Route Decision Preview is the first visible response for non-trivial requests.
+- Added explicit Route Decision Preview template fields and mandatory gates before any discovery/analysis/planning recommendations.
+- Added rule from QA learning: small copy/product-messaging/UX scope may still be compact SDD when central narrative/perception or multi-component consistency is impacted.
+
 Important boundaries:
 - BitsentryAI remains an installer/projector/validator/pack manager.
 - BitsentryAI does NOT become an internal runtime session/orchestration engine.

@@ -24,6 +24,24 @@ type routePreviewJSONOutput struct {
 	SessionPreview routeSessionPreviewOutput `json:"session_preview"`
 }
 
+type routeDecideJSONOutput struct {
+	Input                    string   `json:"input"`
+	MatchedIntent            string   `json:"matched_intent"`
+	MatchedSignals           []string `json:"matched_signals"`
+	Decision                 string   `json:"decision"`
+	RecommendedFlow          string   `json:"recommended_flow,omitempty"`
+	RecommendedRoles         []string `json:"recommended_roles"`
+	RecommendedSkills        []string `json:"recommended_skills"`
+	Confidence               string   `json:"confidence"`
+	Reason                   string   `json:"reason"`
+	RequiresConfirmation     bool     `json:"requires_confirmation"`
+	RequiresBoundedDiscovery bool     `json:"requires_bounded_discovery"`
+	Gates                    []string `json:"gates"`
+	Notes                    []string `json:"notes"`
+	WouldPersist             bool     `json:"would_persist"`
+	WouldExecute             bool     `json:"would_execute"`
+}
+
 type routeInspectJSONOutput struct {
 	Flows []routeInspectFlowJSONOutput `json:"flows"`
 }
@@ -250,6 +268,7 @@ func newRouteCmd(rt *Runtime) *cobra.Command {
 	cmd.AddCommand(
 		newRouteInspectCmd(rt),
 		newRoutePreviewCmd(rt),
+		newRouteDecideCmd(rt),
 		newRouteStartCmd(rt),
 		newRouteReportCmd(rt),
 		newRouteListCmd(rt),
@@ -269,6 +288,120 @@ func newRouteCmd(rt *Runtime) *cobra.Command {
 		newRouteCleanupCmd(rt),
 	)
 
+	return cmd
+}
+
+func newRouteDecideCmd(rt *Runtime) *cobra.Command {
+	var jsonOut bool
+
+	cmd := &cobra.Command{
+		Use:   "decide [prompt]",
+		Short: "Preview route decision envelope without side effects",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			input := strings.TrimSpace(args[0])
+			if input == "" {
+				return fmt.Errorf("prompt must not be empty")
+			}
+
+			root, err := resolveRepoRootWithAssets(".")
+			if err != nil {
+				return fmt.Errorf("resolve assets root: %w", err)
+			}
+			result, err := capabilities.BuildRouteDecisionPreview(root, input)
+			if err != nil {
+				return err
+			}
+
+			payload := routeDecideJSONOutput{
+				Input:                    result.Input,
+				MatchedIntent:            result.MatchedIntent,
+				MatchedSignals:           append([]string{}, result.MatchedSignals...),
+				Decision:                 result.Decision,
+				RecommendedFlow:          result.RecommendedFlow,
+				RecommendedRoles:         append([]string{}, result.RecommendedRoles...),
+				RecommendedSkills:        append([]string{}, result.RecommendedSkills...),
+				Confidence:               result.Confidence,
+				Reason:                   result.Reason,
+				RequiresConfirmation:     result.RequiresConfirmation,
+				RequiresBoundedDiscovery: result.RequiresBoundedDiscovery,
+				Gates:                    append([]string{}, result.Gates...),
+				Notes:                    append([]string{}, result.Notes...),
+				WouldPersist:             false,
+				WouldExecute:             false,
+			}
+
+			if jsonOut {
+				raw, err := json.MarshalIndent(payload, "", "  ")
+				if err != nil {
+					return fmt.Errorf("marshal route decide output: %w", err)
+				}
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), string(raw))
+				return nil
+			}
+
+			out := cmd.OutOrStdout()
+			_, _ = fmt.Fprintln(out, "Route decision preview")
+			_, _ = fmt.Fprintln(out)
+			_, _ = fmt.Fprintln(out, "Input:")
+			_, _ = fmt.Fprintf(out, "%q\n\n", payload.Input)
+			_, _ = fmt.Fprintln(out, "Matched intent:")
+			_, _ = fmt.Fprintf(out, "%s\n\n", payload.MatchedIntent)
+			_, _ = fmt.Fprintln(out, "Matched signals:")
+			if len(payload.MatchedSignals) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, s := range payload.MatchedSignals {
+					_, _ = fmt.Fprintf(out, "- %s\n", s)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+			_, _ = fmt.Fprintln(out, "Decision:")
+			_, _ = fmt.Fprintf(out, "%s\n\n", payload.Decision)
+			_, _ = fmt.Fprintln(out, "Recommended flow:")
+			_, _ = fmt.Fprintf(out, "%s\n\n", firstNonEmpty(payload.RecommendedFlow, "none"))
+
+			_, _ = fmt.Fprintln(out, "Recommended roles:")
+			if len(payload.RecommendedRoles) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, role := range payload.RecommendedRoles {
+					_, _ = fmt.Fprintf(out, "- %s\n", role)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Recommended skills:")
+			if len(payload.RecommendedSkills) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, skill := range payload.RecommendedSkills {
+					_, _ = fmt.Fprintf(out, "- %s\n", skill)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Confidence:")
+			_, _ = fmt.Fprintf(out, "%s\n\n", payload.Confidence)
+			_, _ = fmt.Fprintln(out, "Gates:")
+			for _, gate := range payload.Gates {
+				_, _ = fmt.Fprintf(out, "- %s\n", gate)
+			}
+			_, _ = fmt.Fprintln(out)
+			_, _ = fmt.Fprintln(out, "Reason:")
+			_, _ = fmt.Fprintf(out, "%s\n", payload.Reason)
+			if len(payload.Notes) > 0 {
+				_, _ = fmt.Fprintln(out)
+				_, _ = fmt.Fprintln(out, "Notes:")
+				for _, n := range payload.Notes {
+					_, _ = fmt.Fprintf(out, "- %s\n", n)
+				}
+			}
+			return nil
+		},
+	}
+
+	cmd.Flags().BoolVar(&jsonOut, "json", false, "Emit JSON output")
 	return cmd
 }
 
