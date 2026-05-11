@@ -110,7 +110,12 @@
 - Improve traceability across artifacts
 - Better workflow state visibility in CLI/TUI
 
-## Phase 5 — Bitsentry Runtime Experience & Capability Optimization (next)
+## Phase 5 — OpenCode Agent Orchestration Polish (current)
+
+- Focus: polish native OpenCode `bitsentry` behavior for SDD/SDR/support/tool guidance.
+- Boundary: BitsentryAI remains installer/projector/validator/pack manager, not a standalone runtime executor.
+- Boundary: no new agent targets in this phase (OpenCode only).
+- Boundary: no MCP credential mutation by default.
 
 ### Phase 5.1 — Agent Behavior Polish
 - Make bitsentry behave as a true Bitsentry orchestrator (SDD/SDR/support first)
@@ -132,7 +137,22 @@
 ### Phase 5.6 — OpenCode QA Matrix
 - Validate startup, agent registration, commands, native skills, backups/restore and config preservation
 
-## Phase 6 — Advanced profiles and model routing (future)
+## Phase 6 — Intent-Aware Orchestration & Role Packs MVP (completed)
+- Status: **PASS WITH NOTES**
+- Added Intent Decision Contract in native `bitsentry` prompt (direct answer vs skills vs roles vs flows)
+- Added declarative intent registry (`assets/intents/*.yaml`)
+- Added specialist role pack (`assets/roles/*.md`)
+- Projected roles into OpenCode as subagents while keeping `bitsentry` as primary
+- Preserved safety boundaries: OpenCode-only target, no autonomous runtime, no MCP credential mutation
+
+Non-blocking note:
+- `export-preview` / report YAML summary does not yet expose intents/roles explicitly.
+
+### Phase 6.1 — Route Decision Preview MVP (next)
+- Add lightweight read-only intent classifier and route decision preview envelope.
+- Keep behavior non-mutating and OpenCode-only.
+
+## Phase 7 — Advanced profiles and model routing (future)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability

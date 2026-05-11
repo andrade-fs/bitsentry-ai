@@ -1,0 +1,23 @@
+id: research-analysis
+description: Repository/external source analysis to extract actionable ideas.
+default_decision: use_flow_sdr
+default_flow: sdr
+alternative_flow: direct_answer
+complexity_threshold: low
+pre_flow_roles:
+  - product-analyst
+  - codebase-onboarding
+pre_flow_skills:
+  - source-analysis
+  - idea-extraction
+  - applicability-mapping
+expected_context_outputs:
+  - findings
+  - opportunities
+  - constraints
+direct_answer_allowed: true
+requires_confirmation: true
+requires_bounded_discovery: true
+forbidden_actions:
+  - unsupported_tool_claims
+  - persist_without_confirmation

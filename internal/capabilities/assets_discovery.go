@@ -30,6 +30,44 @@ type AssetCatalog struct {
 	Skills        []DiscoveredSkill
 	Shared        []DiscoveredSharedContract
 	Orchestrators []DiscoveredOrchestrator
+	Intents       []DiscoveredIntent
+	Roles         []DiscoveredRole
+}
+
+type DiscoveredIntent struct {
+	ID                     string   `yaml:"id"`
+	Description            string   `yaml:"description"`
+	DefaultDecision        string   `yaml:"default_decision"`
+	DefaultFlow            string   `yaml:"default_flow"`
+	AlternativeFlow        string   `yaml:"alternative_flow"`
+	ComplexityThreshold    string   `yaml:"complexity_threshold"`
+	PreFlowRoles           []string `yaml:"pre_flow_roles"`
+	PreFlowSkills          []string `yaml:"pre_flow_skills"`
+	ExpectedContextOutputs []string `yaml:"expected_context_outputs"`
+	DirectAnswerAllowed    bool     `yaml:"direct_answer_allowed"`
+	RequiresConfirmation   bool     `yaml:"requires_confirmation"`
+	RequiresBoundedDiscovery bool   `yaml:"requires_bounded_discovery"`
+	ForbiddenActions       []string `yaml:"forbidden_actions"`
+	SourcePath             string
+}
+
+type roleFrontmatter struct {
+	ID          string            `yaml:"id"`
+	Category    string            `yaml:"category"`
+	Kind        string            `yaml:"kind"`
+	UsableIn    []string          `yaml:"usable_in"`
+	Permissions map[string]string `yaml:"permissions"`
+}
+
+type DiscoveredRole struct {
+	ID          string
+	Category    string
+	Kind        string
+	UsableIn    []string
+	Permissions map[string]string
+	Title       string
+	SourcePath  string
+	NonEmpty    bool
 }
 
 type DiscoveredFlow struct {
@@ -115,12 +153,22 @@ func DiscoverAssets(root string) (AssetCatalog, error) {
 	if err != nil {
 		return AssetCatalog{}, err
 	}
+	intents, err := discoverIntents(assetsRoot)
+	if err != nil {
+		return AssetCatalog{}, err
+	}
+	roles, err := discoverRoles(assetsRoot)
+	if err != nil {
+		return AssetCatalog{}, err
+	}
 	return AssetCatalog{
 		Flows:         flows,
 		SkillPacks:    skillPacks,
 		Skills:        skills,
 		Shared:        shared,
 		Orchestrators: orchestrators,
+		Intents:       intents,
+		Roles:         roles,
 	}, nil
 }
 
@@ -336,6 +384,56 @@ func discoverOrchestrators(assetsRoot string) ([]DiscoveredOrchestrator, error) 
 	return out, nil
 }
 
+func discoverIntents(assetsRoot string) ([]DiscoveredIntent, error) {
+	entries, err := filepath.Glob(filepath.Join(assetsRoot, "intents", "*.yaml"))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]DiscoveredIntent, 0, len(entries))
+	for _, p := range entries {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			return nil, err
+		}
+		var in DiscoveredIntent
+		if err := yaml.Unmarshal(raw, &in); err != nil {
+			return nil, err
+		}
+		in.SourcePath = p
+		out = append(out, in)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out, nil
+}
+
+func discoverRoles(assetsRoot string) ([]DiscoveredRole, error) {
+	entries, err := filepath.Glob(filepath.Join(assetsRoot, "roles", "*.md"))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]DiscoveredRole, 0, len(entries))
+	for _, p := range entries {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			return nil, err
+		}
+		fm := parseRoleFrontmatter(raw)
+		text := string(raw)
+		out = append(out, DiscoveredRole{
+			ID:          strings.TrimSpace(fm.ID),
+			Category:    strings.TrimSpace(fm.Category),
+			Kind:        strings.TrimSpace(fm.Kind),
+			UsableIn:    append([]string{}, fm.UsableIn...),
+			Permissions: fm.Permissions,
+			Title:       parseMarkdownTitle(text),
+			SourcePath:  p,
+			NonEmpty:    strings.TrimSpace(text) != "",
+		})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out, nil
+}
+
 func parseSkillTitle(text string) string {
 	for _, line := range strings.Split(text, "\n") {
 		trimmed := strings.TrimSpace(line)
@@ -388,6 +486,26 @@ func parseSkillFrontmatter(raw []byte) (name string, description string) {
 		return "", ""
 	}
 	return strings.TrimSpace(fm.Name), strings.TrimSpace(asString(fm.Description))
+}
+
+func parseRoleFrontmatter(raw []byte) roleFrontmatter {
+	text := string(raw)
+	if !strings.HasPrefix(text, "---\n") {
+		return roleFrontmatter{}
+	}
+	parts := strings.SplitN(text, "\n---\n", 2)
+	if len(parts) != 2 {
+		return roleFrontmatter{}
+	}
+	block := strings.TrimPrefix(parts[0], "---\n")
+	var fm roleFrontmatter
+	if err := yaml.Unmarshal([]byte(block), &fm); err != nil {
+		return roleFrontmatter{}
+	}
+	if fm.Permissions == nil {
+		fm.Permissions = map[string]string{}
+	}
+	return fm
 }
 
 func asString(v any) string {

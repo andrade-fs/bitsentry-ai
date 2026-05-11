@@ -37,6 +37,12 @@ func TestExecuteOpenCodeNativeIntegration_CreatesConfigAndFiles(t *testing.T) {
 	if len(res.NativeSkillFiles) == 0 {
 		t.Fatalf("expected native skill files")
 	}
+	if len(res.RoleFiles) < 14 {
+		t.Fatalf("expected role files projected")
+	}
+	if len(res.IntentFiles) < 7 {
+		t.Fatalf("expected intent files projected")
+	}
 	raw, err := os.ReadFile(filepath.Join(root, "opencode.json"))
 	if err != nil {
 		t.Fatalf("read opencode.json: %v", err)
@@ -69,6 +75,18 @@ func TestExecuteOpenCodeNativeIntegration_CreatesConfigAndFiles(t *testing.T) {
 	}
 	if perm["edit"] != "ask" || perm["bash"] != "ask" {
 		t.Fatalf("unexpected permission block: %#v", perm)
+	}
+	for _, role := range knownRoleIDs() {
+		entry, ok := a[role].(map[string]any)
+		if !ok {
+			t.Fatalf("missing role subagent %s", role)
+		}
+		if entry["mode"] != "subagent" {
+			t.Fatalf("role %s must be subagent", role)
+		}
+		if entry["prompt"] != "{file:bitsentry/roles/"+role+".md}" {
+			t.Fatalf("unexpected role prompt for %s: %v", role, entry["prompt"])
+		}
 	}
 	if _, exists := obj["commands"]; exists {
 		t.Fatalf("unexpected top-level commands key")
@@ -157,6 +175,9 @@ func TestExecuteOpenCodeNativeIntegration_PreservesExistingConfigAndNoDupInstruc
 	if !ok || bPerm["edit"] != "ask" || bPerm["bash"] != "ask" {
 		t.Fatalf("expected bitsentry permission block repaired: %#v", b["permission"])
 	}
+	if role, ok := a["software-architect"].(map[string]any); !ok || role["mode"] != "subagent" {
+		t.Fatalf("expected role subagent preserved/installed")
+	}
 }
 
 func TestExecuteOpenCodeNativeIntegration_RejectsUnparsableConfig(t *testing.T) {
@@ -216,5 +237,202 @@ func TestMigrateCommandsFailsWhenUnknownEntryExists(t *testing.T) {
 	}
 	if _, err := loadAndMigrateCommandMap(obj); err == nil {
 		t.Fatalf("expected failure for unknown non-bitsentry commands entry")
+	}
+}
+
+func TestBitsentryPromptContainsPhase5OrchestrationContract(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+		required := []string{
+		"OpenCode-native Bitsentry orchestrator",
+		"Intent routing:",
+		"SDD:",
+		"SDR:",
+		"Support:",
+		"no internal Bitsentry runtime/session execution",
+		"do not modify code unless explicitly requested",
+		"Tool/MCP honesty:",
+		"## Phase 5 Behavior Matrix",
+		"ambiguous request",
+		"save to Engram",
+		"use Context7",
+		"SDD handshake policy (MANDATORY at sdd-init)",
+		"Execution modes:",
+		"interactive (default)",
+		"Persistence modes:",
+		"none: conversation only, no files/folders/memory writes",
+		"do not auto-advance beyond init by default",
+		"never expose raw 'Thinking:'",
+		"treat SDD phases as delegated capabilities/subagents",
+		"Route decision first (when no flow active):",
+		"do NOT force SDD automatically",
+		"Direct reasoning: trivial/small tasks where formal flow is overkill",
+		"Compact interactive SDD envelope (default):",
+		"do not paste full delegated logs into main chat",
+		"if Engram is available, consult it before meaningful work",
+		"save only non-generic reusable learnings",
+		"if engram unavailable/unverified: state clearly and offer openspec or engram-ready blocks",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("agent prompt missing %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	for _, token := range []string{
+		"Intent Decision Contract (choose exactly one first action)",
+		"direct_answer | use_skill | use_role | use_flow_sdr | use_flow_support | use_flow_sdd | bounded_discovery_then_decide | ask_clarifying_question",
+		"Questions simples/explanations => direct_answer (NO SDD by default).",
+		"do NOT activate any formal flow silently; announce selected flow first",
+		"ask_clarifying_question is allowed only when route cannot be decided with high confidence",
+		"## Intent-to-Route Matrix (Phase 6 MVP)",
+		"architecture/system/refactor/integration",
+		"frontend/UI/TUI/wizard/layout",
+		"bug/failure/regression",
+		"security/appsec/threat/risk",
+		"SDD:",
+		"SDR:",
+		"Support:",
+		"Direct reasoning:",
+		"if ambiguous, ask user to choose before entering a flow",
+		"bounded context discovery is allowed before route confirmation",
+		"bounded discovery limits: read-only only",
+		"for narrow direct requests",
+		"open file X and show Y",
+		"SDR brief audit -> compact SDD corrections",
+		"after any discovery, route decision MUST be visible in chat",
+		"separate permission before apply/edit planning and before persistence",
+		"do not create tasks/todos before route confirmation on broad requests",
+	} {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("route classification missing %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptBroadRequestGatesToolUseBeforeRouteConfirmation(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	checks := []string{
+		"bounded context discovery is allowed before route confirmation",
+		"read-only only, no edits, no todos/tasks, no persistence writes, no implementation decisions",
+		"after any discovery, route decision MUST be visible in chat",
+		"Engram/OpenSpec discovery is allowed read-only; persistence requires explicit confirmation",
+	}
+	for _, c := range checks {
+		if !strings.Contains(prompt, c) {
+			t.Fatalf("missing broad-request gating rule %q", c)
+		}
+	}
+}
+
+func TestBitsentryPromptRequiresVisibleRouteAfterDiscovery(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	for _, token := range []string{
+		"after any discovery, route decision MUST be visible in chat",
+		"post-discovery gate is mandatory: STOP after discovery and ask confirmation",
+		"before route selection, edit planning, apply, or persistence",
+		"forbidden without approval: statements like 'procedo directamente con las ediciones'",
+		"never hidden-only reasoning",
+		"do not say only 'need more context' if a probable route is already detected; show probable route first",
+	} {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("prompt missing visible route enforcement %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptPostDiscoveryOutputRequiresPermissionAndNoApply(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	required := []string{
+		"Route decision",
+		"Decision/recommendation",
+		"Candidate files (read-only candidates only, if discovered)",
+		"Permission needed (explicit before edit/apply)",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("prompt missing post-discovery output token %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptContainsRequiredVisibleOutputShape(t *testing.T) {
+	prompt := buildBitsentryAgentPrompt()
+	for _, token := range []string{
+		"Detected route",
+		"Current phase",
+		"Execution mode",
+		"Persistence mode",
+		"Mutation policy",
+		"Phase result",
+		"Decision needed",
+		"Next recommended phase",
+	} {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("prompt missing visible output field %q", token)
+		}
+	}
+}
+
+func TestBitsentryEntrypointContainsBoundariesAndGuidance(t *testing.T) {
+	entry := buildBitsentryEntrypoint()
+	required := []string{
+		"Activate agent: `@bitsentry`",
+		"/bit-*",
+		"installer/projector/validator/pack manager, NOT runtime flow executor",
+		"Do not change repository code unless the user explicitly requests implementation",
+		"Do not claim memory persistence unless Engram",
+		"AVAILABLE / CONFIGURED / MISSING CREDENTIALS / MANUAL STEP NEEDED / UNSUPPORTED",
+	}
+	for _, token := range required {
+		if !strings.Contains(entry, token) {
+			t.Fatalf("entrypoint missing %q", token)
+		}
+	}
+}
+
+func TestNativeCommandsContainPhase5Contracts(t *testing.T) {
+	sdd := buildNativeBitCommandContent(bitCommandSpec{Name: "bit-sdd-init", Action: "bit-sdd-init", Description: "x"})
+	if !strings.Contains(sdd, "Start an SDD-oriented conversation in compact plan-first mode") {
+		t.Fatalf("bit-sdd-init must be plan-first")
+	}
+	if !strings.Contains(sdd, "Only implement code if user explicitly requests implementation") {
+		t.Fatalf("bit-sdd-init must stay non-mutating by default")
+	}
+	for _, token := range []string{
+		"route decision first: SDD vs SDR vs Support vs Direct reasoning",
+		"Execution mode options:",
+		"interactive (default)",
+		"autonomous-plan",
+		"autonomous-apply (requires explicit approval)",
+		"direct reasoning (no SDD artifacts/phases)",
+		"Persistence mode options:",
+		"engram (default if available/configured)",
+		"openspec",
+		"both",
+		"none",
+		"do not auto-advance beyond init until user confirms mode + persistence",
+		"Fallback: if Engram unavailable, state it and offer OpenSpec or Engram-ready blocks",
+		"Interactive output style (default): compact envelope only",
+		"never expose raw Thinking blocks",
+		"do not paste delegated phase logs in full",
+	} {
+		if !strings.Contains(sdd, token) {
+			t.Fatalf("bit-sdd-init missing required token %q", token)
+		}
+	}
+
+	install := buildNativeBitCommandContent(bitCommandSpec{Name: "bit-install-check", Action: "bit-install-check", Description: "x"})
+	for _, token := range []string{"PASS", "PASS WITH NOTES", "FAIL"} {
+		if !strings.Contains(install, token) {
+			t.Fatalf("bit-install-check missing verdict token %q", token)
+		}
+	}
+
+	status := buildNativeBitCommandContent(bitCommandSpec{Name: "bit-pack-status", Action: "bit-pack-status", Description: "x"})
+	if !strings.Contains(status, "without inventing runtime state") {
+		t.Fatalf("bit-pack-status must avoid invented state")
 	}
 }

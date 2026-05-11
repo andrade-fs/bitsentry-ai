@@ -1,0 +1,23 @@
+id: security-review
+description: Security/AppSec/threat and risk review without autonomous pentest runtime.
+default_decision: use_role
+default_flow: none
+alternative_flow: sdr
+complexity_threshold: medium
+pre_flow_roles:
+  - security-reviewer
+  - appsec-reviewer
+  - threat-modeler
+pre_flow_skills:
+  - threat-surface-mapping
+  - risk-analysis
+expected_context_outputs:
+  - threat_model
+  - risk_register
+  - mitigations
+direct_answer_allowed: true
+requires_confirmation: true
+requires_bounded_discovery: true
+forbidden_actions:
+  - claim_pentest_execution
+  - edit_without_permission

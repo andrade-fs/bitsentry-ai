@@ -1,0 +1,18 @@
+id: direct-answer
+description: Simple question or narrow request that can be solved with a concise response.
+default_decision: direct_answer
+default_flow: none
+alternative_flow: support
+complexity_threshold: low
+pre_flow_roles: []
+pre_flow_skills: []
+expected_context_outputs:
+  - concise_answer
+  - next_step_optional
+direct_answer_allowed: true
+requires_confirmation: false
+requires_bounded_discovery: false
+forbidden_actions:
+  - start_sdd_by_default
+  - edit_without_permission
+  - persist_without_confirmation

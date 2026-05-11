@@ -1,0 +1,23 @@
+id: frontend-ux-change
+description: UI/TUI/wizard and interaction-flow improvements.
+default_decision: use_flow_sdd
+default_flow: sdd
+alternative_flow: support
+complexity_threshold: medium
+pre_flow_roles:
+  - frontend-engineer
+  - ux-flow-designer
+  - test-engineer
+pre_flow_skills:
+  - ui-state-analysis
+  - acceptance-criteria-builder
+expected_context_outputs:
+  - ux_hypotheses
+  - acceptance_criteria
+  - route_decision
+direct_answer_allowed: false
+requires_confirmation: true
+requires_bounded_discovery: true
+forbidden_actions:
+  - edit_without_permission
+  - persist_without_confirmation

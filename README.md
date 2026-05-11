@@ -30,6 +30,39 @@ Not implemented yet:
 - Real SDD workflows
 - Real Red Team / Bug Bounty workflow execution
 
+## Phase 5 status (OpenCode Agent Orchestration Polish)
+
+Implemented now (Phase 5):
+- Native OpenCode `bitsentry` prompt hardened for context-aware orchestration across SDD / SDR / support intents
+- Explicit behavior matrix for routing, allowed/forbidden actions, and output shape
+- Entrypoint guidance hardened with safety boundaries and honest MCP/tool status language
+- Polished command contracts for:
+  - `bit-install-check` (PASS / PASS WITH NOTES / FAIL)
+  - `bit-pack-status` (capability inventory without invented state)
+  - `bit-sdd-init` (plan-first, non-mutating default)
+
+## Phase 6 status (Intent-Aware Orchestration & Role Packs MVP)
+
+Status: **PASS WITH NOTES**
+
+Implemented now (Phase 6 MVP):
+- Intent Decision Contract added to `bitsentry` prompt (`direct_answer`, `use_skill`, `use_role`, `use_flow_sdr`, `use_flow_support`, `use_flow_sdd`, `bounded_discovery_then_decide`, `ask_clarifying_question`)
+- Declarative intent registry added under `assets/intents/*.yaml` (7 MVP intents)
+- Role pack added under `assets/roles/*.md` (14 MVP specialist roles)
+- Roles projected to OpenCode as **subagents**
+- `bitsentry` remains OpenCode **primary** agent
+- Safety boundaries preserved: no autonomous runtime, no new targets, no MCP credential mutation
+- Verification: `go test ./...` PASS (**234 tests in 13 packages**)
+
+Notes:
+- Non-blocking: export-preview/report YAML summary does not yet expose intents/roles explicitly.
+
+Important boundaries:
+- BitsentryAI remains an installer/projector/validator/pack manager.
+- BitsentryAI does NOT become an internal runtime session/orchestration engine.
+- Multi-target expansion is deferred to later phases.
+- TUI installer/tool activation improvements come after Phase 5.
+
 ## Phase 1 status (Bootstrap MVP)
 
 Implemented now:

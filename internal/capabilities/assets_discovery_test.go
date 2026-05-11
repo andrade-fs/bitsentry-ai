@@ -26,6 +26,12 @@ func TestDiscoverAssets_RepoRoot(t *testing.T) {
 	if len(catalog.Skills) == 0 {
 		t.Fatalf("expected discovered skills")
 	}
+	if len(catalog.Intents) < 7 {
+		t.Fatalf("expected at least 7 intents, got %d", len(catalog.Intents))
+	}
+	if len(catalog.Roles) < 14 {
+		t.Fatalf("expected at least 14 roles, got %d", len(catalog.Roles))
+	}
 	for _, s := range catalog.Skills {
 		if s.Status != "valid" {
 			t.Fatalf("expected all repository skills to be valid, got %s for %s", s.Status, s.ID)
@@ -46,6 +52,12 @@ func TestDiscoverAssets_HandlesMissingOrchestratorsDirectory(t *testing.T) {
 	if len(catalog.Orchestrators) != 0 {
 		t.Fatalf("expected no orchestrators when directory is absent")
 	}
+	if len(catalog.Intents) != 0 {
+		t.Fatalf("expected no intents when directory is absent")
+	}
+	if len(catalog.Roles) != 0 {
+		t.Fatalf("expected no roles when directory is absent")
+	}
 }
 
 func TestDiscoverAssets_DynamicPackAndSkillValidation(t *testing.T) {
@@ -55,6 +67,8 @@ func TestDiscoverAssets_DynamicPackAndSkillValidation(t *testing.T) {
 	mustWrite(t, filepath.Join(root, "assets/skills/fake-pack/bad-skill/SKILL.md"), "# Skill: bad-skill\n\n## Purpose\nOnly purpose section\n")
 	mustWrite(t, filepath.Join(root, "assets/skills/_shared/result-envelope.md"), "# Result Envelope\nNon-empty\n")
 	mustWrite(t, filepath.Join(root, "assets/orchestrators/fake.md"), "# Fake Orchestrator\nDetails\n")
+	mustWrite(t, filepath.Join(root, "assets/intents/direct-answer.yaml"), "id: direct-answer\ndescription: x\ndefault_decision: direct_answer\ndefault_flow: none\nalternative_flow: support\ncomplexity_threshold: low\npre_flow_roles: []\npre_flow_skills: []\nexpected_context_outputs: []\ndirect_answer_allowed: true\nrequires_confirmation: false\nrequires_bounded_discovery: false\nforbidden_actions: []\n")
+	mustWrite(t, filepath.Join(root, "assets/roles/codebase-onboarding.md"), "---\nid: codebase-onboarding\ncategory: engineering\nkind: specialist\nusable_in: [sdd]\npermissions: {read: allow, edit: ask}\n---\n# Role: codebase-onboarding\n")
 
 	catalog, err := DiscoverAssets(filepath.Join(root, "assets"))
 	if err != nil {
@@ -84,6 +98,12 @@ func TestDiscoverAssets_DynamicPackAndSkillValidation(t *testing.T) {
 	}
 	if len(catalog.Shared) != 1 || catalog.Shared[0].ID != "result-envelope" {
 		t.Fatalf("expected one discovered shared contract")
+	}
+	if len(catalog.Intents) != 1 || catalog.Intents[0].ID != "direct-answer" {
+		t.Fatalf("expected one discovered intent")
+	}
+	if len(catalog.Roles) != 1 || catalog.Roles[0].ID != "codebase-onboarding" {
+		t.Fatalf("expected one discovered role")
 	}
 }
 

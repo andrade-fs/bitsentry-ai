@@ -14,9 +14,23 @@ type OpenCodeExportProjection struct {
 	IncludedSkills          []ProjectedSkill
 	IncludedSharedContracts []ProjectedSharedContract
 	IncludedOrchestrators   []ProjectedOrchestrator
+	IncludedIntents         []ProjectedIntent
+	IncludedRoles           []ProjectedRole
 	GeneratedFiles          []ProjectedGeneratedFile
 	Warnings                []string
 	Skipped                 []string
+}
+
+type ProjectedIntent struct {
+	ID         string
+	SourcePath string
+	TargetPath string
+}
+
+type ProjectedRole struct {
+	ID         string
+	SourcePath string
+	TargetPath string
 }
 
 type ProjectedFlow struct {
@@ -150,6 +164,8 @@ func BuildOpenCodeExportProjection(catalog AssetCatalog, selectedIDs []string) (
 	projection.IncludedSkills = projectSkills(catalog.Skills, includePacks, includeSkills)
 	projection.IncludedSharedContracts = projectShared(catalog.Shared, includePacks["_shared"])
 	projection.IncludedOrchestrators = projectOrchestrators(catalog.Orchestrators, len(projection.IncludedFlows) > 0)
+	projection.IncludedIntents = projectIntents(catalog.Intents, len(projection.IncludedFlows)+len(projection.IncludedSkillPacks) > 0)
+	projection.IncludedRoles = projectRoles(catalog.Roles, len(projection.IncludedFlows)+len(projection.IncludedSkillPacks) > 0)
 
 	registry := GenerateSkillRegistry(projection)
 	usage := GenerateOpenCodeUsage(projection)
@@ -224,6 +240,22 @@ func GenerateSkillRegistry(p OpenCodeExportProjection) string {
 	} else {
 		for _, sc := range p.IncludedSharedContracts {
 			b.WriteString(fmt.Sprintf("- %s\n", sc.ID))
+		}
+	}
+	b.WriteString("\n## Included Intents\n")
+	if len(p.IncludedIntents) == 0 {
+		b.WriteString("- none\n")
+	} else {
+		for _, in := range p.IncludedIntents {
+			b.WriteString(fmt.Sprintf("- %s\n", in.ID))
+		}
+	}
+	b.WriteString("\n## Included Roles\n")
+	if len(p.IncludedRoles) == 0 {
+		b.WriteString("- none\n")
+	} else {
+		for _, role := range p.IncludedRoles {
+			b.WriteString(fmt.Sprintf("- %s\n", role.ID))
 		}
 	}
 	b.WriteString("\n## Handoffs\n")
@@ -358,6 +390,30 @@ func projectShared(shared []DiscoveredSharedContract, include bool) []ProjectedS
 	out := make([]ProjectedSharedContract, 0, len(shared))
 	for _, s := range shared {
 		out = append(out, ProjectedSharedContract{ID: s.ID, SourcePath: s.Path, TargetPath: fmt.Sprintf("bitsentry/skills/_shared/%s.md", s.ID)})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
+}
+
+func projectIntents(intents []DiscoveredIntent, include bool) []ProjectedIntent {
+	if !include {
+		return []ProjectedIntent{}
+	}
+	out := make([]ProjectedIntent, 0, len(intents))
+	for _, in := range intents {
+		out = append(out, ProjectedIntent{ID: in.ID, SourcePath: in.SourcePath, TargetPath: fmt.Sprintf("bitsentry/intents/%s.yaml", in.ID)})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
+}
+
+func projectRoles(roles []DiscoveredRole, include bool) []ProjectedRole {
+	if !include {
+		return []ProjectedRole{}
+	}
+	out := make([]ProjectedRole, 0, len(roles))
+	for _, role := range roles {
+		out = append(out, ProjectedRole{ID: role.ID, SourcePath: role.SourcePath, TargetPath: fmt.Sprintf("bitsentry/roles/%s.md", role.ID)})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
 	return out

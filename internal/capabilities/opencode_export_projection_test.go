@@ -29,6 +29,12 @@ func TestBuildOpenCodeExportProjection_SelectBitsentrySDD(t *testing.T) {
 	if len(p.GeneratedFiles) == 0 || p.GeneratedFiles[0].Path != "bitsentry/skill-registry.md" {
 		t.Fatalf("expected generated skill registry")
 	}
+	if len(p.IncludedIntents) < 7 {
+		t.Fatalf("expected intents projected")
+	}
+	if len(p.IncludedRoles) < 14 {
+		t.Fatalf("expected roles projected")
+	}
 }
 
 func TestBuildOpenCodeExportProjection_SelectBitsentrySDR(t *testing.T) {
@@ -137,7 +143,7 @@ func TestGenerateSkillRegistryContainsCoreSections(t *testing.T) {
 		IncludedSharedContracts: []ProjectedSharedContract{{ID: "result-envelope"}},
 	}
 	content := GenerateSkillRegistry(p)
-	checks := []string{"## Included Flows", "sdd", "## Loading Rules", "## Persistence Roots", "Result Envelope"}
+	checks := []string{"## Included Flows", "sdd", "## Loading Rules", "## Persistence Roots", "Result Envelope", "## Included Intents", "## Included Roles"}
 	for _, c := range checks {
 		if !strings.Contains(content, c) {
 			t.Fatalf("generated registry missing %q", c)

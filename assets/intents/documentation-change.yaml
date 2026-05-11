@@ -1,0 +1,20 @@
+id: documentation-change
+description: Documentation/content update that may be direct or planned depending scope.
+default_decision: use_role
+default_flow: none
+alternative_flow: sdd
+complexity_threshold: low
+pre_flow_roles:
+  - technical-writer
+pre_flow_skills:
+  - docs-diff-review
+expected_context_outputs:
+  - doc_scope
+  - audience
+  - acceptance_criteria
+direct_answer_allowed: true
+requires_confirmation: true
+requires_bounded_discovery: false
+forbidden_actions:
+  - broad_refactor_without_confirmation
+  - persist_without_confirmation

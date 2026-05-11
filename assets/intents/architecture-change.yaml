@@ -1,0 +1,25 @@
+id: architecture-change
+description: Architectural or integration change with multi-file and contract impact.
+default_decision: use_flow_sdd
+default_flow: sdd
+alternative_flow: sdr
+complexity_threshold: medium
+pre_flow_roles:
+  - codebase-onboarding
+  - software-architect
+  - test-engineer
+pre_flow_skills:
+  - affected-files-discovery
+  - constraints-analysis
+  - risk-analysis
+expected_context_outputs:
+  - route_decision
+  - candidate_files
+  - risk_summary
+direct_answer_allowed: false
+requires_confirmation: true
+requires_bounded_discovery: true
+forbidden_actions:
+  - edit_without_permission
+  - persist_without_confirmation
+  - formal_flow_without_announcement

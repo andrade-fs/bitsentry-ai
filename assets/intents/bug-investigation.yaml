@@ -1,0 +1,22 @@
+id: bug-investigation
+description: Failure/regression investigation, starting with triage and reproducibility.
+default_decision: use_flow_support
+default_flow: support
+alternative_flow: sdd
+complexity_threshold: medium
+pre_flow_roles:
+  - bug-triage-engineer
+  - test-engineer
+pre_flow_skills:
+  - bug-scope-mapping
+  - repro-checklist
+expected_context_outputs:
+  - hypotheses
+  - repro_steps
+  - escalation_criteria
+direct_answer_allowed: false
+requires_confirmation: true
+requires_bounded_discovery: true
+forbidden_actions:
+  - claim_fix_without_evidence
+  - edit_without_permission
