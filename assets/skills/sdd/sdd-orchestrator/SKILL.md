@@ -23,6 +23,10 @@ metadata:
 ## Purpose
 Exclusively coordinate the SDD lifecycle by managing the transition between specialized phase skills. It maintains the "Source of Truth" for the session state and enforces quality gates.
 
+The orchestrator must be decision-first and proportional: do not force full SDD when direct reasoning or compact SDD is sufficient.
+
+Bounded context discovery is allowed in new chats before formal flow activation (read-only only), but detected route must always be surfaced explicitly to the user.
+
 ## Use When
 - **Management**: You need to decide "What happens next?" in a software change.
 - **Validation**: You need to ensure a phase's output is sufficient to move forward.
@@ -38,6 +42,10 @@ Exclusively coordinate the SDD lifecycle by managing the transition between spec
 *The agent must follow these steps in strict linear order:*
 
 1.  **Reconstruct**: Parse `state.yaml`. If not found, invoke `sdd-init` protocol logic.
+    - `sdd-init` handshake is mandatory first: execution mode, persistence mode, mutation permissions, progression policy.
+    - Do not auto-advance phases until handshake decisions are explicit.
+    - If no active flow exists, perform initial route decision: `SDD | SDR | Support | Direct reasoning` and confirm if ambiguous.
+    - Optional pre-route bounded discovery is allowed (Engram/OpenSpec lookup + limited file reads), but MUST remain read-only and end with a visible route decision.
 2.  **Audit**: Inspect the `last_envelope`.
     - If `status: blocked`, stop and surface the blocker.
     - If `status: success`, verify all declared `artifacts` exist.
@@ -49,6 +57,15 @@ Exclusively coordinate the SDD lifecycle by managing the transition between spec
     - Target: `{skill-id}`
     - Context: Links to relevant artifacts (not the full content).
     - Objective: The specific success criteria for that phase.
+
+6.  **Compact Main-Chat Summary**: Return only a compact summary for the parent chat:
+    - `Phase`
+    - `Verdict`
+    - `Useful findings` (max 3-5 bullets)
+    - `Blocking questions` (only if needed)
+    - `Decision/recommendation`
+    - `Next step`
+    - `Context/memory note` (only if relevant)
 
 ## Phase DAG (Directed Acyclic Graph)
 `init` → `explore` → `propose` → **[GATE 1]** → (`spec` & `design`) → `tasks` → **[GATE 2]** → `apply` → `verify` → **[GATE 3]** → `archive`.
@@ -67,6 +84,10 @@ Compliant with _shared/persistence-contract.md and _shared/engram-convention.md
 - **NO Deep Dive**: Do not read source code files; rely on `sdd-explore` reports.
 - **NO Bypass**: Do not skip `sdd-verify` even for "trivial" changes.
 - **Stateless Operation**: Do not rely on hidden memory; everything must be in `state.yaml`.
+- **Visible Output Only**: never emit raw `Thinking:` blocks; return concise result envelopes.
+- **No Ceremony by Default**: avoid large tables/ceremonial sections for simple changes.
+- **No Full Logs in Main Chat**: do not paste delegated phase logs; only summarized outputs.
+- **Discovery Guardrails**: no edits, no persistence writes, no task/todo creation, no implementation decisions during bounded discovery.
 
 ## Result Envelope
 **Status**: `success | partial | blocked`
