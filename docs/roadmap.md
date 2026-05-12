@@ -182,6 +182,15 @@ Non-blocking note:
 - Added formal first-response preview template and mandatory gates.
 - Captured QA routing learning: small copy/product-messaging/UX changes may still route to compact SDD when core narrative/perception is affected.
 
+### Phase 6.2 — Capability Selection Preview (completed)
+- Extended route decision envelope with capability preview fields (`primary_*`, `secondary_*`, `deferred_skills`, `capability_reason`, `capability_gates`).
+- Resolved capability preview from declarative assets (`assets/intents`, `assets/roles`, `assets/skills`, `assets/flows`) through existing discovery.
+- Updated OpenCode native prompt contract to require visible Route + Capability Decision Preview before deep discovery/planning/proposals.
+- Preserved 6.1 preview gates and non-mutating orchestrator boundaries (`edit=deny`, no flow/skill execution, no persistence in preview).
+
+Non-blocking Phase 6.3 note:
+- Consider finer-grained capability ranking heuristics and confidence weighting per flow stage.
+
 ## Phase 7 — Advanced profiles and model routing (future)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type

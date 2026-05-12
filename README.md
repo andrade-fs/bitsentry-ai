@@ -1,235 +1,663 @@
 # bitsentry-ai
 
-`bitsentry-ai` is the BitSentry local CLI/TUI bootstrap tool. Phase 2 delivers working Components MVP so you can inspect your environment, manage agent components (Engram, Context7, MCPs, Skills), detect local AI tooling, manage profiles, and prepare for future workflows.
+`bitsentry-ai` is the BitSentry local CLI/TUI bootstrap tool. It provides an intent-aware orchestration system that routes user requests to appropriate development workflows (SDD, SDR, Support), manages AI agent integrations (OpenCode), and installs capability packs for persistent memory, documentation lookup, and skill-based task execution.
 
-## Phase 2 status (Components MVP)
+## Table of Contents
 
-Implemented now (Phase 2):
-- All Phase 1 commands plus: `components`, `components <component> status`, `components mcps list`, `components skills list`, `components <component> configure --dry-run`
-- Engram runtime detection (binary, version, data dir, config consistency)
-- Context7 metadata configuration (no runtime validation)
-- MCP metadata registry (modeled MCPs: engram, context7, postgres, filesystem, git, github, browser, firecrawl)
-- Skills metadata registry (core families + focused skills; declarative)
-- Component configure dry-run preview
+1. [Overview](#1-overview)
+2. [Installation](#2-installation)
+3. [TUI Reference](#3-tui-reference)
+4. [Integrations](#4-integrations)
+5. [Intent-Aware Orchestration](#5-intent-aware-orchestration)
+6. [Architecture](#6-architecture)
+7. [CLI Reference](#7-cli-reference)
+8. [Profiles](#8-profiles)
+9. [Development](#9-development)
 
-## Phase 2.5 status (OpenCode Integration)
+---
 
-Implemented now (Phase 2.5):
-- OpenCode MCP integration: `agents opencode status`, `agents opencode inspect-config`, `agents opencode export-preview`, `agents opencode export`, `agents opencode apply-plan`, `agents opencode patch-plan`, `agents opencode apply`, `agents opencode backups`, `agents opencode restore`
-- Config safety: JSON validation, top-level key preservation ($schema, agent, mcp, permission, provider)
-- Unknown MCPs preserved: aurea-core, aurea-documents, aurea-fx, obsidian
-- Managed MCPs: context7, engram
-- Dry-run safety: no file modification, no backup creation
-- Backup/restore with pre-restore snapshots
-- Capability installer foundation (registry + planner + OpenCode projection): `capabilities status`, `capabilities plan --target-agent opencode --preset <id>`
-- Capability selection persistence + staged apply MVP: `capabilities configure ...`, `capabilities apply [--dry-run]`
+## 1. Overview
 
-Not implemented yet:
-- Native OpenCode runtime integration for Bitsentry flows/skills (export produces a managed capability pack)
-- Real SDR workflows
-- Real SDD workflows
-- Real Red Team / Bug Bounty workflow execution
+### What is bitsentry-ai?
 
-## Phase 5 status (OpenCode Agent Orchestration Polish)
+A bootstrap tool that:
 
-Implemented now (Phase 5):
-- Native OpenCode `bitsentry` prompt hardened for context-aware orchestration across SDD / SDR / support intents
-- Explicit behavior matrix for routing, allowed/forbidden actions, and output shape
-- Entrypoint guidance hardened with safety boundaries and honest MCP/tool status language
-- Polished command contracts for:
-  - `bit-install-check` (PASS / PASS WITH NOTES / FAIL)
-  - `bit-pack-status` (capability inventory without invented state)
-  - `bit-sdd-init` (plan-first, non-mutating default)
+- **Detects** local AI tooling (OpenCode, Engram, Context7, MCPs)
+- **Orchestrates** development workflows through intent routing
+- **Installs** capability packs (skills, flows, MCPs) to target agents
+- **Manages** profiles for different work contexts
 
-## Phase 6 status (Intent-Aware Orchestration & Role Packs MVP)
+### Intent-Aware Orchestration System
 
-Status: **PASS WITH NOTES**
+```
+User Intent (natural language)
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Route Decision Engine              │
+│  - Intent classification (8 intents)│
+│  - Confidence scoring               │
+│  - Decision contract               │
+└─────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────┐
+│  Router → Planner → Session Store  │
+│  - Flow selection (SDD/SDR/Support) │
+│  - Execution plan generation        │
+│  - Session persistence              │
+└─────────────────────────────────────┘
+    │
+    ▼
+Execution Phases (per flow)
+```
 
-Implemented now (Phase 6 MVP):
-- Intent Decision Contract added to `bitsentry` prompt (`direct_answer`, `use_skill`, `use_role`, `use_flow_sdr`, `use_flow_support`, `use_flow_sdd`, `bounded_discovery_then_decide`, `ask_clarifying_question`)
-- Declarative intent registry added under `assets/intents/*.yaml` (7 MVP intents)
-- Role pack added under `assets/roles/*.md` (14 MVP specialist roles)
-- Roles projected to OpenCode as **subagents**
-- `bitsentry` remains OpenCode **primary** agent
-- Safety boundaries preserved: no autonomous runtime, no new targets, no MCP credential mutation
-- Verification: `go test ./...` PASS (**234 tests in 13 packages**)
+### Phase 6.2 Capability Selection Preview (OpenCode-first)
 
-Notes:
-- Non-blocking: export-preview/report YAML summary does not yet expose intents/roles explicitly.
+- Route preview now includes capability selection preview fields before any deep discovery/planning:
+  - `primary_skills`, `secondary_skills`, `deferred_skills`
+  - `primary_roles`, `secondary_roles`
+  - `capability_reason`, `capability_gates`
+- Preview remains strictly non-executing/non-persistent:
+  - `no_edits_in_preview`
+  - `no_persistence_in_preview`
+  - `no_flow_execution_in_preview`
+- OpenCode native prompt contract is PRIMARY UX for route + capability preview.
+- `bitsentry-ai route decide` stays debug/plumbing parity only (not the principal user workflow).
 
-## Phase 6.1B status (OpenCode Agent Route Preview Wiring)
+### Available Flows
 
-Implemented now (Phase 6.1B):
-- Native `bitsentry` prompt now frames route decision preview as an **OpenCode-native agent capability** (primary UX in `@bitsentry` chat)
-- Prompt contract explicitly includes `matched_signals` in route decision preview reasoning/output
-- Structured route preview envelope fields documented in prompt output contract (input, matched_intent, matched_signals, decision, recommended_flow/roles/skills, confidence, gates)
-- `bitsentry-ai route decide` remains available as **debug/plumbing parity**, not primary end-user UX
+| Flow | Purpose | Skills | Status |
+|------|---------|--------|--------|
+| **SDD** (Spec Driven Development) | Structured software/product change | init → explore → propose → spec → design → tasks → apply → verify → archive | Declarative |
+| **SDR** (Structured Discovery Research) | Research, notes, blog content, idea validation | capture → research → synthesis → questions → structure → validate → archive | Declarative |
+| **Support** | Helper utilities (registry, review, testing, issues, PRs) | skill-registry, judgment-day, go-testing, skill-creator, issue-creation, branch-pr | Declarative |
 
-Boundaries preserved:
-- No runtime flow execution
-- No autonomous orchestration runtime
-- No MCP credential mutation
-- No new target agents
+---
 
-## Phase 6.1C status (OpenCode Prompt Contract Snapshot QA)
+## 2. Installation
 
-Implemented now (Phase 6.1C):
-- Added anti-regression prompt contract tests for OpenCode-first route preview behavior.
-- Added explicit tests ensuring CLI `route decide` is not presented as primary user workflow.
-- Added manual QA checklist: `docs/opencode-phase6-route-preview-qa.md`.
-
-## Phase 6.1E status (Visible Route Preview Enforcement)
-
-Implemented now (Phase 6.1E):
-- Prompt contract now enforces a visible Route Decision Preview before non-trivial discovery/analysis/planning/recommendation work.
-- Required preview fields and mandatory preview gates are explicitly enforced in prompt contract.
-- Added anti-regression test coverage for visible route preview before discovery.
-- Recorded landing QA result as **PASS WITH NOTES** and documented corrective enforcement.
-
-## Phase 6.1E.1 status (Route Preview Prompt Conflict Cleanup)
-
-Implemented now (Phase 6.1E.1):
-- Removed conflicting prompt wording that could imply discovery before route preview.
-- Enforced sequence: user request -> visible route decision preview -> bounded read-only discovery (only if `requires_bounded_discovery=true`) -> updated decision only if findings change -> confirmation.
-- Added anti-regression tests to prevent reintroducing discovery-before-preview prompt conflicts.
-
-## Phase 6.1F status (Bitsentry Orchestrator No-Edit Guardrail)
-
-Implemented now (Phase 6.1F):
-- Native OpenCode `agent.bitsentry.permission.edit` is enforced as `deny`.
-- `bitsentry` contract explicitly states orchestrator-only, non-mutating behavior (route/discovery/planning/gates) and no direct file edits.
-- Documented critical landing re-test failure and the permission-layer corrective action.
-
-## Phase 6.1G status (Prompt Priority / Frontload Contract)
-
-Implemented now (Phase 6.1G):
-- Frontloaded a non-negotiable first-response contract so Route Decision Preview is the first visible response for non-trivial requests.
-- Added explicit Route Decision Preview template fields and mandatory gates before any discovery/analysis/planning recommendations.
-- Added rule from QA learning: small copy/product-messaging/UX scope may still be compact SDD when central narrative/perception or multi-component consistency is impacted.
-
-Important boundaries:
-- BitsentryAI remains an installer/projector/validator/pack manager.
-- BitsentryAI does NOT become an internal runtime session/orchestration engine.
-- Multi-target expansion is deferred to later phases.
-- TUI installer/tool activation improvements come after Phase 5.
-
-## Phase 1 status (Bootstrap MVP)
-
-Implemented now:
-- CLI commands: `version`, `doctor`, `agents`, `profiles`, `profile use <name>`, `components`, `config path`
-- Minimal TUI (launch with no subcommand)
-- Environment doctor (OS/arch/shell/dependencies)
-- OpenCode agent detection
-- Profile system (8 default profiles)
-- Components/workflows registries as **stubs**
-- Local config path: `~/.bitsentry-ai/config.yaml`
-
-Not implemented yet:
-- Real SDR workflows
-- Real SDD workflows
-- Real Red Team / Bug Bounty workflow execution
-
-## Installation
+### Quick Install
 
 ```bash
 ./install.sh
 ```
 
-Useful options:
+### Installation Options
 
 ```bash
-./install.sh --dry-run
-./install.sh --skip-doctor
-./install.sh --prefix "$HOME/.local/bin"
+./install.sh --dry-run      # Preview without modifying anything
+./install.sh --skip-doctor  # Skip environment checks
+./install.sh --prefix ~/.local/bin  # Custom installation path
 ```
 
-## Development usage
+### Verify Installation
+
+```bash
+bitsentry-ai doctor         # Check environment (OS, arch, shell, dependencies)
+bitsentry-ai version        # Show version
+```
+
+### Install from Source
 
 ```bash
 go build -o bitsentry-ai ./cmd/bitsentry-ai
 ./bitsentry-ai version
-./bitsentry-ai doctor
-go test ./...
+go test ./...              # Run tests
 ```
 
-## Local OpenCode dogfooding smoke script (Phase 4.0.2)
-
-Run the one-command local installer/smoke flow:
+### OpenCode Dogfooding (Local Smoke Test)
 
 ```bash
 ./scripts/install-opencode-local.sh
 ```
 
-What it does:
-- checks `go` and `gofmt`
-- formats Go files and runs `go test ./...`
-- builds `./bin/bitsentry-ai`
-- configures `bitsentry-dev`
-- runs OpenCode export preview, dry-run, and real export
-- detects the actual managed OpenCode export root (`~/.opencode/bitsentry` or `~/.config/opencode/bitsentry`)
-- verifies `OPENCODE_USAGE.md` and `skill-registry.md` in the detected export root
-- prints the resolved export path in the final PASS summary
+This script:
+1. Checks `go` and `gofmt`
+2. Formats Go files and runs `go test ./...`
+3. Builds `./bin/bitsentry-ai`
+4. Configures `bitsentry-dev` profile
+5. Runs OpenCode export preview, dry-run, and real export
+6. Verifies `OPENCODE_USAGE.md` and `skill-registry.md` in the export root
 
-If needed, make it executable once:
+---
 
-```bash
-chmod +x ./scripts/install-opencode-local.sh
-```
+## 3. TUI Reference
 
-## TUI Install / Setup Wizard (Phase 4.0.3)
-
-Launch the TUI and open `Install / Setup`:
+### Launch TUI
 
 ```bash
 bitsentry-ai
 ```
 
-Wizard MVP capabilities:
-- Detect OpenCode status, config root, and Bitsentry pack status
-- Select install target (OpenCode), preset (`bitsentry-dev` default), and MCP toggles (Engram/Context7)
-- Review install plan and explicit non-actions (no `opencode.json` mutation, no runtime flow execution)
-- Confirm install and export capability pack
-- Verify `OPENCODE_USAGE.md` and `skill-registry.md`
-- Show next OpenCode dogfooding prompt with detected real paths
+### Navigation Controls
 
-## CLI command list
+| Key | Action |
+|-----|--------|
+| `↑` / `k` | Move up |
+| `↓` / `j` | Move down |
+| `Enter` | Select |
+| `Esc` / `Backspace` | Back to home |
+| `q` / `Ctrl+C` | Quit |
+
+### Available Screens
+
+| Screen | Description |
+|--------|-------------|
+| [Home Menu](#home-menu) | Main navigation hub |
+| [Install / Setup](#install--setup) | Wizard for OpenCode capability installation |
+| [System Check](#system-check) | OS, arch, shell, dependencies |
+| [Detect AI Agents](#detect-ai-agents) | Agent detection status |
+| [Components Status](#components-status) | Engram, Context7, MCPs, Skills |
+| [Capabilities](#capabilities) | Skill/flow/MCP selector |
+| [Profiles](#profiles) | Profile management |
+| [Workflows](#workflows) | Workflow registry (stubs) |
+| [Settings](#settings) | Config paths and preferences |
+
+---
+
+### Home Menu
+
+The landing screen after launching `bitsentry-ai`. Shows:
+
+- Active profile
+- Available screens (9 total)
+- Navigation hints
+
+---
+
+### Install / Setup
+
+6-step wizard for installing Bitsentry capabilities into OpenCode.
+
+**Step 1 — Select target agent**
+- OpenCode detection (binary, config root, pack status)
+
+**Step 2 — Select capabilities**
+- Preset selection (`bitsentry-dev` default)
+- Flow and skill display
+
+**Step 3 — Select MCPs/components**
+- Engram toggle
+- Context7 toggle
+
+**Step 4 — Review install plan**
+- Summary of target, capabilities, components
+- Actions that will be performed
+- Actions that will NOT be performed (no deletion, no MCP mutation, no flow execution)
+
+**Step 5 — Install / Update**
+- Execute the install
+
+**Step 6 — Done**
+- Result status and next steps
+- OpenCode prompt for dogfooding
+
+| Key | Action |
+|-----|--------|
+| `Space` | Toggle selection |
+| `Enter` | Continue to next step |
+| `r` | Refresh detection |
+| `Esc` | Back to previous step |
+
+---
+
+### System Check
+
+Displays system information:
+
+```
+- OS: darwin
+- Arch: arm64
+- Shell: /bin/zsh
+- Package manager: brew (/opt/homebrew/bin/brew)
+- Dependencies:
+  - go: found [/usr/local/go/bin/go]
+  - gofmt: found
+  - git: found
+  - ...
+```
+
+---
+
+### Detect AI Agents
+
+Shows detected AI agents:
+
+```
+- OpenCode (opencode): detected
+  path: /usr/local/bin/opencode
+  version: 1.x.x
+```
+
+---
+
+### Components Status
+
+Runtime-detected component status:
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| **Engram** | Runtime detected | Binary path, version, data dir, config status |
+| **Context7** | Runtime detected | Command, path, config status |
+| **MCPs** | Metadata registry | Modeled: engram, context7, postgres, filesystem, git, github, browser, firecrawl |
+| **Skills** | Metadata registry | Core families + focused skills (declarative) |
+
+---
+
+### Capabilities
+
+MVP selector for OpenCode target with toggles.
+
+| Key | Toggle |
+|-----|--------|
+| `[` / `]` | Cycle presets |
+| `m` | Engram MCP |
+| `c` | Context7 MCP |
+| `p` | PostgreSQL MCP (modeled) |
+| `1` | SDD flow |
+| `2` | SDR flow |
+| `3` | notes flow |
+| `4` | redteam flow |
+| `z` | bitsentry-sdd skill |
+| `x` | research-init skill |
+| `n` | bugbounty-notes skill |
+
+| Key | Action |
+|-----|--------|
+| `s` | Save draft |
+| `v` | Validate |
+| `l` | Plan preview |
+| `d` | Apply dry-run |
+| `a` then `y` | Real apply |
+
+---
+
+### Profiles
+
+Select and activate profiles.
+
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` or `j` / `k` | Navigate |
+| `Enter` | Activate selected profile |
+
+---
+
+### Workflows
+
+Registry of available workflows (currently declarative stubs).
+
+---
+
+### Settings
+
+Configuration information:
+
+```
+- Config directory: ~/.bitsentry-ai/
+- Config file: ~/.bitsentry-ai/config.yaml
+- Active profile: bitsentry-dev
+- Dry-run: off
+```
+
+---
+
+## 4. Integrations
+
+### 4.1 Agents
+
+#### OpenCode
+
+OpenCode integration with full lifecycle management:
+
+```bash
+# Status and inspection
+bitsentry-ai agents opencode status
+bitsentry-ai agents opencode inspect-config
+
+# Export lifecycle
+bitsentry-ai agents opencode export-preview
+bitsentry-ai agents opencode export
+
+# Apply lifecycle
+bitsentry-ai agents opencode apply-plan
+bitsentry-ai agents opencode patch-plan
+bitsentry-ai agents opencode apply
+
+# Backup and restore
+bitsentry-ai agents opencode backups
+bitsentry-ai agents opencode restore
+```
+
+**Capabilities:**
+- JSON validation with top-level key preservation (`$schema`, `agent`, `mcp`, `permission`, `provider`)
+- Unknown MCPs preserved (aurea-core, aurea-documents, aurea-fx, obsidian)
+- Managed MCPs: context7, engram
+- Dry-run safety (no file modification, no backup creation)
+- Pre-restore snapshots
+
+---
+
+### 4.2 MCPs (Model Context Protocol)
+
+| MCP | Status | Description |
+|-----|--------|-------------|
+| **Engram** | ✅ Runtime detected | Persistent memory system |
+| **Context7** | ✅ Runtime detected | Documentation lookup |
+| **PostgreSQL** | 🔲 Modeled | Database integration |
+| **Filesystem** | 🔲 Modeled | File operations |
+| **Git** | 🔲 Modeled | Git operations |
+| **GitHub** | 🔲 Modeled | GitHub integration |
+| **Browser** | 🔲 Modeled | Web browsing |
+| **Firecrawl** | 🔲 Modeled | Web scraping |
+
+---
+
+### 4.3 Skills
+
+Declarative skill packs organized by family:
+
+#### Core Skills Pack
+
+| Family | Skills |
+|--------|--------|
+| **SDD** (8 skills) | sdd-init, sdd-explore, sdd-propose, sdd-spec, sdd-design, sdd-tasks, sdd-apply, sdd-verify, sdd-archive |
+| **SDR** (7 skills) | sdr-capture, sdr-research, sdr-synthesis, sdr-questions, sdr-structure, sdr-validate, sdr-archive |
+| **Support** (6 skills) | skill-registry, judgment-day, go-testing, skill-creator, issue-creation, branch-pr |
+
+#### Skill Loading
+
+Skills are loaded via the `skill` tool when task context matches skill description. Available skills:
+
+- `bitsentry-sdd-*` — SDD phase skills
+- `bitsentry-sdd-orchestrator` — SDD flow orchestrator
+- `bitsentry-sdr-*` — SDR phase skills
+- `bitsentry-sdr-orchestrator` — SDR flow orchestrator
+- `bitsentry-support-*` — Support utilities
+- `branch-pr` — PR creation workflow
+- `go-testing` — Go testing patterns
+- `issue-creation` — Issue creation workflow
+- `judgment-day` — Adversarial review
+- `research-bitsentry-*` — BitSentry research utilities
+- `skill-creator` — Skill creation
+- `skill-registry` — Registry management
+
+---
+
+### 4.4 Flows
+
+#### SDD (Spec Driven Development)
+
+```
+init → explore → propose → spec → design → tasks → apply → verify → archive
+```
+
+**Gates:**
+- `proposal-approval` — Before spec/design
+- `pre-implementation` — Before apply
+- `final-review` — Before archive
+
+**Handoffs:**
+- → SDR (deeper research)
+- → judgment-day (adversarial review)
+- → go-testing (Go verification)
+- → issue-creation (follow-up)
+- → branch-pr (branch/PR plan)
+
+---
+
+#### SDR (Structured Discovery Research)
+
+```
+capture → research → synthesis → questions → structure → validate → archive
+```
+
+**Gates:**
+- `continuation-review` — Before structure
+- `quality-review` — Before archive
+
+**Handoffs:**
+- → SDD (implementation needed)
+- → issue-creation (follow-up)
+- → judgment-day (controversial topics)
+
+---
+
+#### Support
+
+Independent utility invocations (not a mandatory sequential pipeline):
+
+- `skill-registry` — Scan and maintain capability map
+- `judgment-day` — Adversarial review with PASS/PASS WITH NOTES/PARTIAL/BLOCKED verdict
+- `go-testing` — Hermetic Go testing guidance
+- `skill-creator` — Create/improve skills
+- `issue-creation` — Issue draft from findings
+- `branch-pr` — Safe branch/PR plan
+
+---
+
+## 5. Intent-Aware Orchestration
+
+### Intent Registry (8 declared intents)
+
+| Intent | Default Flow | Complexity | Requires Confirmation |
+|--------|--------------|------------|----------------------|
+| `architecture-change` | SDD | medium | yes |
+| `frontend-ux-change` | SDD | medium | yes |
+| `bug-investigation` | Support → SDD | low | no |
+| `research-analysis` | SDR | medium | no |
+| `security-review` | SDR | high | yes |
+| `documentation-change` | SDD | low | no |
+| `direct-answer` | none | — | no |
+
+### Route Decision Preview
+
+The primary UX for `@bitsentry` chat. Before non-trivial work:
+
+```
+Route Decision Preview
+- matched_intent: <intent>
+- decision: <decision>
+- matched_signals: [<signals>]
+- reason: <reason>
+- requires_bounded_discovery: true/false
+- requires_confirmation: true/false
+- gates: [no_edits_in_preview, no_persistence_in_preview, no_flow_execution_in_preview]
+```
+
+### Available Specialist Roles (14)
+
+| Role | Category | Use When |
+|------|----------|----------|
+| `codebase-onboarding` | engineering | New codebase context |
+| `software-architect` | engineering | Architecture, integration, contracts |
+| `frontend-engineer` | engineering | UI/TUI/wizard/layout |
+| `backend-engineer` | engineering | API, services, data |
+| `test-engineer` | engineering | Testing strategy |
+| `security-reviewer` | security | Security review |
+| `appsec-reviewer` | security | AppSec analysis |
+| `threat-modeler` | security | Threat modeling |
+| `product-analyst` | product | Research, content, notes |
+| `ux-flow-designer` | product | UX flow design |
+| `technical-writer` | product | Documentation |
+| `bug-triage-engineer` | support | Bug investigation |
+| `code-reviewer` | support | Code review |
+| `incident-analyst` | support | Incident response |
+
+### Decision Matrix
+
+| Intent signal | Decision | Default route |
+|--------------|----------|---------------|
+| spec, design, feature, change | `use_flow_sdd` | SDD |
+| security, detection, incident, threat, logs | `use_flow_sdr` | SDR |
+| support, bug, help, troubleshoot, error | `use_flow_support` | Support |
+| direct/simple explanation | `direct_answer` | none |
+
+---
+
+## 6. Architecture
+
+### Package Map
+
+```
+cmd/bitsentry-ai/
+  └── Binary entrypoint
+
+internal/
+  ├── cli/            # Cobra command tree (version, doctor, agents, profiles, components, capabilities, route)
+  ├── app/            # Application wiring and shared runtime services
+  ├── config/         # Config path resolution and persistence (~/.bitsentry-ai/config.yaml)
+  ├── system/         # OS/arch/shell detection and dependency checks
+  ├── agents/         # Agent detector contracts and OpenCode detection
+  ├── profiles/       # Default profile catalog and profile selection/persistence
+  ├── components/     # Component registry (Engram, Context7, MCPs, Skills)
+  ├── workflows/      # Workflow registry (stubs)
+  ├── capabilities/   # Capability service (catalog, validation, planning, export)
+  ├── orchestrator/   # Intent routing (Router, Planner, Session Store)
+  ├── tui/            # Bubble Tea based interactive UI (model, screens, wizard, styles)
+  └── logs/            # Logger initialization and log path handling
+```
+
+### Intent Routing Flow
+
+```
+                    ┌────────────────────┐
+                    │  Route Decision    │
+                    │  (route_decision.go)│
+                    │  - 8 intents       │
+                    │  - Confidence      │
+                    │  - Decision contract│
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                    ┌────────────────────┐
+                    │  Router            │
+                    │  (router.go)       │
+                    │  RouteIntentToFlow │
+                    │  Heuristics        │
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                    ┌────────────────────┐
+                    │  Planner           │
+                    │  (planner.go)       │
+                    │  BuildExecutionPlan│
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                    ┌────────────────────┐
+                    │  Session Store     │
+                    │  (store.go)        │
+                    │  SaveSession/      │
+                    │  LoadSession       │
+                    └────────────────────┘
+```
+
+### Capability Service
+
+```
+SelectionDraft → Validate → Plan → ApplyDryRun/Apply
+     │              │         │
+     ▼              ▼         ▼
+  SaveConfig    Check      Project
+  LoadConfig    catalog    OpenCode
+```
+
+### TUI Architecture
+
+```
+model.go (state management)
+    │
+    ├── screens.go (render functions)
+    ├── install_wizard.go (install flow)
+    └── styles.go (Lipgloss styling)
+```
+
+---
+
+## 7. CLI Reference
+
+### Full Command Tree
 
 ```text
 bitsentry-ai
 ├── version
 ├── doctor
 ├── agents
-├── agents opencode status
-├── agents opencode inspect-config
-├── agents opencode export-preview
-├── agents opencode export
-├── agents opencode apply-plan
-├── agents opencode patch-plan
-├── agents opencode apply
-├── agents opencode backups
-├── agents opencode restore
+│   └── opencode
+│       ├── status
+│       ├── inspect-config
+│       ├── export-preview
+│       ├── export
+│       ├── apply-plan
+│       ├── patch-plan
+│       ├── apply
+│       ├── backups
+│       └── restore
 ├── profiles
 ├── profile use <name>
 ├── components
-├── components <component> status
-├── components mcps list
-├── components skills list
-├── components <component> configure [--dry-run]
-├── components engram status
-├── components context7 status
-├── components mcps status
-├── components skills status
-├── capabilities status
-├── capabilities validate
-├── capabilities plan
-├── capabilities export-preview
-├── capabilities export
-├── capabilities configure
-├── capabilities apply
-└── config path
+│   ├── <component> status
+│   ├── mcps list
+│   ├── skills list
+│   ├── <component> configure [--dry-run]
+│   ├── engram status
+│   ├── context7 status
+│   ├── mcps status
+│   └── skills status
+├── capabilities
+│   ├── status
+│   ├── validate
+│   ├── plan
+│   ├── export-preview
+│   ├── export
+│   ├── configure
+│   ├── apply
+│   ├── inspect <capability>
+│   └── report latest
+├── route
+│   ├── inspect
+│   ├── preview
+│   ├── decide [prompt]
+│   ├── start [intent] [--flow-hint <flow>]
+│   ├── report --session <id>
+│   ├── list [--flow <flow>] [--status <status>] [--archived]
+│   ├── archive --session <id>
+│   ├── restore --session <id>
+│   ├── status --session <id>
+│   ├── handoff --session <id> [--output <path>]
+│   ├── resume --session <id>
+│   ├── next --session <id>
+│   ├── progress --session <id>
+│   ├── mark-current --session <id> --stage <id>
+│   ├── mark-done --session <id> --stage <id>
+│   ├── validate --session <id>
+│   ├── migrate --session <id> (--dry-run | --apply --confirm)
+│   ├── repair --session <id> (--dry-run | --apply --confirm)
+│   ├── audit [--include-archived]
+│   └── cleanup [--older-than <duration>] [--flow <flow>] [--status <status>] [--completed-only] (--dry-run | --apply --confirm)
+├── config path
+└── --dry-run
 ```
 
-## Capability installer usage (Phase 3.x)
+### Route Commands Detail
+
+| Command | Description |
+|---------|-------------|
+| `route inspect` | List available flows and stages |
+| `route preview [intent]` | Preview route decision without side effects |
+| `route decide [prompt]` | Show route decision envelope (debug parity) |
+| `route start [intent] --flow-hint <flow>` | Create planned session |
+| `route list` | List persisted sessions |
+| `route status --session <id>` | Show session status |
+| `route progress --session <id>` | Show declarative progress |
+| `route resume --session <id>` | Resume session |
+| `route next --session <id>` | Recommend next step |
+| `route validate --session <id>` | Validate session read-only |
+| `route cleanup` | Archive completed sessions |
+
+### Capabilities Commands Detail
 
 ```bash
 # Configure from preset
@@ -247,134 +675,81 @@ bitsentry-ai capabilities configure --clear-all
 # Plan from saved config
 bitsentry-ai capabilities plan
 
-# Validate saved capability config
+# Validate and apply
 bitsentry-ai capabilities validate
+bitsentry-ai --dry-run capabilities apply  # Dry-run
+bitsentry-ai capabilities apply            # Real apply
 
-# Safe preview apply
-bitsentry-ai --dry-run capabilities apply
-
-# Inspect one capability and latest apply report
+# Inspect
 bitsentry-ai capabilities inspect engram
 bitsentry-ai capabilities report latest
-
-# TUI capability selector (MVP)
-bitsentry-ai
-# Main Menu -> Capabilities
-# Controls in screen:
-# [ / ] preset, m/c/p MCP toggles, 1/2/3/4 flow toggles, z/x/n skill toggles
-# s save draft, v validate, l plan preview, d apply dry-run, a then y real apply
 ```
 
-Apply reports are persisted under:
+---
 
-`~/.bitsentry-ai/exports/capabilities/apply/`
+## 8. Profiles
 
-Notes:
-- Preview/validate/plan/report summary logic is shared in-process via `internal/capabilities`.
-- Real apply remains on the existing safe OpenCode apply path (backup/merge safeguards preserved).
+### Available Profiles (8)
 
-## Core Skills Pack (Phase 3.7, declarative)
+| Profile | Description |
+|---------|-------------|
+| `default` | Default configuration |
+| `minimal` | Minimal setup |
+| `development` | Development-focused |
+| `research` | Research and discovery |
+| `blog` | Blog content creation |
+| `oscp` | OSCP-style security |
+| `bug-bounty` | Bug bounty hunting |
+| `redteam` | Red team operations |
 
-The repository includes declarative skill assets under:
-
-- `assets/skills/_shared/` (contracts)
-- `assets/skills/sdd/` (Spec Driven Development family)
-- `assets/skills/sdr/` (Structured Discovery/Research family)
-- `assets/skills/support/` (helper skills)
-- `assets/flows/` (flow manifests)
-
-Current status:
-- Contracts and skill definitions are available as assets.
-- Runtime orchestration/execution is intentionally out of scope in this phase.
-
-## Dynamic Asset Discovery API (Phase 3.8B)
-
-Read-only discovery is now available in-process via `internal/capabilities`:
-
-- `DiscoverAssets(root string) (AssetCatalog, error)`
-
-Discovery scans:
-- `assets/flows/*.yaml`
-- `assets/skills/_shared/*.md`
-- `assets/skills/<pack-id>/**/SKILL.md`
-- `assets/orchestrators/*.md` (optional; missing directory is handled gracefully)
-
-Catalog includes discovered flows, skill packs, skills, shared contracts, and orchestrator contracts with file metadata and validation status.
-
-Notes:
-- This phase is discovery only (no runtime orchestration, no autonomous execution).
-- OpenCode export/apply behavior remains unchanged.
-
-## Selection-aware OpenCode Export Projection (Phase 3.8C)
-
-Read-only projection is now available in-process:
-
-- `BuildOpenCodeExportProjection(catalog AssetCatalog, selectedIDs []string)`
-- `GenerateSkillRegistry(projection OpenCodeExportProjection)`
-
-Behavior:
-- Resolves selected IDs to discovered flows/skill packs (including aliases like `bitsentry-sdd -> sdd`).
-- Includes required assets for selected flows/packs:
-  - `_shared` contracts
-  - selected flow manifests
-  - selected skill packs and discovered skills
-  - support pack when selected flows require support skills
-  - optional orchestrator contracts if present
-- Generates a registry preview (`bitsentry/skill-registry.md`) from projection data.
-
-Notes:
-- Projection only (no file writes, no OpenCode config mutations).
-- Existing apply/export runtime behavior is unchanged in this phase.
-
-## OpenCode Skills Export (Phase 3.9)
-
-Selection-aware export commands (generic capabilities surface):
+### Activate a Profile
 
 ```bash
-bitsentry-ai capabilities export-preview --target-agent opencode [--select ...]
-bitsentry-ai capabilities export --target-agent opencode --dry-run [--select ...]
-bitsentry-ai capabilities export --target-agent opencode [--select ...]
+bitsentry-ai profile use <name>
 ```
 
-Behavior:
-- Uses dynamic discovery + projection to decide included assets.
-- Dry-run previews written paths without modifying OpenCode files.
-- Real export writes only under managed area: `<opencode-config-root>/bitsentry/`.
-- Generated registry always included when assets are exported: `bitsentry/skill-registry.md`.
-- OpenCode usage guide is generated on export: `bitsentry/OPENCODE_USAGE.md`.
-- Export reports are persisted to `~/.bitsentry-ai/exports/opencode-skills/` with `latest.yaml`.
+Example:
+```bash
+bitsentry-ai profile use development
+```
 
-Important boundary:
-- This export creates a **Bitsentry capability pack** for OpenCode-managed files.
-- It does **not** provide native runtime orchestration/execution in OpenCode yet.
-- It does **not** modify `opencode.json` automatically.
+---
 
-## Native OpenCode integration (Phase 4.0.4+)
+## 9. Development
 
-When using the TUI `Install / Setup` wizard with native integration enabled, bitsentry-ai can also:
-- register `agent.bitsentry`
-- install `/bit-*` native command entries
-- project selected actionable native skills under `<opencode-config-root>/skills/`
-- merge/create `opencode.json` safely with backups while preserving unrelated user config keys
+### Build
 
-Safety notes:
-- Managed pack export under `<opencode-config-root>/bitsentry/` remains unchanged.
-- Runtime flow execution is still out of scope.
-- MCP config mutation remains disabled unless explicitly supported by a future safe registry.
+```bash
+go build -o bitsentry-ai ./cmd/bitsentry-ai
+```
 
+### Test
 
-## Default profiles (8)
+```bash
+go test ./...
+```
 
-- default
-- minimal
-- development
-- research
-- blog
-- oscp
-- bug-bounty
-- redteam
+### Local Smoke Test
 
-## Docs
+```bash
+./scripts/install-opencode-local.sh
+```
+
+### Run TUI
+
+```bash
+bitsentry-ai
+```
+
+### Run Doctor
+
+```bash
+bitsentry-ai doctor
+```
+
+---
+
+## Links
 
 - [Installation guide](docs/install.md)
 - [Architecture overview](docs/architecture.md)

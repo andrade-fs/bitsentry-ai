@@ -120,14 +120,14 @@ func TestExecuteOpenCodeNativeIntegration_PreservesExistingConfigAndNoDupInstruc
 	root := t.TempDir()
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-		existing := map[string]any{
-		"$schema": "x",
+	existing := map[string]any{
+		"$schema":      "x",
 		"instructions": []string{"keep.md", "bitsentry/opencode-entrypoint.md"},
 		"agent": map[string]any{
 			"plan":      map[string]any{"name": "plan"},
 			"bitsentry": map[string]any{"name": "bitsentry", "prompt": "bitsentry/agents/bitsentry.md"},
 		},
-		"mcp": map[string]any{"x": map[string]any{"enabled": true}},
+		"mcp":         map[string]any{"x": map[string]any{"enabled": true}},
 		"permissions": map[string]any{"allow": []string{"*"}},
 	}
 	raw, _ := json.Marshal(existing)
@@ -242,7 +242,7 @@ func TestMigrateCommandsFailsWhenUnknownEntryExists(t *testing.T) {
 
 func TestBitsentryPromptContainsPhase5OrchestrationContract(t *testing.T) {
 	prompt := buildBitsentryAgentPrompt()
-		required := []string{
+	required := []string{
 		"OpenCode-native Bitsentry orchestrator",
 		"Intent routing:",
 		"SDD:",
@@ -373,6 +373,13 @@ func TestBitsentryPromptContainsRequiredVisibleOutputShape(t *testing.T) {
 		"route decision preview envelope",
 		"matched_intent",
 		"matched_signals",
+		"primary_skills",
+		"secondary_skills",
+		"deferred_skills",
+		"primary_roles",
+		"secondary_roles",
+		"capability_reason",
+		"capability_gates",
 		"recommended_flow",
 		"recommended_roles",
 		"recommended_skills",
@@ -492,6 +499,13 @@ func TestBitsentryAgentPrompt_ContainsFirstResponseRoutePreviewTemplate(t *testi
 		"- matched_intent:",
 		"- decision:",
 		"- matched_signals:",
+		"- primary_skills:",
+		"- secondary_skills:",
+		"- deferred_skills:",
+		"- primary_roles:",
+		"- secondary_roles:",
+		"- capability_reason:",
+		"- capability_gates:",
 		"- reason:",
 		"- requires_bounded_discovery:",
 		"- requires_confirmation:",
@@ -499,7 +513,7 @@ func TestBitsentryAgentPrompt_ContainsFirstResponseRoutePreviewTemplate(t *testi
 		"- no_edits_in_preview",
 		"- no_persistence_in_preview",
 		"- no_flow_execution_in_preview",
-		"Only AFTER showing that preview may you inspect files",
+		"Only AFTER showing Route + Capability Decision Preview may you inspect files",
 		"small copy/product-messaging/UX changes may still require compact SDD",
 	}
 	for _, token := range required {

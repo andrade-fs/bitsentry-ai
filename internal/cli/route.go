@@ -32,6 +32,13 @@ type routeDecideJSONOutput struct {
 	RecommendedFlow          string   `json:"recommended_flow,omitempty"`
 	RecommendedRoles         []string `json:"recommended_roles"`
 	RecommendedSkills        []string `json:"recommended_skills"`
+	PrimarySkills            []string `json:"primary_skills"`
+	SecondarySkills          []string `json:"secondary_skills"`
+	DeferredSkills           []string `json:"deferred_skills"`
+	PrimaryRoles             []string `json:"primary_roles"`
+	SecondaryRoles           []string `json:"secondary_roles"`
+	CapabilityReason         string   `json:"capability_reason"`
+	CapabilityGates          []string `json:"capability_gates"`
 	Confidence               string   `json:"confidence"`
 	Reason                   string   `json:"reason"`
 	RequiresConfirmation     bool     `json:"requires_confirmation"`
@@ -321,6 +328,13 @@ func newRouteDecideCmd(rt *Runtime) *cobra.Command {
 				RecommendedFlow:          result.RecommendedFlow,
 				RecommendedRoles:         append([]string{}, result.RecommendedRoles...),
 				RecommendedSkills:        append([]string{}, result.RecommendedSkills...),
+				PrimarySkills:            append([]string{}, result.PrimarySkills...),
+				SecondarySkills:          append([]string{}, result.SecondarySkills...),
+				DeferredSkills:           append([]string{}, result.DeferredSkills...),
+				PrimaryRoles:             append([]string{}, result.PrimaryRoles...),
+				SecondaryRoles:           append([]string{}, result.SecondaryRoles...),
+				CapabilityReason:         result.CapabilityReason,
+				CapabilityGates:          append([]string{}, result.CapabilityGates...),
 				Confidence:               result.Confidence,
 				Reason:                   result.Reason,
 				RequiresConfirmation:     result.RequiresConfirmation,
@@ -361,11 +375,41 @@ func newRouteDecideCmd(rt *Runtime) *cobra.Command {
 			_, _ = fmt.Fprintln(out, "Recommended flow:")
 			_, _ = fmt.Fprintf(out, "%s\n\n", firstNonEmpty(payload.RecommendedFlow, "none"))
 
+			_, _ = fmt.Fprintln(out, "Primary roles:")
+			if len(payload.PrimaryRoles) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, role := range payload.PrimaryRoles {
+					_, _ = fmt.Fprintf(out, "- %s\n", role)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Primary skills:")
+			if len(payload.PrimarySkills) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, skill := range payload.PrimarySkills {
+					_, _ = fmt.Fprintf(out, "- %s\n", skill)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
 			_, _ = fmt.Fprintln(out, "Recommended roles:")
 			if len(payload.RecommendedRoles) == 0 {
 				_, _ = fmt.Fprintln(out, "- none")
 			} else {
 				for _, role := range payload.RecommendedRoles {
+					_, _ = fmt.Fprintf(out, "- %s\n", role)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Secondary roles:")
+			if len(payload.SecondaryRoles) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, role := range payload.SecondaryRoles {
 					_, _ = fmt.Fprintf(out, "- %s\n", role)
 				}
 			}
@@ -377,6 +421,38 @@ func newRouteDecideCmd(rt *Runtime) *cobra.Command {
 			} else {
 				for _, skill := range payload.RecommendedSkills {
 					_, _ = fmt.Fprintf(out, "- %s\n", skill)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Secondary skills:")
+			if len(payload.SecondarySkills) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, skill := range payload.SecondarySkills {
+					_, _ = fmt.Fprintf(out, "- %s\n", skill)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Deferred skills:")
+			if len(payload.DeferredSkills) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, skill := range payload.DeferredSkills {
+					_, _ = fmt.Fprintf(out, "- %s\n", skill)
+				}
+			}
+			_, _ = fmt.Fprintln(out)
+
+			_, _ = fmt.Fprintln(out, "Capability reason:")
+			_, _ = fmt.Fprintf(out, "%s\n\n", payload.CapabilityReason)
+			_, _ = fmt.Fprintln(out, "Capability gates:")
+			if len(payload.CapabilityGates) == 0 {
+				_, _ = fmt.Fprintln(out, "- none")
+			} else {
+				for _, gate := range payload.CapabilityGates {
+					_, _ = fmt.Fprintf(out, "- %s\n", gate)
 				}
 			}
 			_, _ = fmt.Fprintln(out)

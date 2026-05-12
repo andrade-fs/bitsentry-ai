@@ -52,6 +52,12 @@ func TestRouteDecidePrintsHumanEnvelope(t *testing.T) {
 		"frontend-ux-change",
 		"Decision:",
 		"use_flow_sdd",
+		"Primary roles:",
+		"Primary skills:",
+		"Secondary roles:",
+		"Secondary skills:",
+		"Capability reason:",
+		"Capability gates:",
 		"Gates:",
 		"no_edits_in_preview",
 		"no_persistence_in_preview",
@@ -73,11 +79,18 @@ func TestRouteDecideJSONOutput(t *testing.T) {
 		t.Fatalf("execute route decide --json: %v", err)
 	}
 	var payload struct {
-		MatchedIntent  string   `json:"matched_intent"`
-		MatchedSignals []string `json:"matched_signals"`
-		Decision       string   `json:"decision"`
-		WouldPersist   bool     `json:"would_persist"`
-		WouldExecute   bool     `json:"would_execute"`
+		MatchedIntent    string   `json:"matched_intent"`
+		MatchedSignals   []string `json:"matched_signals"`
+		Decision         string   `json:"decision"`
+		PrimarySkills    []string `json:"primary_skills"`
+		SecondarySkills  []string `json:"secondary_skills"`
+		DeferredSkills   []string `json:"deferred_skills"`
+		PrimaryRoles     []string `json:"primary_roles"`
+		SecondaryRoles   []string `json:"secondary_roles"`
+		CapabilityReason string   `json:"capability_reason"`
+		CapabilityGates  []string `json:"capability_gates"`
+		WouldPersist     bool     `json:"would_persist"`
+		WouldExecute     bool     `json:"would_execute"`
 	}
 	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
 		t.Fatalf("route decide json invalid: %v", err)
@@ -90,6 +103,9 @@ func TestRouteDecideJSONOutput(t *testing.T) {
 	}
 	if payload.WouldPersist || payload.WouldExecute {
 		t.Fatalf("route decide must be read-only/non-executing: %+v", payload)
+	}
+	if len(payload.PrimaryRoles) == 0 || len(payload.SecondarySkills) == 0 || payload.CapabilityReason == "" || len(payload.CapabilityGates) == 0 {
+		t.Fatalf("expected capability preview fields populated: %+v", payload)
 	}
 }
 

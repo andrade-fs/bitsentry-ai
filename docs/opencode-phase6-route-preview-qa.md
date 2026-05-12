@@ -2,6 +2,22 @@
 
 Status: **PASS WITH NOTES**
 
+## Phase 6.2 Capability Selection Preview QA
+
+Status: **PASS**
+
+- Added route preview capability fields: `primary_skills`, `secondary_skills`, `deferred_skills`, `primary_roles`, `secondary_roles`, `capability_reason`, `capability_gates`.
+- Confirmed OpenCode-first contract remains primary UX; CLI `route decide` remains debug/plumbing parity only.
+- Confirmed preview remains non-mutating and non-executing:
+  - no skill execution
+  - no flow execution
+  - no Engram/OpenSpec persistence
+  - no code edits in preview (`agent.bitsentry.permission.edit=deny` boundary preserved)
+- Confirmed mandatory preview gates from 6.1 remain intact:
+  - `no_edits_in_preview`
+  - `no_persistence_in_preview`
+  - `no_flow_execution_in_preview`
+
 ## Critical Re-test after 6.1E.1
 
 Status: **FAIL**

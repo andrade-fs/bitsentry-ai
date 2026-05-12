@@ -95,6 +95,32 @@ func TestBuildRouteDecisionPreview_GatesAlwaysSafe(t *testing.T) {
 	}
 }
 
+func TestBuildRouteDecisionPreview_CapabilityFieldsAndPreviewGuards(t *testing.T) {
+	res, err := BuildRouteDecisionPreview("../..", "Quiero cambiar arquitectura del router y opencode")
+	if err != nil {
+		t.Fatalf("decision preview: %v", err)
+	}
+	if len(res.PrimaryRoles) == 0 {
+		t.Fatalf("expected primary roles from intent roles")
+	}
+	if len(res.SecondarySkills) == 0 {
+		t.Fatalf("expected secondary skills from flow orchestrators")
+	}
+	if res.CapabilityReason == "" {
+		t.Fatalf("expected capability reason")
+	}
+	for _, gate := range []string{
+		"preview_only_no_execution",
+		"preview_only_no_skill_execution",
+		"preview_only_no_flow_execution",
+		"preview_only_no_persistence",
+	} {
+		if !containsToken(res.CapabilityGates, gate) {
+			t.Fatalf("missing capability gate %q in %#v", gate, res.CapabilityGates)
+		}
+	}
+}
+
 func containsToken(values []string, want string) bool {
 	for _, v := range values {
 		if v == want {

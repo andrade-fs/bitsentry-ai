@@ -14,6 +14,13 @@ type RouteDecisionEnvelope struct {
 	RecommendedFlow          string   `json:"recommended_flow"`
 	RecommendedRoles         []string `json:"recommended_roles"`
 	RecommendedSkills        []string `json:"recommended_skills"`
+	PrimarySkills            []string `json:"primary_skills"`
+	SecondarySkills          []string `json:"secondary_skills"`
+	DeferredSkills           []string `json:"deferred_skills"`
+	PrimaryRoles             []string `json:"primary_roles"`
+	SecondaryRoles           []string `json:"secondary_roles"`
+	CapabilityReason         string   `json:"capability_reason"`
+	CapabilityGates          []string `json:"capability_gates"`
 	Confidence               string   `json:"confidence"`
 	Reason                   string   `json:"reason"`
 	RequiresConfirmation     bool     `json:"requires_confirmation"`
@@ -68,6 +75,16 @@ func BuildRouteDecisionPreview(root string, input string) (RouteDecisionEnvelope
 		gates = append(gates, "requires_bounded_discovery")
 	}
 
+	primarySkills, secondarySkills, deferredSkills := resolveSkillCapabilityPreview(cat, *intent)
+	primaryRoles, secondaryRoles := resolveRoleCapabilityPreview(cat, *intent)
+	capabilityGates := uniqueSortedDecisionStrings([]string{
+		"preview_only_no_execution",
+		"preview_only_no_skill_execution",
+		"preview_only_no_flow_execution",
+		"preview_only_no_persistence",
+	})
+	capabilityReason := fmt.Sprintf("Capabilities resolved from assets intents/roles/skills/flows for intent %q; preview ranks primary/secondary and defers unresolved aliases without executing flows or skills.", intent.ID)
+
 	return RouteDecisionEnvelope{
 		Input:                    trimmed,
 		MatchedIntent:            intent.ID,
@@ -76,6 +93,13 @@ func BuildRouteDecisionPreview(root string, input string) (RouteDecisionEnvelope
 		RecommendedFlow:          flow,
 		RecommendedRoles:         append([]string{}, intent.PreFlowRoles...),
 		RecommendedSkills:        append([]string{}, intent.PreFlowSkills...),
+		PrimarySkills:            primarySkills,
+		SecondarySkills:          secondarySkills,
+		DeferredSkills:           deferredSkills,
+		PrimaryRoles:             primaryRoles,
+		SecondaryRoles:           secondaryRoles,
+		CapabilityReason:         capabilityReason,
+		CapabilityGates:          capabilityGates,
 		Confidence:               confidence,
 		Reason:                   reason,
 		RequiresConfirmation:     intent.RequiresConfirmation,
@@ -83,6 +107,71 @@ func BuildRouteDecisionPreview(root string, input string) (RouteDecisionEnvelope
 		Gates:                    uniqueSortedDecisionStrings(gates),
 		Notes:                    notes,
 	}, nil
+}
+
+func resolveSkillCapabilityPreview(cat AssetCatalog, intent DiscoveredIntent) (primary []string, secondary []string, deferred []string) {
+	skillSet := map[string]bool{}
+	for _, s := range cat.Skills {
+		skillSet[s.ID] = true
+	}
+	flowByID := map[string]DiscoveredFlow{}
+	for _, f := range cat.Flows {
+		flowByID[f.ID] = f
+	}
+
+	for _, suggested := range intent.PreFlowSkills {
+		s := strings.TrimSpace(suggested)
+		if s == "" {
+			continue
+		}
+		if skillSet[s] {
+			primary = append(primary, s)
+			continue
+		}
+		deferred = append(deferred, s)
+	}
+
+	for _, flowID := range []string{intent.DefaultFlow, intent.AlternativeFlow} {
+		f, ok := flowByID[strings.TrimSpace(flowID)]
+		if !ok {
+			continue
+		}
+		skill := strings.TrimSpace(f.OrchestratorSkill)
+		if skill != "" {
+			secondary = append(secondary, skill)
+		}
+	}
+
+	return uniqueSortedDecisionStrings(primary), uniqueSortedDecisionStrings(secondary), uniqueSortedDecisionStrings(deferred)
+}
+
+func resolveRoleCapabilityPreview(cat AssetCatalog, intent DiscoveredIntent) (primary []string, secondary []string) {
+	roleSet := map[string]bool{}
+	for _, r := range cat.Roles {
+		roleSet[r.ID] = true
+	}
+	for _, role := range intent.PreFlowRoles {
+		r := strings.TrimSpace(role)
+		if r == "" {
+			continue
+		}
+		if roleSet[r] {
+			primary = append(primary, r)
+		}
+	}
+	flowRoleHints := map[string][]string{
+		"sdd":     {"software-architect", "test-engineer"},
+		"sdr":     {"product-analyst", "codebase-onboarding"},
+		"support": {"bug-triage-engineer", "technical-writer"},
+	}
+	for _, flowID := range []string{intent.DefaultFlow, intent.AlternativeFlow} {
+		for _, role := range flowRoleHints[strings.TrimSpace(flowID)] {
+			if roleSet[role] {
+				secondary = append(secondary, role)
+			}
+		}
+	}
+	return uniqueSortedDecisionStrings(primary), uniqueSortedDecisionStrings(secondary)
 }
 
 func classifyIntent(input string) (intentID string, reason string, confidence string, signals []string) {
