@@ -30,6 +30,180 @@ type OpenCodeNativeResult struct {
 	Warnings            []string
 }
 
+type OpenCodeMCPConfigPreview struct {
+	CurrentConfigState       string   `json:"current_config_state"`
+	Exists                   bool     `json:"exists"`
+	Readable                 bool     `json:"readable"`
+	InvalidError             string   `json:"invalid_error,omitempty"`
+	CurrentMCPConfigDetected bool     `json:"current_mcp_config_detected"`
+	MCPReadinessState        string   `json:"mcp_readiness_state"`
+	ProposedSafeChanges      []string `json:"proposed_safe_changes"`
+	PreservedKeys            []string `json:"preserved_keys"`
+	PreservedMCPEntries      []string `json:"preserved_mcp_entries"`
+	Warnings                 []string `json:"warnings"`
+	ManualSteps              []string `json:"manual_steps"`
+	WouldWrite               bool     `json:"would_write"`
+	RequiresConfirmation     bool     `json:"requires_confirmation"`
+	BackupRequired           bool     `json:"backup_required"`
+}
+
+func BuildOpenCodeMCPConfigPreview(configRoot string, selectedMCPs []string) OpenCodeMCPConfigPreview {
+	preview := OpenCodeMCPConfigPreview{
+		CurrentConfigState:       "missing",
+		Exists:                   false,
+		Readable:                 false,
+		CurrentMCPConfigDetected: false,
+		MCPReadinessState:        "manual_step_needed",
+		ProposedSafeChanges:      []string{},
+		PreservedKeys:            []string{},
+		PreservedMCPEntries:      []string{},
+		Warnings:                 []string{},
+		ManualSteps:              []string{},
+		WouldWrite:               false,
+		RequiresConfirmation:     true,
+		BackupRequired:           true,
+	}
+
+	root := strings.TrimSpace(configRoot)
+	if root == "" {
+		preview.CurrentConfigState = "missing_config_root"
+		preview.Warnings = append(preview.Warnings, "OpenCode config root is not resolved.")
+		preview.ManualSteps = append(preview.ManualSteps,
+			"Resolve OpenCode config root before any MCP apply.",
+			"Do not add credentials in this preview phase; configure sensitive values manually.",
+		)
+		return preview
+	}
+
+	path := filepath.Join(root, "opencode.json")
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		preview.CurrentConfigState = "missing_opencode_json"
+		preview.Warnings = append(preview.Warnings, "opencode.json not found or not readable.")
+		preview.ManualSteps = append(preview.ManualSteps,
+			"Create/repair opencode.json manually.",
+			"Future apply must require explicit confirmation and backup before any write.",
+		)
+		preview.proposeSafeMCPChanges(selectedMCPs)
+		return preview
+	}
+
+	preview.Exists = true
+	preview.Readable = true
+
+	obj := map[string]any{}
+	if len(strings.TrimSpace(string(raw))) == 0 {
+		preview.CurrentConfigState = "readable_empty"
+		preview.Warnings = append(preview.Warnings, "opencode.json is empty.")
+		preview.ManualSteps = append(preview.ManualSteps, "Add valid JSON object to opencode.json before any MCP apply.")
+		preview.proposeSafeMCPChanges(selectedMCPs)
+		return preview
+	}
+
+	if err := json.Unmarshal(raw, &obj); err != nil {
+		preview.Readable = false
+		preview.CurrentConfigState = "invalid"
+		preview.InvalidError = err.Error()
+		preview.Warnings = append(preview.Warnings, "Invalid opencode.json; preview cannot safely parse MCP section.")
+		preview.ManualSteps = append(preview.ManualSteps,
+			"Fix JSON syntax manually.",
+			"Re-run preview and confirm backup requirement before future apply.",
+		)
+		preview.proposeSafeMCPChanges(selectedMCPs)
+		return preview
+	}
+
+	preview.CurrentConfigState = "readable"
+	for k := range obj {
+		preview.PreservedKeys = append(preview.PreservedKeys, k)
+	}
+	sort.Strings(preview.PreservedKeys)
+
+	if mcpObj, ok := obj["mcp"].(map[string]any); ok {
+		preview.CurrentMCPConfigDetected = true
+		for k := range mcpObj {
+			preview.PreservedMCPEntries = append(preview.PreservedMCPEntries, k)
+		}
+		sort.Strings(preview.PreservedMCPEntries)
+	} else if _, has := obj["mcp"]; has {
+		preview.CurrentMCPConfigDetected = true
+		preview.Warnings = append(preview.Warnings, "Top-level mcp exists but is not an object; manual normalization required.")
+		preview.ManualSteps = append(preview.ManualSteps, "Normalize opencode.json.mcp to an object manually.")
+	}
+
+	if preview.CurrentMCPConfigDetected {
+		preview.CurrentConfigState = "readable_with_mcp"
+	} else {
+		preview.CurrentConfigState = "readable_without_mcp"
+	}
+
+	preview.proposeSafeMCPChanges(selectedMCPs)
+	preview.deriveReadinessState()
+	if len(preview.ManualSteps) == 0 {
+		preview.ManualSteps = append(preview.ManualSteps,
+			"This is PREVIEW ONLY. Future apply must be explicit and create backup first.",
+		)
+	}
+	return preview
+}
+
+func (p *OpenCodeMCPConfigPreview) proposeSafeMCPChanges(selectedMCPs []string) {
+	set := map[string]bool{}
+	for _, id := range selectedMCPs {
+		t := strings.TrimSpace(id)
+		if t != "" {
+			set[t] = true
+		}
+	}
+	if set["engram"] {
+		p.ProposedSafeChanges = append(p.ProposedSafeChanges, "Ensure mcp.engram metadata entry exists without sensitive values (command-only metadata).")
+		p.ManualSteps = append(p.ManualSteps, "Configure any Engram-sensitive values manually outside preview.")
+	}
+	if set["context7"] {
+		p.ProposedSafeChanges = append(p.ProposedSafeChanges, "Ensure mcp.context7 metadata entry exists without sensitive values (command/args only).")
+		p.ManualSteps = append(p.ManualSteps, "Configure Context7 token/API key manually outside preview.")
+	}
+	if len(p.ProposedSafeChanges) == 0 {
+		p.ProposedSafeChanges = append(p.ProposedSafeChanges, "No MCP selected; no config changes proposed.")
+	}
+	sort.Strings(p.ProposedSafeChanges)
+	p.ManualSteps = uniqueSortedPreviewStrings(p.ManualSteps)
+}
+
+func (p *OpenCodeMCPConfigPreview) deriveReadinessState() {
+	if p.CurrentMCPConfigDetected && p.Readable {
+		p.MCPReadinessState = "configured"
+		return
+	}
+	if p.Readable {
+		p.MCPReadinessState = "detected"
+		return
+	}
+	if p.Exists {
+		p.MCPReadinessState = "manual_step_needed"
+		return
+	}
+	p.MCPReadinessState = "modeled_only"
+}
+
+func uniqueSortedPreviewStrings(in []string) []string {
+	if len(in) == 0 {
+		return []string{}
+	}
+	seen := map[string]bool{}
+	out := []string{}
+	for _, v := range in {
+		t := strings.TrimSpace(v)
+		if t == "" || seen[t] {
+			continue
+		}
+		seen[t] = true
+		out = append(out, t)
+	}
+	sort.Strings(out)
+	return out
+}
+
 func ExecuteOpenCodeNativeIntegration(projection OpenCodeExportProjection, configRoot string, opts OpenCodeNativeOptions) (OpenCodeNativeResult, error) {
 	root := strings.TrimSpace(configRoot)
 	if root == "" {

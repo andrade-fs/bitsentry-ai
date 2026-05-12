@@ -159,8 +159,44 @@ func renderInstall(m model) string {
 			"- execute skills",
 			"- change agent.bitsentry.permission.edit=deny contract",
 		)
+		lines = append(lines,
+			"",
+			"MCP config preview (PREVIEW ONLY):",
+			fmt.Sprintf("- current_config_state: %s", valueOrDefault(m.install.MCPConfigPreview.CurrentConfigState, "unknown")),
+			fmt.Sprintf("- exists: %s", yesNoLabel(m.install.MCPConfigPreview.Exists)),
+			fmt.Sprintf("- readable: %s", yesNoLabel(m.install.MCPConfigPreview.Readable)),
+			fmt.Sprintf("- current_mcp_config_detected: %s", yesNoLabel(m.install.MCPConfigPreview.CurrentMCPConfigDetected)),
+			fmt.Sprintf("- mcp_readiness_state: %s", valueOrDefault(m.install.MCPConfigPreview.MCPReadinessState, "unknown")),
+			fmt.Sprintf("- would_write: %s", yesNoLabel(m.install.MCPConfigPreview.WouldWrite)),
+			fmt.Sprintf("- requires_confirmation: %s", yesNoLabel(m.install.MCPConfigPreview.RequiresConfirmation)),
+			fmt.Sprintf("- backup_required: %s", yesNoLabel(m.install.MCPConfigPreview.BackupRequired)),
+		)
 		lines = append(lines, readinessSummaryLines("Engram", m.install.MCPReadiness["engram"])...)
 		lines = append(lines, readinessSummaryLines("Context7", m.install.MCPReadiness["context7"])...)
+		if len(m.install.MCPConfigPreview.ProposedSafeChanges) > 0 {
+			lines = append(lines, "", "Preview proposed_safe_changes:")
+			for _, c := range m.install.MCPConfigPreview.ProposedSafeChanges {
+				lines = append(lines, fmt.Sprintf("- %s", c))
+			}
+		}
+		if len(m.install.MCPConfigPreview.PreservedKeys) > 0 {
+			lines = append(lines, fmt.Sprintf("- preserved_keys: %s", strings.Join(m.install.MCPConfigPreview.PreservedKeys, ", ")))
+		}
+		if len(m.install.MCPConfigPreview.PreservedMCPEntries) > 0 {
+			lines = append(lines, fmt.Sprintf("- preserved_mcp_entries: %s", strings.Join(m.install.MCPConfigPreview.PreservedMCPEntries, ", ")))
+		}
+		if len(m.install.MCPConfigPreview.Warnings) > 0 {
+			lines = append(lines, "Preview warnings:")
+			for _, w := range m.install.MCPConfigPreview.Warnings {
+				lines = append(lines, fmt.Sprintf("- %s", w))
+			}
+		}
+		if len(m.install.MCPConfigPreview.ManualSteps) > 0 {
+			lines = append(lines, "Preview manual_steps:")
+			for _, s := range m.install.MCPConfigPreview.ManualSteps {
+				lines = append(lines, fmt.Sprintf("- %s", s))
+			}
+		}
 		if !m.install.TargetSelected {
 			lines = append(lines,
 				"",
@@ -190,7 +226,19 @@ func renderInstall(m model) string {
 			fmt.Sprintf("- Native integration status: %s", boolLabel(m.install.NativeIntegrationOK, "installed", "not installed")),
 			fmt.Sprintf("- Backup path (config): %s", valueOrDefault(m.install.ConfigBackupPath, "none")),
 			fmt.Sprintf("- Backup path (native skills): %s", valueOrDefault(m.install.NativeBackupPath, "none")),
+			"",
+			"MCP config preview contract (PREVIEW ONLY):",
+			fmt.Sprintf("- state: %s", valueOrDefault(m.install.MCPConfigPreview.CurrentConfigState, "unknown")),
+			fmt.Sprintf("- would_write: %s", yesNoLabel(m.install.MCPConfigPreview.WouldWrite)),
+			fmt.Sprintf("- requires_confirmation: %s", yesNoLabel(m.install.MCPConfigPreview.RequiresConfirmation)),
+			fmt.Sprintf("- backup_required: %s", yesNoLabel(m.install.MCPConfigPreview.BackupRequired)),
 		)
+		if len(m.install.MCPConfigPreview.ManualSteps) > 0 {
+			lines = append(lines, "- manual steps:")
+			for _, step := range m.install.MCPConfigPreview.ManualSteps {
+				lines = append(lines, fmt.Sprintf("  - %s", step))
+			}
+		}
 		if len(m.install.ResultNotes) > 0 {
 			lines = append(lines, "", "Manual steps / notes:")
 			for _, n := range m.install.ResultNotes {

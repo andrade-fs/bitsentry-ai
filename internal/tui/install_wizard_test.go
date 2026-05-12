@@ -112,6 +112,15 @@ func TestLoadInstallWizard_DefaultSelections(t *testing.T) {
 	if m.install.InstallMode != installModeEverything {
 		t.Fatalf("expected default install mode to be Install Everything when pack not installed")
 	}
+	if m.install.MCPConfigPreview.WouldWrite {
+		t.Fatalf("preview contract must remain read-only")
+	}
+	if !m.install.MCPConfigPreview.RequiresConfirmation {
+		t.Fatalf("preview contract requires_confirmation must be true")
+	}
+	if !m.install.MCPConfigPreview.BackupRequired {
+		t.Fatalf("preview contract backup_required must be true")
+	}
 }
 
 func TestInstallWizardEnterNavigationAndBlock(t *testing.T) {

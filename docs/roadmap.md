@@ -211,6 +211,14 @@ Non-blocking Phase 6.4 note:
 Minimal 6.5 roadmap note:
 - Phase 6.5 should focus on deeper per-MCP validation adapters while preserving no-secret-mutation boundaries.
 
+### Phase 6.5 — OpenCode MCP Config Preview (completed)
+- Added a preview-only `opencode.json` MCP config model (no write path) with explicit safety contract fields.
+- Modeled scenarios: missing/invalid/readable without MCP/readable with MCP plus readiness summary.
+- Preserved existing top-level and MCP keys in preview output; no overwrite/replace behavior in preview phase.
+- Added manual-step guidance for sensitive setup gaps without writing credentials/tokens.
+- Integrated preview contract into TUI review + done/control-panel screens with **PREVIEW ONLY** marker.
+- Added tests for no-write preview behavior, confirmation+backup gating contract, config-shape scenarios, and TUI rendering.
+
 ## Phase 7 — Advanced profiles and model routing (future)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type

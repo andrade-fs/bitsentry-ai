@@ -116,6 +116,85 @@ func TestExecuteOpenCodeNativeIntegration_CreatesConfigAndFiles(t *testing.T) {
 	}
 }
 
+func TestBuildOpenCodeMCPConfigPreview_MissingOpenCodeJSON(t *testing.T) {
+	root := t.TempDir()
+	p := BuildOpenCodeMCPConfigPreview(root, []string{"engram", "context7"})
+	if p.Exists {
+		t.Fatalf("expected exists=false")
+	}
+	if p.CurrentConfigState != "missing_opencode_json" {
+		t.Fatalf("unexpected state: %s", p.CurrentConfigState)
+	}
+	if p.WouldWrite {
+		t.Fatalf("preview must be read-only")
+	}
+	if !p.RequiresConfirmation || !p.BackupRequired {
+		t.Fatalf("future apply contract must require confirmation+backup")
+	}
+}
+
+func TestBuildOpenCodeMCPConfigPreview_InvalidOpenCodeJSON(t *testing.T) {
+	root := t.TempDir()
+	_ = os.WriteFile(filepath.Join(root, "opencode.json"), []byte("{"), 0o644)
+	p := BuildOpenCodeMCPConfigPreview(root, []string{"engram"})
+	if !p.Exists {
+		t.Fatalf("expected exists=true")
+	}
+	if p.Readable {
+		t.Fatalf("expected readable=false for invalid json")
+	}
+	if p.CurrentConfigState != "invalid" {
+		t.Fatalf("unexpected state: %s", p.CurrentConfigState)
+	}
+	if strings.TrimSpace(p.InvalidError) == "" {
+		t.Fatalf("expected invalid error message")
+	}
+}
+
+func TestBuildOpenCodeMCPConfigPreview_PreservesExistingMCPConfig(t *testing.T) {
+	root := t.TempDir()
+	raw := []byte(`{"agent":{"custom":{}},"mcp":{"existing":{"enabled":true},"github":{"enabled":false}},"other":1}`)
+	_ = os.WriteFile(filepath.Join(root, "opencode.json"), raw, 0o644)
+	p := BuildOpenCodeMCPConfigPreview(root, []string{"context7"})
+	if !p.CurrentMCPConfigDetected {
+		t.Fatalf("expected existing mcp config detected")
+	}
+	if p.CurrentConfigState != "readable_with_mcp" {
+		t.Fatalf("unexpected state: %s", p.CurrentConfigState)
+	}
+	if !containsString(p.PreservedKeys, "agent") || !containsString(p.PreservedKeys, "mcp") {
+		t.Fatalf("expected preserved top-level keys, got %#v", p.PreservedKeys)
+	}
+	if !containsString(p.PreservedMCPEntries, "existing") || !containsString(p.PreservedMCPEntries, "github") {
+		t.Fatalf("expected preserved mcp entries, got %#v", p.PreservedMCPEntries)
+	}
+}
+
+func TestBuildOpenCodeMCPConfigPreview_ProposedChangesExcludeCredentialsSecrets(t *testing.T) {
+	root := t.TempDir()
+	_ = os.WriteFile(filepath.Join(root, "opencode.json"), []byte(`{"mcp":{}}`), 0o644)
+	p := BuildOpenCodeMCPConfigPreview(root, []string{"engram", "context7"})
+	joined := strings.ToLower(strings.Join(p.ProposedSafeChanges, " "))
+	forbidden := []string{"token", "api_key", "apikey", "password", "secret", "credential"}
+	for _, f := range forbidden {
+		if strings.Contains(joined, f) {
+			t.Fatalf("proposed changes must not include sensitive field %q: %s", f, joined)
+		}
+	}
+}
+
+func TestBuildOpenCodeMCPConfigPreview_NoWriteInPreview(t *testing.T) {
+	root := t.TempDir()
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	_ = os.WriteFile(filepath.Join(root, "opencode.json"), []byte(`{"mcp":{}}`), 0o644)
+	_ = BuildOpenCodeMCPConfigPreview(root, []string{"engram"})
+	backupDir := filepath.Join(home, ".bitsentry-ai", "backups")
+	if _, err := os.Stat(backupDir); err == nil {
+		t.Fatalf("preview must not create backup directories")
+	}
+}
+
 func TestExecuteOpenCodeNativeIntegration_PreservesExistingConfigAndNoDupInstruction(t *testing.T) {
 	root := t.TempDir()
 	home := t.TempDir()

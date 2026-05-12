@@ -83,6 +83,23 @@ Execution Phases (per flow)
 - Install/Setup now surfaces readiness in review + done screens with manual next steps when applicable.
 - No secret/token reads or writes were added; MCP credential mutation remains out of scope.
 
+### Phase 6.5 OpenCode MCP Config Preview (OpenCode-only)
+
+- Added a PREVIEW-ONLY MCP config model for `opencode.json` safety planning:
+  - `current_config_state`, `exists`, `readable`, `invalid_error`
+  - `current_mcp_config_detected`, `mcp_readiness_state`
+  - `proposed_safe_changes`, `preserved_keys`, `preserved_mcp_entries`
+  - `warnings`, `manual_steps`
+  - `would_write`, `requires_confirmation`, `backup_required`
+- Preview builder is pure/read-only:
+  - no writes
+  - no backups created
+  - no config mutation
+  - no `.env` reads
+  - no secrets/tokens injection
+- TUI Install/Setup now shows this model in review + done/control-panel screens and labels it explicitly as **PREVIEW ONLY**.
+- Future apply remains separate and gated by explicit confirmation + backup requirement.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

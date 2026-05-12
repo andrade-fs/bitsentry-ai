@@ -47,6 +47,7 @@ type installWizardState struct {
 	InstallCommands     bool
 	InstallNativeSkills bool
 	ConfigureMCP        bool
+	MCPConfigPreview    capabilities.OpenCodeMCPConfigPreview
 	NativeIntegrationOK bool
 	ConfigBackupPath    string
 	NativeBackupPath    string
@@ -90,6 +91,7 @@ func (m *model) loadInstallWizard() {
 		ConfigureMCP:        false,
 		ResultNotes:         []string{},
 	}
+	m.install.MCPConfigPreview = capabilities.BuildOpenCodeMCPConfigPreview(m.install.OpenCodeConfig, selectedMCPList(m.install.SelectedMCPs))
 }
 
 func (m *model) refreshInstallWizardPreserveSelections() {
@@ -150,6 +152,7 @@ func (m *model) refreshInstallWizardPreserveSelections() {
 		ResultNotes:         append([]string{}, prev.ResultNotes...),
 		NextPrompt:          prev.NextPrompt,
 	}
+	m.install.MCPConfigPreview = capabilities.BuildOpenCodeMCPConfigPreview(m.install.OpenCodeConfig, selectedMCPList(m.install.SelectedMCPs))
 }
 
 func (m *model) handleInstallKey(key string) bool {
