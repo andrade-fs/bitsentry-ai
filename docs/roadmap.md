@@ -262,9 +262,19 @@ Minimal 6.5 roadmap note:
 - Updated docs and manifest-contract tests to enforce flow stability and support-skill linkage.
 - Preserved all security guardrails (read-only first, no `.env`/secrets, no exploit/live target testing, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`).
 
-### Phase 7.3 — Security Report Markdown (next)
-- Define richer Markdown output schema for `security-report` (executive summary, finding table, remediation plan, residual risk register).
-- Add report quality gate checks and anti-regression tests for report completeness.
+### Phase 7.3 — Security Report Markdown (completed)
+- Defined strict Markdown report contract in `security-report` with exact required sections:
+  - Title, Executive Summary, Scope, Methodology, Repository / Application Context, Risk Summary, Findings, Evidence, Remediation Plan, Verification Steps, Assumptions and Limitations, Next Steps, Appendix.
+- Defined strict minimum finding contract in `security-findings` with exact required tokens and enums:
+  - fields: ID, Title, Severity, Confidence, Category, Affected files, Affected component, Evidence, Impact, Likelihood, Remediation, Verification, References / Notes.
+  - Severity: Critical, High, Medium, Low, Informational.
+  - Confidence: High, Medium, Low.
+- Added static anti-regression tests for:
+  - mandatory finding fields,
+  - severity/confidence enums,
+  - mandatory report sections,
+  - explicit handoff `security-findings -> security-report`.
+- Kept `source-security-review` stable (same flow ID and stage IDs/order).
 
 - Next Phase 7 tracks:
 - Profile composition and inheritance

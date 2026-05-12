@@ -122,7 +122,20 @@ Execution Phases (per flow)
   - no runtime activation or flow execution in preview
   - no persistence/edits in preview
   - OpenCode-first UX, CLI as debug/plumbing parity
-  - `agent.bitsentry.permission.edit=deny`
+- `agent.bitsentry.permission.edit=deny`
+
+### Phase 7.3 Security Report Markdown Contract (OpenCode-only)
+
+- Hardened security flow documentation contracts (no runtime execution) for:
+  - `assets/skills/security/security-findings/SKILL.md`
+  - `assets/skills/security/security-report/SKILL.md`
+- Enforced exact report section contract and minimum finding token contract with strict static tests.
+- Enforced required value enums:
+  - Severity: `Critical | High | Medium | Low | Informational`
+  - Confidence: `High | Medium | Low`
+- Added explicit handoff contract `security-findings -> security-report` checks.
+- Kept flow stability: no flow ID change, no stage ID/order changes, no runtime flow execution.
+- Preserved guardrails: read-only first, no `.env`/secrets, no exploit/live target testing, no destructive actions, no MCP credential mutation, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
 
 ### Available Flows
 

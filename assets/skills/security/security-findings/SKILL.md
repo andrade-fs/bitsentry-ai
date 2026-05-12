@@ -19,6 +19,36 @@ metadata:
 ## Purpose
 Convert review candidates into actionable security findings with clear severity and remediation direction.
 
+## Findings Contract (Minimum Required Tokens)
+Every finding entry MUST include these exact field labels:
+
+- ID
+- Title
+- Severity
+- Confidence
+- Category
+- Affected files
+- Affected component
+- Evidence
+- Impact
+- Likelihood
+- Remediation
+- Verification
+- References / Notes
+
+### Allowed Values (Exact)
+Severity:
+- Critical
+- High
+- Medium
+- Low
+- Informational
+
+Confidence:
+- High
+- Medium
+- Low
+
 ## Use When
 - `security-review` has candidate findings.
 - A formal findings gate is required before final reporting.
@@ -32,12 +62,26 @@ Convert review candidates into actionable security findings with clear severity 
 2. Assign severity and confidence using declared rubric.
 3. Add impact, likelihood, and exploit preconditions (conceptual, no execution).
 4. Add mitigation guidance and verification hints.
-5. Output findings manifest for final report.
+5. Validate all minimum finding tokens and allowed value enums.
+6. Output findings manifest for final report.
 
 ## Outputs
 - `findings.md` with normalized findings register.
 
 ## Boundaries
+- read-only first.
+- OpenCode-first.
+- no runtime flow execution.
+- no autonomous mode.
+- no edits by default.
+- agent.bitsentry.permission.edit = deny.
+- no .env access.
+- no secrets.
+- no exploit execution.
+- no external target testing.
+- no destructive actions.
+- no MCP credential mutation.
+- CLI debug/plumbing only.
 - NO vulnerability proof-of-concept execution.
 - NO runtime mutation or environment manipulation.
 - NO credential or secret operations.
@@ -57,10 +101,13 @@ Findings gate completed with severity-ranked, actionable entries.
 **Next Recommended**: `security-report`
 
 ## Handoffs
-- to `security/security-report` for final synthesis.
+- explicit handoff: `security-findings -> security-report` for final synthesis.
 - to `support/issue-creation` when follow-up tracking is required.
 
 ## Quality Checklist
 - [ ] Every finding has severity and evidence.
+- [ ] Every finding contains all required contract tokens (exact labels).
+- [ ] Severity value is one of: Critical, High, Medium, Low, Informational.
+- [ ] Confidence value is one of: High, Medium, Low.
 - [ ] Mitigations are actionable and bounded.
 - [ ] No secrets/runtime/pentest behavior introduced.

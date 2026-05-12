@@ -85,7 +85,7 @@ stages:
       - "review.md"
   - id: findings
     skill: security/security-findings
-    description: "Normalize findings with severity, evidence, and mitigation guidance."
+    description: "Normalize findings with strict minimum contract tokens, severity/confidence enums, evidence, and mitigation guidance."
     outputs:
       - "findings.md"
     is_gate: true
