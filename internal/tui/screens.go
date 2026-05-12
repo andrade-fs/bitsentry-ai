@@ -138,9 +138,9 @@ func renderInstall(m model) string {
 			fmt.Sprintf("- flows: %s", valueOrDefault(strings.Join(preset.Flows, ", "), "none")),
 			fmt.Sprintf("- skills: %s", valueOrDefault(strings.Join(preset.Skills, ", "), "none")),
 			"",
-			"Detected MCP/component status:",
-			fmt.Sprintf("- Engram: %s", valueOrDefault(m.install.MCPStatus["engram"], "unknown")),
-			fmt.Sprintf("- Context7: %s", valueOrDefault(m.install.MCPStatus["context7"], "unknown")),
+			"Detected MCP readiness:",
+			fmt.Sprintf("- Engram: %s", m.install.MCPReadiness["engram"].Status),
+			fmt.Sprintf("- Context7: %s", m.install.MCPReadiness["context7"].Status),
 			"",
 			"Will do:",
 			"- export Bitsentry capability pack",
@@ -159,6 +159,8 @@ func renderInstall(m model) string {
 			"- execute skills",
 			"- change agent.bitsentry.permission.edit=deny contract",
 		)
+		lines = append(lines, readinessSummaryLines("Engram", m.install.MCPReadiness["engram"])...)
+		lines = append(lines, readinessSummaryLines("Context7", m.install.MCPReadiness["context7"])...)
 		if !m.install.TargetSelected {
 			lines = append(lines,
 				"",
@@ -195,6 +197,9 @@ func renderInstall(m model) string {
 				lines = append(lines, fmt.Sprintf("- %s", n))
 			}
 		}
+		lines = append(lines, "", "MCP readiness summary:")
+		lines = append(lines, readinessSummaryLines("Engram", m.install.MCPReadiness["engram"])...)
+		lines = append(lines, readinessSummaryLines("Context7", m.install.MCPReadiness["context7"])...)
 		lines = append(lines,
 			"",
 			"OpenCode prompt:",
@@ -357,6 +362,20 @@ func valueOrDefault(v string, def string) string {
 		return def
 	}
 	return v
+}
+
+func readinessSummaryLines(name string, readiness components.MCPReadiness) []string {
+	lines := []string{fmt.Sprintf("- %s status: %s (safe_usable=%s)", name, readiness.Status, yesNoLabel(readiness.SafeUsable))}
+	if len(readiness.DetectedEvidence) > 0 {
+		lines = append(lines, fmt.Sprintf("  evidence: %s", strings.Join(readiness.DetectedEvidence, "; ")))
+	}
+	if len(readiness.Blockers) > 0 {
+		lines = append(lines, fmt.Sprintf("  blockers: %s", strings.Join(readiness.Blockers, "; ")))
+	}
+	if len(readiness.ManualHints) > 0 {
+		lines = append(lines, fmt.Sprintf("  manual: %s", strings.Join(readiness.ManualHints, "; ")))
+	}
+	return lines
 }
 
 func renderProfiles(m model) string {

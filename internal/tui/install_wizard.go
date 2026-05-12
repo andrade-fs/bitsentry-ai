@@ -42,7 +42,7 @@ type installWizardState struct {
 	TargetSelected      bool
 	InstallMode         int
 	SelectedMCPs        map[string]bool
-	MCPStatus           map[string]string
+	MCPReadiness        map[string]components.MCPReadiness
 	RegisterAgent       bool
 	InstallCommands     bool
 	InstallNativeSkills bool
@@ -80,9 +80,9 @@ func (m *model) loadInstallWizard() {
 			"engram":   engramSelected,
 			"context7": context7Selected,
 		},
-		MCPStatus: map[string]string{
-			"engram":   componentStatusLabel(engramCfg, engramRuntime),
-			"context7": componentStatusLabel(context7Cfg, context7Runtime),
+		MCPReadiness: map[string]components.MCPReadiness{
+			"engram":   deriveMCPReadiness("engram", engramCfg, engramRuntime),
+			"context7": deriveMCPReadiness("context7", context7Cfg, context7Runtime),
 		},
 		RegisterAgent:       true,
 		InstallCommands:     true,
@@ -135,9 +135,9 @@ func (m *model) refreshInstallWizardPreserveSelections() {
 		TargetSelected:    targetSelected,
 		InstallMode:       installMode,
 		SelectedMCPs:      selectedMCPs,
-		MCPStatus: map[string]string{
-			"engram":   componentStatusLabel(engramCfg, engramRuntime),
-			"context7": componentStatusLabel(context7Cfg, context7Runtime),
+		MCPReadiness: map[string]components.MCPReadiness{
+			"engram":   deriveMCPReadiness("engram", engramCfg, engramRuntime),
+			"context7": deriveMCPReadiness("context7", context7Cfg, context7Runtime),
 		},
 		RegisterAgent:       prev.RegisterAgent,
 		InstallCommands:     prev.InstallCommands,
@@ -477,14 +477,17 @@ func openCodeStatusLine(v bool) string {
 	return "false"
 }
 
-func componentStatusLabel(cfgEnabled bool, detected bool) string {
+func deriveMCPReadiness(id string, cfgEnabled bool, detected bool) components.MCPReadiness {
 	if cfgEnabled {
-		return "configured"
+		return components.BuildMCPReadiness(components.StatusConfigured, []string{"bitsentry metadata configured"}, nil, nil, true)
 	}
 	if detected {
-		return "available"
+		return components.BuildMCPReadiness(components.StatusDetected, []string{"runtime evidence detected"}, []string{"metadata not configured"}, []string{"manual metadata step needed"}, false)
 	}
-	return "not configured"
+	if id == "context7" {
+		return components.BuildMCPReadiness(components.StatusMissing, nil, []string{"runtime command not detected"}, []string{"manual install + metadata configuration needed"}, false)
+	}
+	return components.BuildMCPReadiness(components.StatusMissing, nil, []string{"runtime evidence not detected"}, []string{"manual setup needed if this MCP is required"}, false)
 }
 
 func boolLabel(v bool, yes string, no string) string {

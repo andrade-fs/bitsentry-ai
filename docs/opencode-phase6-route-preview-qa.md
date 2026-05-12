@@ -2,6 +2,27 @@
 
 Status: **PASS WITH NOTES**
 
+## Phase 6.4 MCP Readiness & Validation QA
+
+Status: **PASS**
+
+- Confirmed MCP readiness model exists and is testable with fields:
+  - `status`
+  - `detected_evidence`
+  - `blockers`
+  - `manual_hints`
+  - `safe_usable`
+- Confirmed Engram/Context7 readiness now differentiates configured/detected/missing/manual-step-needed paths.
+- Confirmed modeled-only and unsupported MCP statuses are explicit (`modeled_only`, `not_implemented`).
+- Confirmed TUI Install/Setup shows MCP readiness summary in review and done/control panel steps.
+- Confirmed guardrails preserved:
+  - no `.env`/secret access
+  - no MCP credential mutation
+  - no autonomous runtime activation
+  - no flow execution
+  - no skill execution
+  - no change to `agent.bitsentry.permission.edit=deny`
+
 ## Phase 6.3 TUI Install Everything Mode QA
 
 Status: **PASS**

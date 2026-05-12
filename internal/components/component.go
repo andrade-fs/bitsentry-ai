@@ -9,9 +9,29 @@ const (
 	StatusInstalled      Status = "installed"
 	StatusConfigured     Status = "configured"
 	StatusMissing        Status = "missing"
+	StatusModeledOnly    Status = "modeled_only"
+	StatusManualStep     Status = "manual_step_needed"
 	StatusError          Status = "error"
 	StatusNotImplemented Status = "not_implemented"
 )
+
+type MCPReadiness struct {
+	Status          Status
+	DetectedEvidence []string
+	Blockers        []string
+	ManualHints     []string
+	SafeUsable      bool
+}
+
+func BuildMCPReadiness(status Status, evidence []string, blockers []string, hints []string, safeUsable bool) MCPReadiness {
+	return MCPReadiness{
+		Status:           status,
+		DetectedEvidence: append([]string{}, evidence...),
+		Blockers:         append([]string{}, blockers...),
+		ManualHints:      append([]string{}, hints...),
+		SafeUsable:       safeUsable,
+	}
+}
 
 type Component struct {
 	ID                 string

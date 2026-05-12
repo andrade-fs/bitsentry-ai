@@ -201,6 +201,16 @@ Non-blocking note:
 Non-blocking Phase 6.4 note:
 - Consider finer-grained capability ranking heuristics and confidence weighting per flow stage.
 
+### Phase 6.4 — MCP Readiness & Validation (completed)
+- Added a normalized MCP readiness model (`status`, evidence, blockers, manual hints, `safe_usable`).
+- Enriched Engram + Context7 runtime summaries with readiness and explicit manual-step states.
+- Added readiness state distinctions: configured/detected/missing/modeled-only/not-implemented/manual-step-needed.
+- Integrated readiness summaries in TUI install review and final control panel screens.
+- Added regression tests for readiness model, MCP registry statuses, TUI rendering, and no-mutation guardrail defaults.
+
+Minimal 6.5 roadmap note:
+- Phase 6.5 should focus on deeper per-MCP validation adapters while preserving no-secret-mutation boundaries.
+
 ## Phase 7 — Advanced profiles and model routing (future)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type

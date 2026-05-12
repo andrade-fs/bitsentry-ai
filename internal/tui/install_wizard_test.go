@@ -19,15 +19,18 @@ func TestSelectedMCPListOrder(t *testing.T) {
 	}
 }
 
-func TestComponentStatusLabel(t *testing.T) {
-	if got := componentStatusLabel(true, false); got != "configured" {
-		t.Fatalf("configured status mismatch: %s", got)
+func TestDeriveMCPReadiness(t *testing.T) {
+	configured := deriveMCPReadiness("engram", true, false)
+	if configured.Status != "configured" || !configured.SafeUsable {
+		t.Fatalf("configured readiness mismatch: %#v", configured)
 	}
-	if got := componentStatusLabel(false, true); got != "available" {
-		t.Fatalf("available status mismatch: %s", got)
+	detected := deriveMCPReadiness("engram", false, true)
+	if detected.Status != "detected" || detected.SafeUsable {
+		t.Fatalf("detected readiness mismatch: %#v", detected)
 	}
-	if got := componentStatusLabel(false, false); got != "not configured" {
-		t.Fatalf("not configured status mismatch: %s", got)
+	missing := deriveMCPReadiness("context7", false, false)
+	if missing.Status != "missing" || missing.SafeUsable {
+		t.Fatalf("missing readiness mismatch: %#v", missing)
 	}
 }
 
@@ -58,6 +61,26 @@ func TestDetectOpenCodeInstallStatusPrefersExistingConfigPath(t *testing.T) {
 	}
 	if !status.PackInstalled || !status.UsageExists || !status.RegistryExists {
 		t.Fatalf("expected installed pack flags true, got installed=%t usage=%t registry=%t", status.PackInstalled, status.UsageExists, status.RegistryExists)
+	}
+}
+
+func TestInstallWizardGuardrail_NoMCPMutationDuringInstall(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	if err := os.MkdirAll(filepath.Join(home, ".config", "opencode"), 0o755); err != nil {
+		t.Fatalf("mkdir opencode config: %v", err)
+	}
+
+	cm := config.NewManager()
+	if _, err := cm.Load(); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+	a := &app.App{ConfigManager: cm, ProfileStore: profiles.NewInMemoryStore(), AgentRegistry: agents.NewRegistry(agents.OpenCodeDetector{})}
+	m := newModel(a, false)
+	m.loadInstallWizard()
+	if m.install.ConfigureMCP {
+		t.Fatalf("expected ConfigureMCP to remain disabled by default")
 	}
 }
 

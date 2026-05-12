@@ -65,6 +65,24 @@ Execution Phases (per flow)
 - OpenCode native prompt contract is PRIMARY UX for route + capability preview.
 - `bitsentry-ai route decide` stays debug/plumbing parity only (not the principal user workflow).
 
+### Phase 6.4 MCP Readiness & Validation (OpenCode-only)
+
+- Added a simple, testable MCP readiness model used by Engram/Context7 and wizard summaries:
+  - `status`
+  - `detected_evidence`
+  - `blockers`
+  - `manual_hints`
+  - `safe_usable`
+- Readiness states now clearly distinguish:
+  - `configured`
+  - `detected`
+  - `missing`
+  - `modeled_only`
+  - `not_implemented`
+  - `manual_step_needed`
+- Install/Setup now surfaces readiness in review + done screens with manual next steps when applicable.
+- No secret/token reads or writes were added; MCP credential mutation remains out of scope.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

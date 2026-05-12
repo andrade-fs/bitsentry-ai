@@ -21,6 +21,7 @@ type MCP struct {
 	Configured  bool
 	Required    bool
 	Status      Status
+	Readiness   MCPReadiness
 	Notes       string
 }
 
@@ -57,6 +58,7 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Package:     "@upstash/context7-mcp",
 			Required:    false,
 			Status:      context7Details.Status,
+			Readiness:   context7Details.Readiness,
 			Notes:       "Status derived from Context7 component config/runtime when available.",
 		},
 		{
@@ -67,6 +69,7 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Command:     "engram",
 			Required:    false,
 			Status:      engramDetails.Status,
+			Readiness:   engramDetails.Readiness,
 			Notes:       "Status derived from Engram component config/runtime when available.",
 		},
 		{
@@ -74,7 +77,8 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Name:        "Filesystem",
 			Description: "Local filesystem MCP metadata entry.",
 			Category:    "local",
-			Status:      StatusAvailable,
+			Status:      StatusModeledOnly,
+			Readiness:   BuildMCPReadiness(StatusModeledOnly, []string{"catalog entry only"}, []string{"runtime probing not implemented"}, []string{"Use manual local validation in target agent"}, false),
 			Notes:       "Modeled only; no agent config is written.",
 		},
 		{
@@ -84,6 +88,7 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Category:    "development",
 			Command:     "git",
 			Status:      detectPathCommandStatus("git"),
+			Readiness:   BuildMCPReadiness(detectPathCommandStatus("git"), []string{"git runtime check via PATH"}, nil, []string{"No credential validation is performed"}, detectPathCommandStatus("git") == StatusDetected),
 			Notes:       "Status is based on whether git is present in PATH.",
 		},
 		{
@@ -91,7 +96,8 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Name:        "GitHub",
 			Description: "GitHub MCP metadata entry.",
 			Category:    "development",
-			Status:      StatusAvailable,
+			Status:      StatusModeledOnly,
+			Readiness:   BuildMCPReadiness(StatusModeledOnly, []string{"catalog entry only"}, []string{"token/config validation not implemented"}, []string{"Configure manually in OpenCode when needed"}, false),
 			Notes:       "Modeled only; token/config validation is future work.",
 		},
 		{
@@ -99,7 +105,8 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Name:        "Postgres",
 			Description: "PostgreSQL MCP metadata entry.",
 			Category:    "database",
-			Status:      StatusAvailable,
+			Status:      StatusModeledOnly,
+			Readiness:   BuildMCPReadiness(StatusModeledOnly, []string{"capability planning entry"}, []string{"adapter write support not implemented"}, []string{"Manual MCP setup required outside this phase"}, false),
 			Notes:       "Modeled for capability planning; adapter write support is not implemented yet.",
 		},
 		{
@@ -108,6 +115,7 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Description: "Browser automation MCP metadata entry.",
 			Category:    "automation",
 			Status:      StatusNotImplemented,
+			Readiness:   BuildMCPReadiness(StatusNotImplemented, nil, []string{"not implemented"}, []string{"Wait for future phase implementation"}, false),
 			Notes:       "Reserved for future implementation.",
 		},
 		{
@@ -115,7 +123,8 @@ func MCPRegistry(_ context.Context, cfg config.Config, engramDetails EngramRunti
 			Name:        "Firecrawl",
 			Description: "Research crawling MCP metadata entry.",
 			Category:    "research",
-			Status:      StatusAvailable,
+			Status:      StatusModeledOnly,
+			Readiness:   BuildMCPReadiness(StatusModeledOnly, []string{"catalog entry only"}, []string{"API key validation not implemented"}, []string{"Manual credential setup required; no secrets are read/written here"}, false),
 			Notes:       "Modeled only; API key validation is not implemented yet.",
 		},
 	}
