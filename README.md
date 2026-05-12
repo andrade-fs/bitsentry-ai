@@ -168,34 +168,36 @@ The landing screen after launching `bitsentry-ai`. Shows:
 
 ### Install / Setup
 
-6-step wizard for installing Bitsentry capabilities into OpenCode.
+6-step wizard reframed as an OpenCode installer/control panel.
 
-**Step 1 — Select target agent**
+**Step 1 — Confirm OpenCode target**
 - OpenCode detection (binary, config root, pack status)
 
-**Step 2 — Select capabilities**
-- Preset selection (`bitsentry-dev` default)
-- Flow and skill display
+**Step 2 — Choose install mode**
+- `Install Everything` (main path)
+- `Install Bitsentry Pack`
+- `Update/Reinstall Bitsentry Pack` (main path when already installed)
 
-**Step 3 — Select MCPs/components**
-- Engram toggle
-- Context7 toggle
+**Step 3 — Install intent summary**
+- Clear what installer will do vs will NOT do
+- Explicit non-execution boundaries (no flow execution, no skill execution, no autonomous runtime)
 
 **Step 4 — Review install plan**
-- Summary of target, capabilities, components
-- Actions that will be performed
-- Actions that will NOT be performed (no deletion, no MCP mutation, no flow execution)
+- Detected state + selected mode + concrete operations
+- Manual action notes when needed
 
 **Step 5 — Install / Update**
-- Execute the install
+- Execute selected install mode with backup safeguards
 
-**Step 6 — Done**
-- Result status and next steps
-- OpenCode prompt for dogfooding
+**Step 6 — Done / Control panel summary**
+- Final status and manual notes
+- OpenCode detection/config roots
+- Pack/native integration status and backup paths
+- OpenCode test prompt
 
 | Key | Action |
 |-----|--------|
-| `Space` | Toggle selection |
+| `Space` | Toggle/select option |
 | `Enter` | Continue to next step |
 | `r` | Refresh detection |
 | `Esc` | Back to previous step |

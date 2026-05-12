@@ -2,6 +2,38 @@
 
 Status: **PASS WITH NOTES**
 
+## Phase 6.3 TUI Install Everything Mode QA
+
+Status: **PASS**
+
+- Confirmed Install/Setup is now positioned as OpenCode installer/control panel (not CLI-first UX).
+- Confirmed primary install path is simplified to:
+  1) Install Everything
+  2) Install Bitsentry Pack
+  3) Update/Reinstall Bitsentry Pack (default when already installed)
+- Confirmed normal installation no longer forces granular flow/skill/preset selection in main path.
+- Confirmed review/final screens clearly state:
+  - what it will do
+  - what it will not do
+  - detected state
+  - manual action notes
+- Confirmed final summary includes:
+  - OpenCode detected/not detected
+  - OpenCode config root
+  - Bitsentry pack root
+  - pack status
+  - native integration status
+  - backup path(s)
+  - manual steps/notes
+  - OpenCode test prompt
+- Confirmed guardrails preserved:
+  - OpenCode-only target
+  - no MCP credential mutation
+  - no autonomous runtime activation
+  - no flow execution
+  - no skill execution
+  - no change to `agent.bitsentry.permission.edit=deny`
+
 ## Phase 6.2 Capability Selection Preview QA
 
 Status: **PASS**

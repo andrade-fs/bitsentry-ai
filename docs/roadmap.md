@@ -188,7 +188,17 @@ Non-blocking note:
 - Updated OpenCode native prompt contract to require visible Route + Capability Decision Preview before deep discovery/planning/proposals.
 - Preserved 6.1 preview gates and non-mutating orchestrator boundaries (`edit=deny`, no flow/skill execution, no persistence in preview).
 
-Non-blocking Phase 6.3 note:
+### Phase 6.3 — TUI Install Everything Mode (completed)
+- Reframed Install/Setup as OpenCode installer/control panel with a simple main path:
+  1) Install Everything
+  2) Install Bitsentry Pack
+  3) Update/Reinstall Bitsentry Pack (default when already installed)
+- Removed granular preset/skill/flow/MCP toggles from primary path and relegated that granularity to advanced/debug pathways.
+- Improved factual copy for detected state, actions, guardrails, manual steps, and final outcome summary.
+- Expanded final screen with OpenCode detection/config roots, pack/native integration status, backup paths, and test prompt.
+- Preserved core safety boundaries: OpenCode-only target, no flow/skill execution, no autonomous runtime, no MCP credential mutation, no change to `agent.bitsentry.permission.edit=deny` contract.
+
+Non-blocking Phase 6.4 note:
 - Consider finer-grained capability ranking heuristics and confidence weighting per flow stage.
 
 ## Phase 7 — Advanced profiles and model routing (future)

@@ -86,6 +86,9 @@ func TestLoadInstallWizard_DefaultSelections(t *testing.T) {
 	if m.install.SelectedMCPs["context7"] {
 		t.Fatalf("expected context7 default selection false when not configured")
 	}
+	if m.install.InstallMode != installModeEverything {
+		t.Fatalf("expected default install mode to be Install Everything when pack not installed")
+	}
 }
 
 func TestInstallWizardEnterNavigationAndBlock(t *testing.T) {
@@ -114,11 +117,11 @@ func TestInstallWizardEnterNavigationAndBlock(t *testing.T) {
 
 	m.install.TargetSelected = true
 	m.installEnterAction()
-	if m.install.CurrentStep != installStepCapabilities {
+	if m.install.CurrentStep != installStepMode {
 		t.Fatalf("expected step 2, got %d", m.install.CurrentStep)
 	}
 	m.installEnterAction()
-	if m.install.CurrentStep != installStepComponents {
+	if m.install.CurrentStep != installStepReview {
 		t.Fatalf("expected step 3, got %d", m.install.CurrentStep)
 	}
 }
@@ -141,39 +144,48 @@ func TestInstallWizardSpaceTogglesTarget(t *testing.T) {
 	}
 }
 
-func TestInstallWizardComponentTogglesPersistAcrossSteps(t *testing.T) {
+func TestInstallWizardInstallModeSelectionPersistsAcrossSteps(t *testing.T) {
 	m := model{screen: screenInstall}
 	m.install = installWizardState{
-		CurrentStep:    installStepComponents,
-		Cursor:         0,
+		CurrentStep:      installStepMode,
+		Cursor:           installModeEverything,
+		InstallMode:      installModeEverything,
 		OpenCodeDetected: true,
-		TargetSelected: true,
-		SelectedMCPs: map[string]bool{
-			"engram":   true,
-			"context7": false,
-		},
+		TargetSelected:   true,
 	}
 
-	m.handleInstallKey(" ")
-	if m.install.SelectedMCPs["engram"] {
-		t.Fatalf("expected engram toggled off")
-	}
 	m.handleInstallKey("down")
 	m.handleInstallKey(" ")
-	if !m.install.SelectedMCPs["context7"] {
-		t.Fatalf("expected context7 toggled on")
+	if m.install.InstallMode != installModePackOnly {
+		t.Fatalf("expected pack-only mode selected")
 	}
 
-	m.installEnterAction() // to review
+	m.installEnterAction() // mode -> review
 	if m.install.CurrentStep != installStepReview {
 		t.Fatalf("expected review step")
 	}
-	m.install.CurrentStep = installStepComponents // simulate back
-	if m.install.SelectedMCPs["engram"] {
-		t.Fatalf("expected engram selection persisted off")
+	m.install.CurrentStep = installStepMode // simulate back
+	if m.install.InstallMode != installModePackOnly {
+		t.Fatalf("expected install mode selection persisted")
 	}
-	if !m.install.SelectedMCPs["context7"] {
-		t.Fatalf("expected context7 selection persisted on")
+}
+
+func TestInstallModeHelpers(t *testing.T) {
+	if got := defaultInstallMode(false); got != installModeEverything {
+		t.Fatalf("default mode mismatch for fresh install: %d", got)
+	}
+	if got := defaultInstallMode(true); got != installModeUpdateReinstall {
+		t.Fatalf("default mode mismatch for installed pack: %d", got)
+	}
+	if got := presetForMode(installModeEverything); got != "bitsentry-full" {
+		t.Fatalf("preset mismatch for everything mode: %s", got)
+	}
+	if got := presetForMode(installModePackOnly); got != "bitsentry-dev" {
+		t.Fatalf("preset mismatch for pack-only mode: %s", got)
+	}
+	reg, cmd, skills := nativeOptionsForMode(installModePackOnly)
+	if reg || cmd || skills {
+		t.Fatalf("pack-only mode should disable native integration options")
 	}
 }
 

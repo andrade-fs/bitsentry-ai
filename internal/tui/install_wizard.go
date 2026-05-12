@@ -14,12 +14,17 @@ import (
 
 const (
 	installStepTarget = iota
-	installStepCapabilities
-	installStepComponents
+	installStepMode
 	installStepReview
 	installStepInstall
 	installStepDone
 	installStepCount = 6
+)
+
+const (
+	installModeEverything = iota
+	installModePackOnly
+	installModeUpdateReinstall
 )
 
 type installWizardState struct {
@@ -34,15 +39,17 @@ type installWizardState struct {
 	UsageExists       bool
 	RegistryExists    bool
 
-	TargetSelected bool
-	PresetOrder    []string
-	Preset         string
-	SelectedMCPs   map[string]bool
-	MCPStatus      map[string]string
-	RegisterAgent  bool
-	InstallCommands bool
+	TargetSelected      bool
+	InstallMode         int
+	SelectedMCPs        map[string]bool
+	MCPStatus           map[string]string
+	RegisterAgent       bool
+	InstallCommands     bool
 	InstallNativeSkills bool
-	ConfigureMCP bool
+	ConfigureMCP        bool
+	NativeIntegrationOK bool
+	ConfigBackupPath    string
+	NativeBackupPath    string
 
 	ResultStatus string
 	ResultNotes  []string
@@ -68,8 +75,7 @@ func (m *model) loadInstallWizard() {
 		UsageExists:       status.UsageExists,
 		RegistryExists:    status.RegistryExists,
 		TargetSelected:    status.Detected,
-		PresetOrder:       []string{"bitsentry-dev", "bitsentry-full", "bitsentry-research", "bitsentry-blog"},
-		Preset:            "bitsentry-dev",
+		InstallMode:       defaultInstallMode(status.PackInstalled),
 		SelectedMCPs: map[string]bool{
 			"engram":   engramSelected,
 			"context7": context7Selected,
@@ -78,11 +84,11 @@ func (m *model) loadInstallWizard() {
 			"engram":   componentStatusLabel(engramCfg, engramRuntime),
 			"context7": componentStatusLabel(context7Cfg, context7Runtime),
 		},
-		RegisterAgent: true,
-		InstallCommands: true,
+		RegisterAgent:       true,
+		InstallCommands:     true,
 		InstallNativeSkills: true,
-		ConfigureMCP: false,
-		ResultNotes: []string{},
+		ConfigureMCP:        false,
+		ResultNotes:         []string{},
 	}
 }
 
@@ -93,9 +99,7 @@ func (m *model) refreshInstallWizardPreserveSelections() {
 	engramRuntime, context7Runtime := detectComponentRuntimeStatus(m)
 
 	targetSelected := status.Detected
-	if prev.Preset != "" {
-		targetSelected = prev.TargetSelected
-	}
+	targetSelected = prev.TargetSelected
 	if !status.Detected {
 		targetSelected = false
 	}
@@ -109,9 +113,9 @@ func (m *model) refreshInstallWizardPreserveSelections() {
 		selectedMCPs["context7"] = prev.SelectedMCPs["context7"]
 	}
 
-	preset := "bitsentry-dev"
-	if prev.Preset != "" {
-		preset = prev.Preset
+	installMode := prev.InstallMode
+	if installMode < installModeEverything || installMode > installModeUpdateReinstall {
+		installMode = defaultInstallMode(status.PackInstalled)
 	}
 	currentStep := installStepTarget
 	if prev.CurrentStep >= installStepTarget && prev.CurrentStep < installStepCount {
@@ -129,20 +133,22 @@ func (m *model) refreshInstallWizardPreserveSelections() {
 		UsageExists:       status.UsageExists,
 		RegistryExists:    status.RegistryExists,
 		TargetSelected:    targetSelected,
-		PresetOrder:       []string{"bitsentry-dev", "bitsentry-full", "bitsentry-research", "bitsentry-blog"},
-		Preset:            preset,
+		InstallMode:       installMode,
 		SelectedMCPs:      selectedMCPs,
 		MCPStatus: map[string]string{
 			"engram":   componentStatusLabel(engramCfg, engramRuntime),
 			"context7": componentStatusLabel(context7Cfg, context7Runtime),
 		},
-		RegisterAgent: prev.RegisterAgent,
-		InstallCommands: prev.InstallCommands,
+		RegisterAgent:       prev.RegisterAgent,
+		InstallCommands:     prev.InstallCommands,
 		InstallNativeSkills: prev.InstallNativeSkills,
-		ConfigureMCP: prev.ConfigureMCP,
-		ResultStatus: prev.ResultStatus,
-		ResultNotes:  append([]string{}, prev.ResultNotes...),
-		NextPrompt:   prev.NextPrompt,
+		ConfigureMCP:        prev.ConfigureMCP,
+		NativeIntegrationOK: prev.NativeIntegrationOK,
+		ConfigBackupPath:    prev.ConfigBackupPath,
+		NativeBackupPath:    prev.NativeBackupPath,
+		ResultStatus:        prev.ResultStatus,
+		ResultNotes:         append([]string{}, prev.ResultNotes...),
+		NextPrompt:          prev.NextPrompt,
 	}
 }
 
@@ -150,12 +156,12 @@ func (m *model) handleInstallKey(key string) bool {
 	w := &m.install
 	switch key {
 	case "up", "k":
-		if w.CurrentStep == installStepComponents && w.Cursor > 0 {
+		if (w.CurrentStep == installStepMode || w.CurrentStep == installStepTarget) && w.Cursor > 0 {
 			w.Cursor--
 		}
 		return true
 	case "down", "j":
-		if w.CurrentStep == installStepComponents && w.Cursor < 1 {
+		if (w.CurrentStep == installStepMode || w.CurrentStep == installStepTarget) && w.Cursor < 2 {
 			w.Cursor++
 		}
 		return true
@@ -165,24 +171,8 @@ func (m *model) handleInstallKey(key string) bool {
 			if w.OpenCodeDetected {
 				w.TargetSelected = !w.TargetSelected
 			}
-		case installStepCapabilities:
-			w.ShiftPreset(1)
-		case installStepComponents:
-			if w.Cursor == 0 {
-				w.ToggleMCP("engram")
-			} else {
-				w.ToggleMCP("context7")
-			}
-		}
-		return true
-	case "[":
-		if w.CurrentStep == installStepCapabilities {
-			w.ShiftPreset(-1)
-		}
-		return true
-	case "]":
-		if w.CurrentStep == installStepCapabilities {
-			w.ShiftPreset(1)
+		case installStepMode:
+			w.InstallMode = w.Cursor
 		}
 		return true
 	case "r":
@@ -203,13 +193,11 @@ func (m *model) installEnterAction() bool {
 			m.errMsg = "Cannot continue: select at least one target agent."
 			return true
 		}
-		w.CurrentStep = installStepCapabilities
+		w.CurrentStep = installStepMode
 		m.errMsg = ""
 		return true
-	case installStepCapabilities:
-		w.CurrentStep = installStepComponents
-		return true
-	case installStepComponents:
+	case installStepMode:
+		w.InstallMode = w.Cursor
 		w.CurrentStep = installStepReview
 		return true
 	case installStepReview:
@@ -230,31 +218,6 @@ func (m *model) installEnterAction() bool {
 	return true
 }
 
-func (w *installWizardState) ShiftPreset(delta int) {
-	if len(w.PresetOrder) == 0 {
-		return
-	}
-	idx := 0
-	for i, p := range w.PresetOrder {
-		if p == w.Preset {
-			idx = i
-			break
-		}
-	}
-	idx = (idx + delta + len(w.PresetOrder)) % len(w.PresetOrder)
-	w.Preset = w.PresetOrder[idx]
-}
-
-func (w *installWizardState) ToggleMCP(id string) {
-	if w.SelectedMCPs == nil {
-		w.SelectedMCPs = map[string]bool{}
-	}
-	if id != "engram" && id != "context7" {
-		return
-	}
-	w.SelectedMCPs[id] = !w.SelectedMCPs[id]
-}
-
 func (m *model) runInstallWizard() {
 	if !m.install.TargetSelected {
 		m.errMsg = "Install blocked: OpenCode target is not selected."
@@ -267,19 +230,19 @@ func (m *model) runInstallWizard() {
 		return
 	}
 
-	preset, ok := capabilities.PresetByID(m.install.Preset, capabilities.DefaultPresets())
+	presetID := presetForMode(m.install.InstallMode)
+	preset, ok := capabilities.PresetByID(presetID, capabilities.DefaultPresets())
 	if !ok {
-		m.errMsg = fmt.Sprintf("Install blocked: preset %q not found.", m.install.Preset)
+		m.errMsg = fmt.Sprintf("Install blocked: preset %q not found.", presetID)
 		m.install.ResultStatus = "FAIL"
 		return
 	}
 
-	selectedMCPs := []string{}
-	for _, id := range preset.MCPs {
-		if (id == "engram" || id == "context7") && m.install.SelectedMCPs[id] {
-			selectedMCPs = append(selectedMCPs, id)
-		}
-	}
+	selectedMCPs := selectedMCPList(m.install.SelectedMCPs)
+	registerAgent, installCommands, installNativeSkills := nativeOptionsForMode(m.install.InstallMode)
+	m.install.RegisterAgent = registerAgent
+	m.install.InstallCommands = installCommands
+	m.install.InstallNativeSkills = installNativeSkills
 	draft := capabilities.SelectionDraft{
 		TargetAgent: "opencode",
 		Preset:      preset.ID,
@@ -331,9 +294,9 @@ func (m *model) runInstallWizard() {
 		return
 	}
 	nativeRes, err := capabilities.ExecuteOpenCodeNativeIntegration(projection, m.install.OpenCodeConfig, capabilities.OpenCodeNativeOptions{
-		RegisterAgent:       m.install.RegisterAgent,
-		InstallCommands:     m.install.InstallCommands,
-		InstallNativeSkills: m.install.InstallNativeSkills,
+		RegisterAgent:       registerAgent,
+		InstallCommands:     installCommands,
+		InstallNativeSkills: installNativeSkills,
 		ConfigureMCP:        m.install.ConfigureMCP,
 	})
 	if err != nil {
@@ -355,6 +318,9 @@ func (m *model) runInstallWizard() {
 	}
 
 	m.install.BitsentryPackRoot = res.TargetRoot
+	m.install.NativeIntegrationOK = true
+	m.install.ConfigBackupPath = nativeRes.ConfigBackupPath
+	m.install.NativeBackupPath = nativeRes.NativeBackupPath
 	m.install.UsageExists = true
 	m.install.RegistryExists = true
 	m.install.PackInstalled = true
@@ -383,6 +349,40 @@ func (m *model) runInstallWizard() {
 	m.message = fmt.Sprintf("Install completed: %s", m.install.ResultStatus)
 	m.errMsg = ""
 	m.refreshData()
+}
+
+func defaultInstallMode(packInstalled bool) int {
+	if packInstalled {
+		return installModeUpdateReinstall
+	}
+	return installModeEverything
+}
+
+func presetForMode(mode int) string {
+	if mode == installModePackOnly {
+		return "bitsentry-dev"
+	}
+	return "bitsentry-full"
+}
+
+func nativeOptionsForMode(mode int) (registerAgent bool, installCommands bool, installNativeSkills bool) {
+	if mode == installModePackOnly {
+		return false, false, false
+	}
+	return true, true, true
+}
+
+func installModeLabel(mode int) string {
+	switch mode {
+	case installModeEverything:
+		return "Install Everything"
+	case installModePackOnly:
+		return "Install Bitsentry Pack"
+	case installModeUpdateReinstall:
+		return "Update/Reinstall Bitsentry Pack"
+	default:
+		return "Install Everything"
+	}
 }
 
 func buildOpenCodeDogfoodingPrompt(packRoot string) string {
