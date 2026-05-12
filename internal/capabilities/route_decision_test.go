@@ -65,6 +65,19 @@ func TestBuildRouteDecisionPreview_Security(t *testing.T) {
 	}
 }
 
+func TestBuildRouteDecisionPreview_SecurityRepoReviewStaysSourceFlow(t *testing.T) {
+	res, err := BuildRouteDecisionPreview("../..", "quiero una revisión de seguridad del repo")
+	if err != nil {
+		t.Fatalf("decision preview: %v", err)
+	}
+	if res.MatchedIntent != "security-review" {
+		t.Fatalf("expected security-review, got %s", res.MatchedIntent)
+	}
+	if res.RecommendedFlow != "source-security-review" {
+		t.Fatalf("expected source-security-review default flow, got %s", res.RecommendedFlow)
+	}
+}
+
 func TestBuildRouteDecisionPreview_Docs(t *testing.T) {
 	res, err := BuildRouteDecisionPreview("../..", "actualiza README y roadmap")
 	if err != nil {

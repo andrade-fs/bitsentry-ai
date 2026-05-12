@@ -1,0 +1,92 @@
+id: web-assessment
+name: Web Assessment
+kind: flow
+selectable: true
+top_level_flow: true
+description: >
+  Declarative authorized web-target assessment flow for OpenCode bitsentry.
+  This flow is for explicitly authorized live targets only and is gated before any request/tooling.
+family: security
+skill_pack: security
+orchestrator_skill: security/security-init
+status: declarative
+
+triggers:
+  - web-assessment
+  - target vivo
+  - live target
+  - dominio
+  - url
+  - staging
+  - prod
+  - external lab
+
+routing:
+  prefer_when:
+    - "The user explicitly requests authorized assessment against a live/public web target (URL/domain)."
+    - "The user asks for bounded web assessment planning with explicit authorization and scope definition."
+  avoid_when:
+    - "The request is source code/repository security review without live target signals."
+    - "Authorization, ownership, exact scope, environment, or testing window is missing."
+  fallback: source-security-review
+
+contracts:
+  - result-envelope
+  - persistence-contract
+  - handoff-contract
+  - engram-convention
+  - opencode-convention
+  - skill-loading
+
+requires:
+  mcps:
+    - engram
+  targets:
+    - opencode
+  optional_mcps:
+    - context7
+  support_skills:
+    - security/security-scope
+    - support/issue-creation
+
+persistence:
+  engram_root: "web-assessment/{slug}"
+  local_root: "web-assessment/{slug}"
+  opencode_root: "artifacts/web-assessment/{slug}"
+
+stages:
+  - id: authorization-gates
+    skill: security/security-scope
+    description: "Declarative-only authorization/scope/environment/tooling gate validation before any request/tooling."
+    outputs:
+      - "web-assessment-gates.md"
+
+stage_graph:
+  authorization-gates:
+    next: []
+
+gates:
+  - authorized_target_required
+  - owner_or_authorization_required
+  - exact_scope_required
+  - out_of_scope_required
+  - environment_required
+  - testing_window_required
+  - intensity_required
+  - allowed_tools_required
+  - prohibited_actions_required
+  - rate_limits_required
+  - test_credentials_handling_required
+  - emergency_contact_recommended
+  - explicit_permission_before_requests
+  - no_exploit_execution_by_default
+  - no_dos_or_load_testing
+  - no_credential_attacks
+  - no_destructive_actions
+  - no_secrets_exposure
+
+notes:
+  - "This is declarative-only in Phase 7.5A: no runtime flow execution and no tooling execution."
+  - "No curl/httpx/nuclei/browser execution, no exploit execution, no DoS/load testing, no credential attacks."
+  - "Requires explicit authorization and exact scope before any request/tooling in future phases."
+  - "Source-security-review remains the default for repository/source read-only AppSec review."

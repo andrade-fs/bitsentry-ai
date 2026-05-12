@@ -310,8 +310,16 @@ Minimal 6.5 roadmap note:
 - Added evidence capture rules, guardrails matrix, known acceptable PASS WITH NOTES cases, and final go/no-go checklist before 7.5.
 - Kept strict scope and stability boundaries: docs-only changes; no flow/runtime/schema/registry/agent/target mutations.
 
+### Phase 7.5A — Web Assessment Declarative Route + Authorization Gates (completed)
+- Added new parallel declarative flow manifest: `assets/flows/web-assessment.yaml`.
+- Kept `security-review` default route anchored to `source-security-review` for source/repo/read-only requests.
+- Added explicit alternative route to `web-assessment` and prompt decision token `use_flow_web-assessment` for authorized live-target web assessment signals.
+- Added strong, testable manifest gates:
+  - `authorized_target_required`, `owner_or_authorization_required`, `exact_scope_required`, `out_of_scope_required`, `environment_required`, `testing_window_required`, `intensity_required`, `allowed_tools_required`, `prohibited_actions_required`, `rate_limits_required`, `test_credentials_handling_required`, `emergency_contact_recommended`, `explicit_permission_before_requests`, `no_exploit_execution_by_default`, `no_dos_or_load_testing`, `no_credential_attacks`, `no_destructive_actions`, `no_secrets_exposure`.
+- Preserved 7.5A boundaries: no runtime flow execution, no tooling execution (curl/httpx/nuclei/browser), no live target testing, no exploit/DoS/credential attacks/destructive actions.
+
 - Next Phase 7 tracks:
-- 7.5 Web Assessment Flow (next, gated by 7.4C go/no-go checklist)
+- 7.5B Web Assessment routing/classifier hardening and gated UX handshake (next)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability

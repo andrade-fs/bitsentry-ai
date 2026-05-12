@@ -367,7 +367,7 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 	prompt := buildBitsentryAgentPrompt()
 	for _, token := range []string{
 		"Intent Decision Contract (choose exactly one first action)",
-		"direct_answer | use_skill | use_role | use_flow_sdr | use_flow_support | use_flow_sdd | use_flow_source-security-review | bounded_discovery_then_decide | ask_clarifying_question",
+		"direct_answer | use_skill | use_role | use_flow_sdr | use_flow_support | use_flow_sdd | use_flow_source-security-review | use_flow_web-assessment | bounded_discovery_then_decide | ask_clarifying_question",
 		"Questions simples/explanations => direct_answer (NO SDD by default).",
 		"do NOT activate any formal flow silently; announce selected flow first",
 		"ask_clarifying_question is allowed only when route cannot be decided with high confidence",
@@ -378,6 +378,7 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 		"bug/failure/regression",
 		"security/appsec/threat/risk",
 		"source code security review",
+		"live target URL/domain/public web/curl/httpx/nuclei/browser (authorized)",
 		"SDD:",
 		"SDR:",
 		"Support:",
@@ -392,6 +393,7 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 		"updated route decision only if findings change",
 		"separate permission before apply/edit planning and before persistence",
 		"do not create tasks/todos before route confirmation on broad requests",
+		"require explicit authorization + exact scope + environment + testing window + intensity + tool allowlist BEFORE any request/tooling",
 	} {
 		if !strings.Contains(prompt, token) {
 			t.Fatalf("route classification missing %q", token)

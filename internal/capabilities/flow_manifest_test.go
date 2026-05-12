@@ -28,6 +28,7 @@ type flowManifest struct {
 		Targets       []string `yaml:"targets"`
 		SupportSkills []string `yaml:"support_skills"`
 	} `yaml:"requires"`
+	Gates []string `yaml:"gates"`
 }
 
 func TestFlowManifestsDynamicFields(t *testing.T) {
@@ -36,6 +37,7 @@ func TestFlowManifestsDynamicFields(t *testing.T) {
 		"../../assets/flows/sdr.yaml",
 		"../../assets/flows/support.yaml",
 		"../../assets/flows/source-security-review.yaml",
+		"../../assets/flows/web-assessment.yaml",
 	}
 	for _, p := range paths {
 		m := readFlowManifest(t, p)
@@ -97,6 +99,7 @@ func TestFlowManifestSkillRefsArePackPrefixed(t *testing.T) {
 		"../../assets/flows/sdr.yaml",
 		"../../assets/flows/support.yaml",
 		"../../assets/flows/source-security-review.yaml",
+		"../../assets/flows/web-assessment.yaml",
 	}
 	for _, p := range paths {
 		m := readFlowManifest(t, p)
@@ -142,6 +145,42 @@ func TestSourceSecurityReviewManifestStabilityAndSupportLinks(t *testing.T) {
 	for _, got := range m.Requires.SupportSkills {
 		if !wantSupport[got] {
 			t.Fatalf("unexpected support skill in manifest: %s", got)
+		}
+	}
+}
+
+func TestWebAssessmentManifestHasRequiredAuthorizationGates(t *testing.T) {
+	m := readFlowManifest(t, "../../assets/flows/web-assessment.yaml")
+	if m.ID != "web-assessment" {
+		t.Fatalf("web-assessment flow id changed: %s", m.ID)
+	}
+
+	wantGates := map[string]bool{
+		"authorized_target_required":           true,
+		"owner_or_authorization_required":      true,
+		"exact_scope_required":                 true,
+		"out_of_scope_required":                true,
+		"environment_required":                 true,
+		"testing_window_required":              true,
+		"intensity_required":                   true,
+		"allowed_tools_required":               true,
+		"prohibited_actions_required":          true,
+		"rate_limits_required":                 true,
+		"test_credentials_handling_required":   true,
+		"emergency_contact_recommended":        true,
+		"explicit_permission_before_requests":  true,
+		"no_exploit_execution_by_default":      true,
+		"no_dos_or_load_testing":               true,
+		"no_credential_attacks":                true,
+		"no_destructive_actions":               true,
+		"no_secrets_exposure":                  true,
+	}
+	if len(m.Gates) != len(wantGates) {
+		t.Fatalf("unexpected gates count: got %d want %d", len(m.Gates), len(wantGates))
+	}
+	for _, got := range m.Gates {
+		if !wantGates[got] {
+			t.Fatalf("unexpected gate in web-assessment manifest: %s", got)
 		}
 	}
 }

@@ -182,12 +182,23 @@ Execution Phases (per flow)
 - Added evidence-capture rules, known acceptable PASS WITH NOTES situations, and final go/no-go checklist before Phase 7.5.
 - Preserved strict scope boundaries: docs/protocol only; no runtime flow execution, no exploit/live-target testing, no code edits by default.
 
+### Phase 7.5A Web Assessment Declarative Routing + Authorization Gates (OpenCode-only)
+
+- Added a new **parallel declarative flow** manifest:
+  - `assets/flows/web-assessment.yaml`
+- Kept `source-security-review` as the default `security-review` route for source/repo/read-only AppSec work.
+- Added explicit `web-assessment` alternative route and prompt decision `use_flow_web-assessment` for live target signals (URL/domain/public web/curl/httpx/nuclei/browser), gated by authorization and exact scope.
+- Added strong, testable authorization/safety gates in manifest (authorization, scope, environment, testing window, intensity, tool allowlist, prohibited actions, rate limits, credentials handling, explicit permission before requests, no exploit/DoS/credential attacks/destructive actions/secrets exposure).
+- Preserved strict boundaries in 7.5A: declarative-only, no runtime flow execution, no live target requests, no tooling execution.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |
 |------|---------|--------|--------|
 | **SDD** (Spec Driven Development) | Structured software/product change | init → explore → propose → spec → design → tasks → apply → verify → archive | Declarative |
 | **SDR** (Structured Discovery Research) | Research, notes, blog content, idea validation | capture → research → synthesis → questions → structure → validate → archive | Declarative |
+| **Source Security Review** | Source code/repo/read-only AppSec review | init → scope → map → review → findings → report | Declarative |
+| **Web Assessment** | Authorized live target web assessment (gated, declarative in 7.5A) | authorization/scope gate contract (no runtime execution in 7.5A) | Declarative |
 | **Support** | Helper utilities (registry, review, testing, issues, PRs) | skill-registry, judgment-day, go-testing, skill-creator, issue-creation, branch-pr | Declarative |
 
 ---
