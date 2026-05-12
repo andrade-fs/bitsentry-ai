@@ -367,7 +367,7 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 	prompt := buildBitsentryAgentPrompt()
 	for _, token := range []string{
 		"Intent Decision Contract (choose exactly one first action)",
-		"direct_answer | use_skill | use_role | use_flow_sdr | use_flow_support | use_flow_sdd | bounded_discovery_then_decide | ask_clarifying_question",
+		"direct_answer | use_skill | use_role | use_flow_sdr | use_flow_support | use_flow_sdd | use_flow_source-security-review | bounded_discovery_then_decide | ask_clarifying_question",
 		"Questions simples/explanations => direct_answer (NO SDD by default).",
 		"do NOT activate any formal flow silently; announce selected flow first",
 		"ask_clarifying_question is allowed only when route cannot be decided with high confidence",
@@ -377,6 +377,7 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 		"frontend/UI/TUI/wizard/layout",
 		"bug/failure/regression",
 		"security/appsec/threat/risk",
+		"source code security review",
 		"SDD:",
 		"SDR:",
 		"Support:",

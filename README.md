@@ -522,7 +522,7 @@ Independent utility invocations (not a mandatory sequential pipeline):
 | `frontend-ux-change` | SDD | medium | yes |
 | `bug-investigation` | Support → SDD | low | no |
 | `research-analysis` | SDR | medium | no |
-| `security-review` | SDR | high | yes |
+| `security-review` | Source Security Review | high | yes |
 | `documentation-change` | SDD | low | no |
 | `direct-answer` | none | — | no |
 
@@ -565,7 +565,14 @@ Route Decision Preview
 | Intent signal | Decision | Default route |
 |--------------|----------|---------------|
 | spec, design, feature, change | `use_flow_sdd` | SDD |
-| security, detection, incident, threat, logs | `use_flow_sdr` | SDR |
+| security, appsec, threat, risk, source review | `use_flow_source-security-review` | Source Security Review |
+
+### Source Security Review (Phase 7.1 MVP)
+
+- Declarative/read-only-first flow: `source-security-review`
+- Scope: source code, non-secret config, dependencies, risky patterns
+- Out of scope: pentest runtime, exploit execution, external target testing
+- Guardrails preserved: no `.env` access, no secrets, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing parity only, `agent.bitsentry.permission.edit=deny`
 | support, bug, help, troubleshoot, error | `use_flow_support` | Support |
 | direct/simple explanation | `direct_answer` | none |
 

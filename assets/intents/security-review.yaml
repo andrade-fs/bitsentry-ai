@@ -1,16 +1,17 @@
 id: security-review
 description: Security/AppSec/threat and risk review without autonomous pentest runtime.
-default_decision: use_role
-default_flow: none
-alternative_flow: sdr
+default_decision: use_flow_source-security-review
+default_flow: source-security-review
+alternative_flow: support
 complexity_threshold: medium
 pre_flow_roles:
   - security-reviewer
   - appsec-reviewer
   - threat-modeler
 pre_flow_skills:
-  - threat-surface-mapping
-  - risk-analysis
+  - security/security-init
+  - security/security-scope
+  - security/security-map
 expected_context_outputs:
   - threat_model
   - risk_register

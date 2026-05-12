@@ -10,6 +10,7 @@ func TestFlowManifestsExist(t *testing.T) {
 		"../../assets/flows/sdd.yaml",
 		"../../assets/flows/sdr.yaml",
 		"../../assets/flows/support.yaml",
+		"../../assets/flows/source-security-review.yaml",
 	}
 	for _, p := range paths {
 		if !fileExists(p) {

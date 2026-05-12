@@ -245,6 +245,14 @@ Minimal 6.5 roadmap note:
 - Added anti-regression tests for Compact Direct Mode vs Full Preview triggers.
 - Preserved non-mutation and security guardrails (no secrets/.env access, no MCP credential mutation, no runtime/flow execution in preview, no preview persistence/edits, OpenCode-first, CLI debug/plumbing only).
 
+### Phase 7.1 — Source Security Review Flow MVP (completed)
+- Added new declarative flow manifest: `assets/flows/source-security-review.yaml`.
+- Added security skill pack with 6 structural skills: init, scope, map, review, findings, report.
+- Wired `security-review` intent to recommend `source-security-review`.
+- Updated OpenCode bitsentry prompt matrix to recognize source-security-review instead of the prior "no pentest flow yet" copy.
+- Preserved guardrails: read-only first, no `.env`/secrets, no exploit execution, no external target testing, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing parity, `agent.bitsentry.permission.edit=deny`.
+- Updated discovery/manifest/skills/route/prompt/workflow visibility tests for the new flow and security pack.
+
 - Next Phase 7 tracks:
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type

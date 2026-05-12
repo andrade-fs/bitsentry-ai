@@ -60,6 +60,9 @@ func TestBuildRouteDecisionPreview_Security(t *testing.T) {
 	if res.MatchedIntent != "security-review" {
 		t.Fatalf("expected security-review, got %s", res.MatchedIntent)
 	}
+	if res.RecommendedFlow != "source-security-review" {
+		t.Fatalf("expected source-security-review recommended flow, got %s", res.RecommendedFlow)
+	}
 }
 
 func TestBuildRouteDecisionPreview_Docs(t *testing.T) {

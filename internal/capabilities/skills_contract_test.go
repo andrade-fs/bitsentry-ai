@@ -9,7 +9,7 @@ import (
 )
 
 func TestAllSkillFilesContainRequiredSections(t *testing.T) {
-	groups := []string{"sdd", "sdr", "support"}
+	groups := []string{"sdd", "sdr", "support", "security"}
 	skillFiles := make([]string, 0)
 	for _, group := range groups {
 		pattern := filepath.Join("..", "..", "assets", "skills", group, "*", "SKILL.md")
@@ -21,7 +21,7 @@ func TestAllSkillFilesContainRequiredSections(t *testing.T) {
 	}
 	sort.Strings(skillFiles)
 	if len(skillFiles) == 0 {
-		t.Fatal("no SKILL.md files found under assets/skills/{sdd,sdr,support}")
+		t.Fatal("no SKILL.md files found under assets/skills/{sdd,sdr,support,security}")
 	}
 
 	required := []string{
@@ -92,6 +92,7 @@ func TestSharedContractsAndFlowsAreNonEmpty(t *testing.T) {
 		"../../assets/flows/sdd.yaml",
 		"../../assets/flows/sdr.yaml",
 		"../../assets/flows/support.yaml",
+		"../../assets/flows/source-security-review.yaml",
 	}
 	for _, p := range paths {
 		raw, err := os.ReadFile(p)

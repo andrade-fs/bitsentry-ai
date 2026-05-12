@@ -1,0 +1,138 @@
+id: source-security-review
+name: Source Security Review
+kind: flow
+selectable: true
+top_level_flow: true
+description: >
+  Declarative, read-only-first source code security review flow for OpenCode bitsentry.
+  Focuses on code, non-secret configuration, dependencies, and risky patterns.
+family: security
+skill_pack: security
+orchestrator_skill: security/security-init
+status: declarative
+
+triggers:
+  - security
+  - appsec
+  - threat
+  - risk
+  - review
+  - vulnerability
+  - hardening
+  - dependencies
+
+routing:
+  prefer_when:
+    - "The task is a source code security review (code/config/dependencies/risk patterns)."
+    - "The user asks for AppSec review without live target testing or pentest runtime."
+  avoid_when:
+    - "The task requests exploit execution, pentest runtime, or external target testing."
+    - "The task is general research/content creation unrelated to source security review."
+  fallback: support
+
+contracts:
+  - result-envelope
+  - persistence-contract
+  - handoff-contract
+  - engram-convention
+  - opencode-convention
+  - skill-loading
+
+requires:
+  mcps:
+    - engram
+  targets:
+    - opencode
+  optional_mcps:
+    - context7
+  support_skills:
+    - support/judgment-day
+    - support/issue-creation
+
+persistence:
+  engram_root: "source-security-review/{slug}"
+  local_root: "security-review/{slug}"
+  opencode_root: "artifacts/security-review/{slug}"
+
+stages:
+  - id: init
+    skill: security/security-init
+    description: "Set scope and enforce read-only/no-runtime/no-secrets guardrails."
+    outputs:
+      - "init.md"
+  - id: scope
+    skill: security/security-scope
+    description: "Define in-scope components, non-goals, and evidence plan."
+    outputs:
+      - "scope.md"
+  - id: map
+    skill: security/security-map
+    description: "Map threat surface from source layout, config, dependencies, and trust boundaries."
+    outputs:
+      - "map.md"
+  - id: review
+    skill: security/security-review
+    description: "Perform bounded read-only review and identify candidate risk patterns."
+    outputs:
+      - "review.md"
+  - id: findings
+    skill: security/security-findings
+    description: "Normalize findings with severity, evidence, and mitigation guidance."
+    outputs:
+      - "findings.md"
+    is_gate: true
+    gate: findings-quality
+  - id: report
+    skill: security/security-report
+    description: "Produce final source security review report with residual risks and next actions."
+    outputs:
+      - "report.md"
+
+stage_graph:
+  init:
+    next:
+      - scope
+  scope:
+    next:
+      - map
+  map:
+    next:
+      - review
+  review:
+    next:
+      - findings
+  findings:
+    next:
+      - report
+    gate: findings-quality
+  report:
+    next: []
+
+handoffs:
+  - to: support/issue-creation
+    when: "findings require tracked remediation tasks"
+    payload_type: handoff-contract
+  - to: support/judgment-day
+    when: "high-severity findings require adversarial audit"
+    payload_type: handoff-contract
+
+final_artifacts:
+  - path: "security-review/{slug}/init.md"
+    type: phase-artifact
+  - path: "security-review/{slug}/scope.md"
+    type: phase-artifact
+  - path: "security-review/{slug}/map.md"
+    type: phase-artifact
+  - path: "security-review/{slug}/review.md"
+    type: phase-artifact
+  - path: "security-review/{slug}/findings.md"
+    type: gate-artifact
+  - path: "security-review/{slug}/report.md"
+    type: closure-manifest
+
+notes:
+  - "Read-only first: no file edits by default and no runtime flow execution."
+  - "No .env access, no secret handling, no exploit execution, and no external target testing."
+  - "No destructive actions and no MCP credential mutation."
+  - "OpenCode-first; CLI route decide is debug/plumbing parity only."
+  - "Preserve agent.bitsentry.permission.edit = deny contract."
