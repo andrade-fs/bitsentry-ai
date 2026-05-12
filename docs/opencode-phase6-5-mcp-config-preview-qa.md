@@ -2,6 +2,9 @@
 
 Status: **PASS**
 
+Related closure doc:
+- `docs/opencode-phase6-6-release-stabilization.md`
+
 ## Scope
 
 Validate Phase 6.5 preview-only MCP config behavior in OpenCode path with strict safety constraints.

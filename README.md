@@ -100,6 +100,16 @@ Execution Phases (per flow)
 - TUI Install/Setup now shows this model in review + done/control-panel screens and labels it explicitly as **PREVIEW ONLY**.
 - Future apply remains separate and gated by explicit confirmation + backup requirement.
 
+### Phase 6.6 Release Stabilization (OpenCode-only)
+
+- Consolidated release closure in `docs/opencode-phase6-6-release-stabilization.md`.
+- Stabilized OpenCode-first product framing:
+  - TUI **Install Everything** as main user path
+  - MCP Readiness + MCP Config Preview as visible safety checkpoints
+  - Route+Capability Preview as primary in-chat OpenCode behavior
+- Confirmed CLI remains debug/plumbing only and not primary UX.
+- Preserved non-mutation guardrails (`agent.bitsentry.permission.edit=deny`, no flow/skill execution, no autonomous runtime, no MCP credential mutation).
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |
@@ -111,6 +121,20 @@ Execution Phases (per flow)
 ---
 
 ## 2. Installation
+
+### OpenCode-first Quickstart (Recommended)
+
+1. Run `./install.sh`.
+2. Launch TUI with `bitsentry-ai`.
+3. Open **Install / Setup** and choose **Install Everything**.
+4. In review/done screens, verify:
+   - MCP Readiness summary
+   - MCP Config Preview (**PREVIEW ONLY**, no-write)
+5. In OpenCode, use a route preview prompt (example):
+   - `@bitsentry Quiero mejorar el wizard del TUI`
+6. Confirm Route+Capability Preview appears before deep planning/editing.
+
+> CLI commands remain available for debugging/plumbing parity, but OpenCode + TUI is the primary UX.
 
 ### Quick Install
 

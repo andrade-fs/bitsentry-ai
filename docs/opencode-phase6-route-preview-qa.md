@@ -2,6 +2,9 @@
 
 Status: **PASS WITH NOTES**
 
+Related closure doc:
+- `docs/opencode-phase6-6-release-stabilization.md`
+
 ## Phase 6.4 MCP Readiness & Validation QA
 
 Status: **PASS**

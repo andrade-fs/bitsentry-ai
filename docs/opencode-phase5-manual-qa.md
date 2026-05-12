@@ -1,5 +1,8 @@
 # OpenCode Phase 5 — Manual QA Checklist
 
+Phase 6 closure reference:
+- `docs/opencode-phase6-6-release-stabilization.md`
+
 Goal: validate OpenCode `bitsentry` orchestration polish (SDD/SDR/support/tool guidance) without turning BitsentryAI into a runtime executor.
 
 Verdict taxonomy per check: `PASS` / `PASS WITH NOTES` / `FAIL`.

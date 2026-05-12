@@ -219,6 +219,23 @@ Minimal 6.5 roadmap note:
 - Integrated preview contract into TUI review + done/control-panel screens with **PREVIEW ONLY** marker.
 - Added tests for no-write preview behavior, confirmation+backup gating contract, config-shape scenarios, and TUI rendering.
 
+### Phase 6.6 — Release Stabilization (completed)
+- Consolidated Phase 6 closure artifacts in a single release stabilization document.
+- Aligned README + roadmap + QA docs around OpenCode-first positioning and safety boundaries.
+- Finalized release demo flow: TUI Install Everything → MCP Readiness → MCP Config Preview → OpenCode Route+Capability Preview.
+- Preserved all guardrails (no secrets/no `.env`/no MCP credential mutation/no autonomous runtime/no flow/skill execution in preview path).
+
+### Phase 6 Status Snapshot (6.1 → 6.6)
+- 6.1 Route Decision Preview: completed
+- 6.2 Capability Selection Preview: completed
+- 6.3 TUI Install Everything Mode: completed
+- 6.4 MCP Readiness & Validation: completed
+- 6.5 OpenCode MCP Config Preview: completed
+- 6.6 Release Stabilization: completed
+
+### Next Step
+- Prepare and validate release candidate tag for Phase 6 closure (no new major feature scope).
+
 ## Phase 7 — Advanced profiles and model routing (future)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
