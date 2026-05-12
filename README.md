@@ -573,6 +573,20 @@ Route Decision Preview
 - Scope: source code, non-secret config, dependencies, risky patterns
 - Out of scope: pentest runtime, exploit execution, external target testing
 - Guardrails preserved: no `.env` access, no secrets, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing parity only, `agent.bitsentry.permission.edit=deny`
+
+### Security Skill Pack MVP (Phase 7.2)
+
+- Added 8 support security skills (checklists/references, not flow stages):
+  - `security/auth-security-review`
+  - `security/jwt-review`
+  - `security/graphql-security-review`
+  - `security/xss-review`
+  - `security/file-upload-review`
+  - `security/ssrf-review`
+  - `security/secrets-review`
+  - `security/dependency-risk-review`
+- Kept flow contract stable: same ID (`source-security-review`) and same stage chain (`security-init` → `security-scope` → `security-map` → `security-review` → `security-findings` → `security-report`).
+- Guardrails remain explicit and unchanged: read-only first, no `.env` access, no secrets handling, no exploit execution, no external target testing, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
 | support, bug, help, troubleshoot, error | `use_flow_support` | Support |
 | direct/simple explanation | `direct_answer` | none |
 

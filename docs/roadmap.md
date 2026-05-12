@@ -253,6 +253,19 @@ Minimal 6.5 roadmap note:
 - Preserved guardrails: read-only first, no `.env`/secrets, no exploit execution, no external target testing, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing parity, `agent.bitsentry.permission.edit=deny`.
 - Updated discovery/manifest/skills/route/prompt/workflow visibility tests for the new flow and security pack.
 
+### Phase 7.2 — Security Skill Pack MVP (completed)
+- Added 8 specialized support security skills under `assets/skills/security/*/SKILL.md`:
+  - auth-security-review, jwt-review, graphql-security-review, xss-review
+  - file-upload-review, ssrf-review, secrets-review, dependency-risk-review
+- Kept flow contract stable: no flow ID change and no stage changes/additions.
+- Linked the 8 skills as support references/checklists in `assets/flows/source-security-review.yaml` (`requires.support_skills`) without turning them into stages.
+- Updated docs and manifest-contract tests to enforce flow stability and support-skill linkage.
+- Preserved all security guardrails (read-only first, no `.env`/secrets, no exploit/live target testing, no destructive actions, no MCP credential mutation, no runtime flow execution, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`).
+
+### Phase 7.3 — Security Report Markdown (next)
+- Define richer Markdown output schema for `security-report` (executive summary, finding table, remediation plan, residual risk register).
+- Add report quality gate checks and anti-regression tests for report completeness.
+
 - Next Phase 7 tracks:
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type

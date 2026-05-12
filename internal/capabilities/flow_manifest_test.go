@@ -20,11 +20,13 @@ type flowManifest struct {
 	Persistence       map[string]string `yaml:"persistence"`
 	StageGraph        map[string]any    `yaml:"stage_graph"`
 	Stages            []struct {
+		ID    string `yaml:"id"`
 		Skill string `yaml:"skill"`
 	} `yaml:"stages"`
 	Requires struct {
-		MCPs    []string `yaml:"mcps"`
-		Targets []string `yaml:"targets"`
+		MCPs          []string `yaml:"mcps"`
+		Targets       []string `yaml:"targets"`
+		SupportSkills []string `yaml:"support_skills"`
 	} `yaml:"requires"`
 }
 
@@ -102,6 +104,44 @@ func TestFlowManifestSkillRefsArePackPrefixed(t *testing.T) {
 			if !strings.Contains(st.Skill, "/") {
 				t.Fatalf("manifest %s has non-prefixed skill ref: %s", p, st.Skill)
 			}
+		}
+	}
+}
+
+func TestSourceSecurityReviewManifestStabilityAndSupportLinks(t *testing.T) {
+	m := readFlowManifest(t, "../../assets/flows/source-security-review.yaml")
+	if m.ID != "source-security-review" {
+		t.Fatalf("source security flow id changed: %s", m.ID)
+	}
+
+	wantStages := []string{"init", "scope", "map", "review", "findings", "report"}
+	if len(m.Stages) != len(wantStages) {
+		t.Fatalf("unexpected source-security-review stage count: got %d want %d", len(m.Stages), len(wantStages))
+	}
+	for i, want := range wantStages {
+		if m.Stages[i].ID != want {
+			t.Fatalf("unexpected stage[%d]: got %q want %q", i, m.Stages[i].ID, want)
+		}
+	}
+
+	wantSupport := map[string]bool{
+		"support/judgment-day":                true,
+		"support/issue-creation":              true,
+		"security/auth-security-review":       true,
+		"security/jwt-review":                 true,
+		"security/graphql-security-review":    true,
+		"security/xss-review":                 true,
+		"security/file-upload-review":         true,
+		"security/ssrf-review":                true,
+		"security/secrets-review":             true,
+		"security/dependency-risk-review":     true,
+	}
+	if len(m.Requires.SupportSkills) != len(wantSupport) {
+		t.Fatalf("unexpected support_skills count: got %d want %d", len(m.Requires.SupportSkills), len(wantSupport))
+	}
+	for _, got := range m.Requires.SupportSkills {
+		if !wantSupport[got] {
+			t.Fatalf("unexpected support skill in manifest: %s", got)
 		}
 	}
 }

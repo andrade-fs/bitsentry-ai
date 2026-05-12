@@ -48,6 +48,14 @@ requires:
   support_skills:
     - support/judgment-day
     - support/issue-creation
+    - security/auth-security-review
+    - security/jwt-review
+    - security/graphql-security-review
+    - security/xss-review
+    - security/file-upload-review
+    - security/ssrf-review
+    - security/secrets-review
+    - security/dependency-risk-review
 
 persistence:
   engram_root: "source-security-review/{slug}"
@@ -136,3 +144,4 @@ notes:
   - "No destructive actions and no MCP credential mutation."
   - "OpenCode-first; CLI route decide is debug/plumbing parity only."
   - "Preserve agent.bitsentry.permission.edit = deny contract."
+  - "Support security skills are checklists/references for review quality, not additional flow stages."
