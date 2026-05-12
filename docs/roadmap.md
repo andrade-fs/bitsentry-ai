@@ -276,6 +276,33 @@ Minimal 6.5 roadmap note:
   - explicit handoff `security-findings -> security-report`.
 - Kept `source-security-review` stable (same flow ID and stage IDs/order).
 
+### Phase 7.4A — Findings Taxonomy + Calibration Contract (completed)
+- Added official findings taxonomy enum to `security-findings` for source review normalization:
+  - Authentication, Authorization, Session Management, Input Validation, Injection, Cross-Site Scripting, Server-Side Request Forgery, File Upload, Secrets Exposure, Cryptography, Dependency Risk, GraphQL Security, Business Logic, Configuration, Logging / Monitoring, Error Handling, Data Exposure, Supply Chain, Informational.
+- Added explicit Severity calibration anchors via **Impact × Likelihood** (Critical/High/Medium/Low/Informational).
+- Added explicit Confidence calibration anchors by evidence quality (High/Medium/Low).
+- Added formal skill→category mapping contract (primary/secondary) for specialized security review skills.
+- Added explicit deduplication rules, evidence grouping rules, and assumptions/limitations rules.
+- Hardened handoff `security-findings -> security-report` with required payload semantics.
+- Updated `security-report` to explicitly consume taxonomy and calibrated fields in **Risk Summary** and **Findings**.
+- Added strict anchor/token tests for official categories, enums, Impact × Likelihood token, dedup/evidence/assumptions rules, mapping contract, handoff, and report taxonomy consumption.
+- Kept flow stability: `source-security-review` ID unchanged, no stage ID/order changes, no runtime flow execution.
+
+### Phase 7.4B — Findings/Report Examples + Golden Fixtures (completed)
+- Added safe synthetic documentation contract artifacts under `assets/docs/security/`:
+  - examples: `findings-example.md`, `report-example.md`
+  - fixtures: `findings-golden.md`, `report-golden.md`
+  - reference guide: `assets/docs/security/README.md`
+- Extended `internal/capabilities/security_contracts_test.go` with static checks for:
+  - docs artifact existence,
+  - minimum finding token coverage,
+  - severity coverage in findings golden fixture (Critical/High/Medium/Low/Informational),
+  - confidence enum presence (High/Medium/Low),
+  - taxonomy usage and dedup/evidence/assumptions anchors,
+  - required report section order in `report-golden`.
+- Preserved flow and runtime boundaries: no `source-security-review` flow ID/stage changes, no runtime flow execution, no route/schema/registry mutations.
+- Preserved security guardrails in fixtures/examples: read-only-first, no `.env`/secrets, no exploit or live-target testing, no destructive actions, no MCP credential mutation, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
+
 - Next Phase 7 tracks:
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type

@@ -137,6 +137,37 @@ Execution Phases (per flow)
 - Kept flow stability: no flow ID change, no stage ID/order changes, no runtime flow execution.
 - Preserved guardrails: read-only first, no `.env`/secrets, no exploit/live target testing, no destructive actions, no MCP credential mutation, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
 
+### Phase 7.4A Security Findings Taxonomy & Calibration (OpenCode-only)
+
+- Defined official findings taxonomy enum for source security review normalization:
+  - Authentication, Authorization, Session Management, Input Validation, Injection, Cross-Site Scripting, Server-Side Request Forgery, File Upload, Secrets Exposure, Cryptography, Dependency Risk, GraphQL Security, Business Logic, Configuration, Logging / Monitoring, Error Handling, Data Exposure, Supply Chain, Informational.
+- Added explicit Severity calibration anchors using **Impact × Likelihood** and Confidence calibration anchors by evidence quality.
+- Added explicit skill-to-category mapping contract (primary/secondary) for specialized security skills.
+- Added formal rules for deduplication, evidence grouping, and assumptions/limitations.
+- Hardened findings→report handoff so `security-report` must consume taxonomy in both Risk Summary and Findings.
+- Added strict static anchor/token tests for taxonomy, calibrations, mapping, dedup/evidence/assumptions rules, and report-consumption contract.
+- Kept flow stability: ID `source-security-review` unchanged, same stage IDs/order, no runtime flow execution.
+- Preserved all guardrails (`read-only first`, `no .env access`, `no secrets`, `no exploit execution`, `no external target testing`, `no destructive actions`, `no MCP credential mutation`, `no autonomous mode`, `no edits by default`, `OpenCode-first`, `CLI debug/plumbing only`, `agent.bitsentry.permission.edit=deny`).
+
+### Phase 7.4B Security Findings/Report Fixtures & Golden Contracts (OpenCode-only)
+
+- Added safe synthetic docs structure for source-security-review contracts:
+  - `assets/docs/security/examples/findings-example.md`
+  - `assets/docs/security/examples/report-example.md`
+  - `assets/docs/security/fixtures/findings-golden.md`
+  - `assets/docs/security/fixtures/report-golden.md`
+  - `assets/docs/security/README.md`
+- Added static contract tests validating:
+  - fixture/example presence,
+  - minimum finding token coverage in docs fixtures,
+  - severity coverage in `findings-golden` (Critical/High/Medium/Low/Informational),
+  - confidence enum presence (High/Medium/Low),
+  - taxonomy usage examples,
+  - deduplication/evidence-grouping/assumptions-limitations anchors,
+  - required report section order in `report-golden`.
+- Preserved flow/runtime stability: no changes to `source-security-review` flow identity, stages, runtime execution, route decision, schema, or registry.
+- Preserved all guardrails for docs/examples (`read-only first`, no `.env`/secrets, no exploit/live-target behavior, no destructive actions, no MCP credential mutation, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`).
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |
