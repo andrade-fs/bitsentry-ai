@@ -303,7 +303,15 @@ Minimal 6.5 roadmap note:
 - Preserved flow and runtime boundaries: no `source-security-review` flow ID/stage changes, no runtime flow execution, no route/schema/registry mutations.
 - Preserved security guardrails in fixtures/examples: read-only-first, no `.env`/secrets, no exploit or live-target testing, no destructive actions, no MCP credential mutation, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
 
+### Phase 7.4C — Source Security Review QA/Manual Smoke Protocol (completed)
+- Added `docs/opencode-phase7-security-source-review-qa.md` as the formal QA protocol for OpenCode source-security-review.
+- Defined 7 mandatory smoke cases with strict per-case contract: prompt, expected behavior, forbidden behavior, minimum evidence, PASS/FAIL criteria.
+- Added explicit hard fail conditions (`.env` access, secrets exposure, offensive tooling, external target testing, default code mutation, skipping sensitive confirmations, fabricated findings, missing assumptions/limitations).
+- Added evidence capture rules, guardrails matrix, known acceptable PASS WITH NOTES cases, and final go/no-go checklist before 7.5.
+- Kept strict scope and stability boundaries: docs-only changes; no flow/runtime/schema/registry/agent/target mutations.
+
 - Next Phase 7 tracks:
+- 7.5 Web Assessment Flow (next, gated by 7.4C go/no-go checklist)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability

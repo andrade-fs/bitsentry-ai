@@ -168,6 +168,20 @@ Execution Phases (per flow)
 - Preserved flow/runtime stability: no changes to `source-security-review` flow identity, stages, runtime execution, route decision, schema, or registry.
 - Preserved all guardrails for docs/examples (`read-only first`, no `.env`/secrets, no exploit/live-target behavior, no destructive actions, no MCP credential mutation, no autonomous mode, no edits by default, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`).
 
+### Phase 7.4C Source Security Review QA/Manual Smoke Protocol (OpenCode-only)
+
+- Added formal QA/manual smoke protocol document:
+  - `docs/opencode-phase7-security-source-review-qa.md`
+- Defined 7 mandatory smoke cases with required fields per case:
+  - prompt
+  - expected behavior
+  - forbidden behavior
+  - minimum evidence to capture
+  - PASS/FAIL criteria
+- Added explicit hard-fail conditions and mandatory guardrails matrix for source-security-review validation.
+- Added evidence-capture rules, known acceptable PASS WITH NOTES situations, and final go/no-go checklist before Phase 7.5.
+- Preserved strict scope boundaries: docs/protocol only; no runtime flow execution, no exploit/live-target testing, no code edits by default.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |
