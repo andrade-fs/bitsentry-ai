@@ -110,6 +110,20 @@ Execution Phases (per flow)
 - Confirmed CLI remains debug/plumbing only and not primary UX.
 - Preserved non-mutation guardrails (`agent.bitsentry.permission.edit=deny`, no flow/skill execution, no autonomous runtime, no MCP credential mutation).
 
+### Phase 7.0 Compact Direct Mode & Agent Token Efficiency (OpenCode-only)
+
+- Updated native OpenCode prompt contract to support **Compact Direct Mode** for direct/atomic/concrete requests with clear intent.
+- Compact Direct Mode now avoids printing full Route Decision Preview and full Capability Preview blocks when they add no value.
+- Full Route Decision Preview remains mandatory for open/ambiguous/exploratory/planning/architecture/security/multi-file/sensitive requests.
+- Sensitive direct requests keep compact output but require brief explicit confirmation before mutation-risk actions.
+- Preserved guardrails and boundaries:
+  - no `.env` or secrets handling
+  - no MCP credential mutation
+  - no runtime activation or flow execution in preview
+  - no persistence/edits in preview
+  - OpenCode-first UX, CLI as debug/plumbing parity
+  - `agent.bitsentry.permission.edit=deny`
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

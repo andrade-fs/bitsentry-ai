@@ -92,3 +92,11 @@ The following guardrails remain explicit and unchanged for the release candidate
 
 - Pass: required documentation, QA cross-linking, guardrail consolidation, roadmap/readme alignment, and final automated test validation are complete.
 - Notes: final release sign-off should include one human-run OpenCode smoke pass using the demo flow above before tagging.
+
+---
+
+## Post-closure follow-up (Phase 7.0)
+
+- Added **Compact Direct Mode & Agent Token Efficiency** contract in OpenCode prompt behavior.
+- Maintained Full Route Decision Preview for open/ambiguous/exploratory/planning/architecture/security/multi-file/sensitive requests.
+- Preserved all release guardrails from Phase 6.6 unchanged.

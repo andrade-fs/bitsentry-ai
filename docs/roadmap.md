@@ -236,7 +236,16 @@ Minimal 6.5 roadmap note:
 ### Next Step
 - Prepare and validate release candidate tag for Phase 6 closure (no new major feature scope).
 
-## Phase 7 — Advanced profiles and model routing (future)
+## Phase 7 — Advanced profiles and model routing (current)
+
+### Phase 7.0 — Compact Direct Mode & Agent Token Efficiency (completed)
+- Added prompt-level contract to use Compact Direct Mode for direct/atomic/concrete/already-intentional requests.
+- Kept Full Route Decision Preview mandatory for open/ambiguous/exploratory/planning/architecture/security/multi-file/sensitive requests.
+- Added explicit compact+confirmation behavior for direct but sensitive/remote/destructive/ambiguous requests.
+- Added anti-regression tests for Compact Direct Mode vs Full Preview triggers.
+- Preserved non-mutation and security guardrails (no secrets/.env access, no MCP credential mutation, no runtime/flow execution in preview, no preview persistence/edits, OpenCode-first, CLI debug/plumbing only).
+
+- Next Phase 7 tracks:
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability

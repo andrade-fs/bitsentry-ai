@@ -5,6 +5,25 @@ Status: **PASS WITH NOTES**
 Related closure doc:
 - `docs/opencode-phase6-6-release-stabilization.md`
 
+## Phase 7.0 Compact Direct Mode & Agent Token Efficiency QA
+
+Status: **PASS**
+
+- Confirmed prompt contract now distinguishes:
+  - **Full Preview mode** for open/ambiguous/exploratory/planning/architecture/security/multi-file/sensitive requests.
+  - **Compact Direct Mode** for direct/atomic/concrete/already-intentional requests.
+- Confirmed Compact Direct Mode explicitly avoids full Route Decision Preview and full Capability Preview blocks when low value.
+- Confirmed direct-but-sensitive/remote/destructive/ambiguous requests require brief explicit confirmation.
+- Confirmed guardrails remain preserved:
+  - no `.env`/secret access
+  - no MCP credential mutation
+  - no runtime activation
+  - no flow execution in preview
+  - no persistence in preview
+  - no edits in preview
+  - OpenCode-first positioning and CLI debug/plumbing parity
+  - `agent.bitsentry.permission.edit=deny`
+
 ## Phase 6.4 MCP Readiness & Validation QA
 
 Status: **PASS**

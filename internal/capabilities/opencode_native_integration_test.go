@@ -498,6 +498,39 @@ func TestBitsentryAgentPrompt_OpenCodeFirstRoutePreviewContract(t *testing.T) {
 	}
 }
 
+func TestBitsentryAgentPrompt_CompactDirectModeContractPresent(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"compact direct mode & agent token efficiency",
+		"for direct/atomic/concrete/already-intentional requests with clear implicit intent",
+		"without full route decision preview table",
+		"without full capability preview table",
+		"compact direct mode does not remove internal reasoning quality",
+		"for direct requests that are sensitive/remote/destructive/ambiguous",
+		"require a brief explicit confirmation",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected compact direct mode token %q", token)
+		}
+	}
+}
+
+func TestBitsentryAgentPrompt_FullPreviewKeptForOpenEndedAndSensitiveScopes(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"for open/ambiguous/exploratory/strategic/planning/architecture/security/multi-file/sensitive requests",
+		"first visible response must be a full route decision preview",
+		"full preview trigger classes: open, ambiguous, exploratory, planning, architecture, security/risk, multi-file change, sensitive/high-impact operations",
+		"the route decision preview template is mandatory when full preview applies",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected full-preview trigger token %q", token)
+		}
+	}
+}
+
 func TestBitsentryAgentPrompt_DoesNotPresentCLIAsPrimaryUX(t *testing.T) {
 	prompt := strings.ToLower(buildBitsentryAgentPrompt())
 	forbidden := []string{
