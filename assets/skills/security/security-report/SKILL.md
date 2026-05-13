@@ -44,9 +44,22 @@ The final report MUST include these exact section names (in English):
 - `findings.md` normalized findings.
 - Prior stage artifacts (`scope.md`, `map.md`, `review.md`).
 
+## Taxonomy Consumption Contract
+`security-report` MUST consume the official findings taxonomy from `security-findings`.
+
+### Risk Summary (Required Consumption)
+- Aggregate by Category (official enum), Severity, and Confidence.
+- Show Impact × Likelihood rationale anchors for top risks.
+
+### Findings (Required Consumption)
+- Preserve each finding Category exactly as provided by `security-findings` taxonomy.
+- Preserve Severity and Confidence enums exactly.
+- Preserve deduplicated canonical finding IDs and grouped evidence references.
+- Preserve assumptions/limitations relevant to exploitability confidence.
+
 ## Workflow
 1. Summarize review scope, method, and guardrail compliance.
-2. Present severity distribution and key findings.
+2. Present severity distribution, category distribution, and key findings.
 3. Validate all required report sections by exact heading token before finalizing.
 4. Document residual risks and assumptions.
 5. Recommend remediation order and owner-ready next actions.
@@ -88,6 +101,7 @@ Final source security review report generated with risk-ranked findings and reme
 **Next Recommended**: `support/issue-creation` or close.
 
 ## Handoffs
+- explicit handoff consumed: `security-findings -> security-report`.
 - to `support/issue-creation` for remediation issue drafting.
 - to `support/judgment-day` for adversarial review on critical risk.
 
@@ -96,5 +110,7 @@ Final source security review report generated with risk-ranked findings and reme
 - [ ] Includes all required report sections with exact English names.
 - [ ] Findings section consumes the minimum finding contract from `security-findings`.
 - [ ] Explicit handoff consumed from `security-findings -> security-report`.
+- [ ] Risk Summary consumes official taxonomy categories and Severity/Confidence distributions.
+- [ ] Findings preserve category/severity/confidence enums from the findings contract.
 - [ ] Residual risks are documented.
 - [ ] Recommendations are prioritized and actionable.
