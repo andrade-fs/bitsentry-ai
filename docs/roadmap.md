@@ -406,7 +406,7 @@ Minimal 6.5 roadmap note:
 - Preserved strict boundaries: no stubs/runtime/flow execution/network requests/crawler/tooling live ops/exploits/new target-agent/credential mutation/refactor grande.
 
 - Next Phase 7 tracks:
-- 7.7B offline Go stubs (next)
+- 7.7B offline Go stubs
 - 7.8 Passive Discovery MVP
 - 7.9 Controlled Crawler MVP
 - 7.10 Safe Check Modules
@@ -415,3 +415,14 @@ Minimal 6.5 roadmap note:
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability
 - Normalize flow manifests for dynamic discovery/routing readiness
+
+### Phase 7.7B — Controlled Web Request Adapter Offline Contracts (completed)
+- Implemented offline-only Go contracts in `internal/securityweb/`:
+  - adapter interface (`Plan`, `Validate`, `RenderEvidenceTemplate`, `RedactEvidence`)
+  - policy evaluator contract and baseline enforcement rules
+  - dry-run planner, redactor, evidence recorder, and contract error model
+- Enforced 7.7B safety boundary in implementation and docs:
+  - **sin network execution**
+  - no `ExecuteApproved` method
+  - no runtime flow/network/tool execution
+- Added focused tests for policy denies, redaction, evidence contract fields, and static import safety (`net/http`, `os/exec` denied in package).

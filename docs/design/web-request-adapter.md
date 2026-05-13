@@ -152,3 +152,58 @@ Template:
 - 7.8 Passive Discovery MVP
 - 7.9 Controlled Crawler MVP
 - 7.10 Safe Check Modules
+
+### 12) 7.7B implemented contracts mapping
+
+This section maps the canonical 7.7 design into an **offline-only Go contract package**:
+
+- Package: `internal/securityweb/`
+- Runtime boundary: **sin network execution** (no net/http client, no crawler, no runtime flow execution)
+
+Design component -> 7.7B type/contract mapping:
+
+- `ControlledWebRequestAdapter` -> interface with only:
+  - `Plan(...)`
+  - `Validate(...)`
+  - `RenderEvidenceTemplate(...)`
+  - `RedactEvidence(...)`
+- `PolicyEvaluator` -> `DefaultPolicyEvaluator` + `PolicyDecision` + `PolicyViolation`
+- `DryRunPlanner` -> `DefaultDryRunPlanner` (deterministic plan shaping only)
+- `EvidenceRecorder` -> `DefaultEvidenceRecorder` (template rendering + redaction flow)
+- `Redactor` -> `DefaultRedactor` (headers/query-sensitive fields redaction)
+
+Core offline domain types implemented:
+
+- `AssessmentSessionContext`
+- `PlannedRequest`
+- `PolicyDecision`
+- `PolicyViolation`
+- `EvidenceEntry`
+- `ExecutionMode`
+- `Intensity`
+- `ToolClass`
+- `RequestMethod`
+
+Policy rules implemented in `policy.go` (contract-only enforcement):
+
+- `planning_only` never executes
+- `dry_run` never executes
+- `execute_approved` requires explicit approval
+- `retest` requires existing finding/check linkage
+- target must be in scope
+- scheme must be `http`/`https`
+- `GET`/`HEAD` allowed-by-default posture maintained via deny list for unsafe methods
+- `POST` denied by default
+- unsafe/destructive methods denied by default
+- rate limit, request budget, timeout, max response size required for executable modes
+- stop conditions required
+- evidence plan required
+- prohibited tool class denied
+- out-of-scope redirects denied by default
+- no secrets in evidence/logs through redaction contracts
+
+Explicitly out of 7.7B scope:
+
+- no `ExecuteApproved`
+- no network execution
+- no live target testing/tooling execution

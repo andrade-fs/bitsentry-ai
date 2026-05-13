@@ -277,6 +277,28 @@ Execution Phases (per flow)
   - `internal/capabilities/security_contracts_test.go`
   - anchors include execution modes (`planning_only`, `dry_run`, `execute_approved`, `retest`), components (`PolicyEvaluator`, `DryRunPlanner`, `EvidenceRecorder`, `Redactor`), and critical guardrails (scope, approval, GET/HEAD default, redaction/no secrets in logs, redirect deny, request budget/rate limits/timeout/max response size/stop conditions).
 
+### Phase 7.7B Controlled Web Request Adapter Offline Go Contracts (implemented)
+
+- Added offline contract package:
+  - `internal/securityweb/types.go`
+  - `internal/securityweb/policy.go`
+  - `internal/securityweb/dryrun.go`
+  - `internal/securityweb/redaction.go`
+  - `internal/securityweb/evidence.go`
+  - `internal/securityweb/errors.go`
+- Added contract tests in `internal/securityweb/*_test.go` covering:
+  - execution-mode policy gates,
+  - scope/scheme/method/tool-class denies,
+  - executable-mode safety requirements,
+  - evidence template required fields,
+  - sensitive header/query redaction,
+  - static import guards (no `net/http`, no `os/exec`).
+- Added design mapping section `7.7B implemented contracts mapping` in `docs/design/web-request-adapter.md` with explicit boundary: **sin network execution**.
+- Preserved strict scope boundaries:
+  - no network/runtime/flow execution,
+  - no live target testing,
+  - no execute method introduced in 7.7B.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

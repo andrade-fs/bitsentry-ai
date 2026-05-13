@@ -32,6 +32,20 @@ func TestSecurityFindingsSkillMinimumContractTokens(t *testing.T) {
 	}
 }
 
+func TestWebRequestAdapterDesignHas77BImplementedMappingAnchor(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/web-request-adapter.md")
+	required := []string{
+		"### 12) 7.7B implemented contracts mapping",
+		"internal/securityweb/",
+		"sin network execution",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-request-adapter design missing 7.7B mapping token %q", token)
+		}
+	}
+}
+
 func TestSecurityFindingsSkillSeverityAndConfidenceEnums(t *testing.T) {
 	content := mustReadText(t, "../../assets/skills/security/security-findings/SKILL.md")
 
