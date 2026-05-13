@@ -733,3 +733,64 @@ func TestWebRequestAdapterPhase77ContractualSafetyAnchors(t *testing.T) {
 		}
 	}
 }
+
+func TestControlledHTTPExecutorPhase78BContractAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/controlled-http-executor.md")
+
+	required := []string{
+		"Controlled HTTP Executor",
+		"execute_approved only",
+		"per-request approval",
+		"approval_id",
+		"approved_request_id",
+		"approved_method",
+		"approved_url",
+		"expires_at",
+		"approval_text_or_hash",
+		"follow_redirects=false",
+		"no redirects followed by default",
+		"out-of-scope redirect requires new approval",
+		"GET/HEAD only first MVP",
+		"one request at a time",
+		"no POST",
+		"no payloads",
+		"no crawler",
+		"no scanner",
+		"no background execution",
+		"body_preview_redacted",
+		"headers_redacted",
+		"no full response stored by default",
+		"FakeTransport only for future tests",
+		"no real network in 7.8B",
+	}
+
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("controlled-http-executor design missing 7.8B contract token %q", token)
+		}
+	}
+}
+
+
+func TestControlledHTTPExecutorPhase78DHardeningAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/controlled-http-executor.md")
+	required := []string{
+		"7.8D Hardening Addendum",
+		"approval_scope_missing",
+		"approval_execution_mode_missing",
+		"approval_tool_class_missing",
+		"approval_intensity_missing",
+		"approval_actor_missing",
+		"approval_proof_missing",
+		"approval_exceeds_context_limits",
+		"redirect_location_invalid",
+		"redirect_out_of_scope",
+		"request_ref -> approval_id -> evidence_id -> execution_result",
+		"no real network in 7.8D",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("controlled-http-executor design missing 7.8D hardening token %q", token)
+		}
+	}
+}

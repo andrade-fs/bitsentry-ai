@@ -361,6 +361,23 @@ Execution Phases (per flow)
   - no `net/http` import,
   - no `os/exec` import.
 
+
+
+### Phase 7.8D Executor Approval, Limits & Traceability Hardening (offline)
+
+- Hardened offline executor contracts for approval, limits, redirect policy, and traceability.
+- Added strict approval requirements and mismatch checks:
+  - `approval_id`, `approved_by`, `approval_text_or_hash`, `approved_scope_ref`, `approved_execution_mode`, `approved_tool_class`, `approved_intensity`, `expires_at`.
+- Added limit hard requirements for `execute_approved`:
+  - request budget, rate limit, timeout, max response size, max preview size, stop conditions.
+- Added approval-vs-context guardrails (`approval_exceeds_context_limits`).
+- Kept redirect hard default:
+  - `follow_redirects=false`,
+  - invalid redirect location denied,
+  - out-of-scope redirect denied.
+- Preserved offline boundaries:
+  - no real network, no `net/http`, no runtime flow execution.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

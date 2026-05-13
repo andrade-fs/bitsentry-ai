@@ -60,6 +60,7 @@ type AssessmentSessionContext struct {
 	RequestBudget         int
 	TimeoutSeconds        int
 	MaxResponseSizeBytes  int64
+	MaxPreviewSizeBytes   int64
 	StopConditions        []string
 	EvidencePlanRef       string
 	AllowedToolClasses    []ToolClass
@@ -163,24 +164,39 @@ type ExecutionApproval struct {
 }
 
 type ExecutionResult struct {
-	RequestID            string
-	EvidenceID           string
-	Method               RequestMethod
-	URL                  string
-	StatusCode           int
-	FinalURL             string
-	RedirectObserved     bool
-	RedirectLocation     string
-	HeadersRedacted      map[string]string
-	BodyPreviewRedacted  string
-	BodyTruncated        bool
-	ResponseSize         int64
-	MaxPreviewSize       int64
-	PolicyDecision       string
-	Violations           []PolicyViolation
-	LinkedFindingIDs     []string
-	FollowRedirects      bool
+	RequestID             string
+	EvidenceID            string
+	ApprovalID            string
+	ApprovedBy            string
+	ApprovalExpiresAt     time.Time
+	Method                RequestMethod
+	URL                   string
+	StatusCode            int
+	FinalURL              string
+	RedirectObserved      bool
+	RedirectLocation      string
+	HeadersRedacted       map[string]string
+	BodyPreviewRedacted   string
+	BodyTruncated         bool
+	ResponseSize          int64
+	MaxPreviewSize        int64
+	PolicyDecision        string
+	Violations            []PolicyViolation
+	LinkedFindingIDs      []string
+	FollowRedirects       bool
 	SensitiveDataRedacted bool
+	SafetyNotes           []string
+	RedactionsApplied     []string
+}
+
+
+
+type ControlledHTTPExecutor interface {
+	ExecuteApproved(ctx AssessmentSessionContext, req PlannedRequest, approval *ExecutionApproval) ExecutionResult
+}
+
+type HTTPTransport interface {
+	Execute(req PlannedRequest) (FakeTransportResponse, error)
 }
 
 func NewOfflineAdapter(evaluator PolicyEvaluator, planner DryRunPlanner, recorder EvidenceRecorder) *OfflineAdapter {

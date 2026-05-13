@@ -252,3 +252,6 @@ Phase 7.8B adds a dedicated design-only contract document:
 - `ExecutionResult` metadata contract including `evidence_id`, `body_truncated`, `body_preview_redacted`, `response_size`, `max_preview_size`
 
 Boundary remains strict: no real network, no `net/http`, no runtime flow execution.
+
+
+- See also: `docs/design/controlled-http-executor.md` for the dedicated execution-layer design and 7.8D hardening constraints.

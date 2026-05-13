@@ -484,3 +484,13 @@ Minimal 6.5 roadmap note:
   - sensitive header/body/query redaction coverage
   - evidence linkage via `EvidenceID`
 - Added/updated tests in `internal/securityweb/executor_test.go` and validated static guardrails (no `net/http`, no `os/exec` imports).
+
+
+### Phase 7.8D — Executor Approval, Limits & Traceability Hardening (completed)
+- Hardened offline executor approval model with strict required fields and mismatch denials.
+- Added traceability fields in execution result: `ApprovalID`, `ApprovedBy`, `ApprovalExpiresAt`.
+- Added hard-required limits for execute-approved offline path (budget/rate/timeout/max sizes/stop conditions).
+- Added `approval_exceeds_context_limits` guard when approval is more permissive than context.
+- Added redirect hardening with explicit invalid redirect denial (`redirect_location_invalid`) and out-of-scope denial (`redirect_out_of_scope`).
+- Expanded redaction edge-case handling and metadata (`RedactionsApplied`, safety notes, truncated preview metadata).
+- Kept strict offline boundary: no real network, no runtime execution, no live target interaction.

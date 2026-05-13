@@ -26,9 +26,15 @@ func (r DefaultRedactor) RedactURL(rawURL string) string {
 		return rawURL
 	}
 	q := u.Query()
-	for _, key := range []string{"token", "access_token", "api_key", "password", "secret"} {
-		if q.Has(key) {
-			q.Set(key, "[REDACTED]")
+	sensitive := map[string]struct{}{
+		"token": {}, "access_token": {}, "api_key": {}, "password": {}, "secret": {},
+	}
+	for k, vals := range q {
+		if _, ok := sensitive[strings.ToLower(k)]; ok {
+			for i := range vals {
+				vals[i] = "[REDACTED]"
+			}
+			q[k] = vals
 		}
 	}
 	u.RawQuery = q.Encode()
