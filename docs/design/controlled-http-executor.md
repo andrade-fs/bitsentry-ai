@@ -224,3 +224,24 @@ This phase remains **offline-only** and adds strict hardening rules before any f
 - approval_intensity_missing
 - approval_actor_missing
 - approval_proof_missing
+
+## 14) 7.9C Executor Transport Injection (implemented)
+
+Phase 7.9C keeps architecture boundaries intact while enabling runtime transport injection:
+
+- `OfflineControlledExecutor` now depends on `securityweb.HTTPTransport` interface directly.
+- **PEP remains unique in executor**:
+  - approval/policy denies happen before transport execution,
+  - transport remains policy-agnostic I/O only.
+- Approved `GET/HEAD` requests can execute through injected real transport (e.g. `securitywebhttp.Transport`) in `httptest`-only tests.
+- Deny paths guarantee **transport is not invoked**:
+  - invalid approval,
+  - denied method (`POST`),
+  - out-of-scope target.
+- Redirect behavior preserved:
+  - observed and recorded,
+  - not followed by default.
+- Evidence chain remains explicit:
+  - `request_ref -> approval_id -> evidence_id` in `ExecutionResult`.
+- `BodyTruncated` semantics aligned:
+  - executor now preserves truncation when either preview cap truncates OR the underlying transport already marks `BodyTruncated=true`.

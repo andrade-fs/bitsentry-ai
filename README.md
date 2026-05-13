@@ -414,6 +414,19 @@ Execution Phases (per flow)
   - normalized safe transport errors.
 - Added test coverage using `httptest` only (GET/HEAD, redirect behavior, body capping/truncation, timeout) and static import guards forbidding `os/exec`/`syscall` in `internal/securitywebhttp`.
 
+### Phase 7.9C Executor Transport Injection + PEP Guardrails (implemented)
+
+- Updated `OfflineControlledExecutor` to accept injected `securityweb.HTTPTransport` (not fake-only constructor typing).
+- Preserved unique Policy Enforcement Point in executor:
+  - approval/policy denies happen before transport,
+  - transport remains policy-agnostic.
+- Added deny-path tests asserting transport is **not called** on:
+  - invalid approval,
+  - POST,
+  - out-of-scope target.
+- Added integration coverage (httptest-only) proving approved GET/HEAD can execute through injected real `internal/securitywebhttp` transport.
+- Aligned truncation semantics: executor preserves `BodyTruncated` when marked by either preview cap or transport.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

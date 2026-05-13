@@ -537,3 +537,12 @@ Minimal 6.5 roadmap note:
   - normalized safe transport errors.
 - Added `httptest`-only test coverage for GET/HEAD, redirect no-follow/location capture, preview cap/truncation, timeout enforcement, and policy-agnostic transport behavior.
 - Added static import guard for `internal/securitywebhttp` forbidding `os/exec` and `syscall`.
+
+### Phase 7.9C — Executor transport injection with strict PEP guardrails (completed)
+- `OfflineControlledExecutor` constructor now receives `securityweb.HTTPTransport` interface, enabling injection of real transport implementations.
+- PEP remains unique in `internal/securityweb`:
+  - deny decisions happen before transport invocation,
+  - `internal/securitywebhttp` keeps zero policy logic.
+- Added deny-path tests confirming transport is not invoked for invalid approval, POST deny, and out-of-scope target deny.
+- Added httptest-only integration coverage: approved GET/HEAD through injected real transport.
+- Aligned truncation semantics: `ExecutionResult.BodyTruncated` is true when executor cap truncates OR transport pre-truncation flag is true.

@@ -18,7 +18,7 @@ type OfflineControlledExecutor struct {
 	usedByScope map[string]int
 }
 
-func NewOfflineControlledExecutor(transport *FakeTransport, redactor Redactor) *OfflineControlledExecutor {
+func NewOfflineControlledExecutor(transport HTTPTransport, redactor Redactor) *OfflineControlledExecutor {
 	return &OfflineControlledExecutor{
 		transport:   transport,
 		redactor:    redactor,
@@ -64,17 +64,24 @@ func (e *OfflineControlledExecutor) ExecuteApproved(ctx AssessmentSessionContext
 	if req.Method != MethodGET && req.Method != MethodHEAD {
 		return denyResult(result, violation("approval_post_denied", ErrMethodDenied, "method"))
 	}
+	host, hErr := requestHost(req.URL)
+	if hErr != nil {
+		return denyResult(result, violation("request_url_invalid", ErrSchemeDenied, "url"))
+	}
+	if !inScope(host, ctx.InScopeTargets) {
+		return denyResult(result, violation("target_out_of_scope", ErrScopeViolation, "url"))
+	}
 
 	if e.budgetExceeded(ctx.ScopeRef, effectiveBudget(ctx, approval)) {
 		return denyResult(result, violation("limiter_budget_exceeded", ErrLimiterBudgetExceeded, "request_budget"))
 	}
 
 	if e.transport == nil {
-		return denyResult(result, PolicyViolation{Code: "approval_transport_missing_fake_response", Reason: "fake transport is required", Field: "transport"})
+		return denyResult(result, PolicyViolation{Code: "approval_transport_missing_response", Reason: "transport is required", Field: "transport"})
 	}
 	resp, err := e.transport.Execute(req)
 	if err != nil {
-		return denyResult(result, PolicyViolation{Code: "approval_transport_missing_fake_response", Reason: err.Error(), Field: "transport"})
+		return denyResult(result, PolicyViolation{Code: "approval_transport_missing_response", Reason: err.Error(), Field: "transport"})
 	}
 
 	if resp.RedirectObserved {
@@ -100,7 +107,7 @@ func (e *OfflineControlledExecutor) ExecuteApproved(ctx AssessmentSessionContext
 	preview, trunc := buildPreview(resp.Body, ctx.MaxPreviewSizeBytes)
 	redPreview, applied := redactBodyPreviewConservative(preview)
 	result.BodyPreviewRedacted = redPreview
-	result.BodyTruncated = trunc
+	result.BodyTruncated = trunc || resp.BodyTruncated
 	result.SensitiveDataRedacted = true
 	result.RedactionsApplied = applied
 	result.SafetyNotes = append(result.SafetyNotes, "no full response stored by default")
@@ -279,6 +286,18 @@ func safeRedirectHost(raw string) (string, error) {
 		return "", fmt.Errorf("empty redirect host")
 	}
 	return strings.ToLower(h), nil
+}
+
+func requestHost(raw string) (string, error) {
+	u, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil {
+		return "", fmt.Errorf("invalid url")
+	}
+	host := strings.ToLower(strings.TrimSpace(u.Hostname()))
+	if host == "" {
+		return "", fmt.Errorf("invalid url")
+	}
+	return host, nil
 }
 
 func firstNonEmpty(a, b string) string {

@@ -2,9 +2,37 @@ package securityweb
 
 import (
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
+
+type spyTransport struct {
+	mu      sync.Mutex
+	calls   int
+	resp    FakeTransportResponse
+	err     error
+	onCall  func()
+}
+
+func (s *spyTransport) Execute(req PlannedRequest) (FakeTransportResponse, error) {
+	s.mu.Lock()
+	s.calls++
+	s.mu.Unlock()
+	if s.onCall != nil {
+		s.onCall()
+	}
+	if s.err != nil {
+		return FakeTransportResponse{}, s.err
+	}
+	return s.resp, nil
+}
+
+func (s *spyTransport) CallCount() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.calls
+}
 
 func validApproval(req PlannedRequest) *ExecutionApproval {
 	return &ExecutionApproval{
@@ -185,9 +213,46 @@ func TestPOSTDenied(t *testing.T) {
 	req := baseRequest()
 	req.Method = MethodPOST
 	approval := validApproval(req)
-	res := NewOfflineControlledExecutor(NewFakeTransport(), DefaultRedactor{}).ExecuteApproved(ctx, req, approval)
+	tr := &spyTransport{}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, approval)
 	if !hasViolation(res.Violations, "approval_post_denied") {
 		t.Fatalf("expected approval_post_denied")
+	}
+	if tr.CallCount() != 0 {
+		t.Fatalf("transport should not execute on denied POST")
+	}
+}
+
+func TestInvalidApprovalNeverReachesTransport(t *testing.T) {
+	ctx := baseContext()
+	req := baseRequest()
+	tr := &spyTransport{}
+	ex := NewOfflineControlledExecutor(tr, DefaultRedactor{})
+	a := validApproval(req)
+	a.ApprovedURL = "https://example.com/other"
+	res := ex.ExecuteApproved(ctx, req, a)
+	if !hasViolation(res.Violations, "approval_url_mismatch") {
+		t.Fatalf("expected approval_url_mismatch")
+	}
+	if tr.CallCount() != 0 {
+		t.Fatalf("transport should not execute for invalid approval")
+	}
+}
+
+func TestOutOfScopeRedirectDeniedBeforeTransport(t *testing.T) {
+	ctx := baseContext()
+	ctx.InScopeTargets = []string{"example.com"}
+	req := baseRequest()
+	req.URL = "https://evil.example/path"
+	approval := validApproval(req)
+	approval.ApprovedURL = req.URL
+	tr := &spyTransport{}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, approval)
+	if !hasViolation(res.Violations, "target_out_of_scope") {
+		t.Fatalf("expected target_out_of_scope")
+	}
+	if tr.CallCount() != 0 {
+		t.Fatalf("transport should not execute for out-of-scope request")
 	}
 }
 
@@ -241,6 +306,17 @@ func TestMaxResponseAndPreviewMetadata(t *testing.T) {
 	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, validApproval(req))
 	if !res.BodyTruncated || res.BodyPreviewRedacted != "12345" || res.ResponseSize != 9 || res.MaxPreviewSize != 5 {
 		t.Fatalf("expected truncated preview with metadata")
+	}
+}
+
+func TestExecutorPreservesTransportTruncatedSignal(t *testing.T) {
+	ctx := baseContext()
+	ctx.MaxPreviewSizeBytes = 50
+	req := baseRequest()
+	tr := &spyTransport{resp: FakeTransportResponse{StatusCode: 200, Body: "short", BodyTruncated: true}}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, validApproval(req))
+	if !res.BodyTruncated {
+		t.Fatalf("expected BodyTruncated=true when transport marks truncation")
 	}
 }
 

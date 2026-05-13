@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -169,5 +170,80 @@ func TestTransportErrorsNormalizedSafely(t *testing.T) {
 	}
 	if !strings.Contains(msg, fmt.Sprintf("%v", ErrTransport)) {
 		t.Fatalf("expected normalized transport error, got: %s", msg)
+	}
+}
+
+func TestExecutorWithInjectedRealTransportGETAndHEAD(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("ok-get"))
+		case http.MethodHead:
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	}))
+	defer ts.Close()
+
+	tr, err := New(200*time.Millisecond, 1024)
+	if err != nil {
+		t.Fatalf("new transport: %v", err)
+	}
+	exec := securityweb.NewOfflineControlledExecutor(tr, securityweb.DefaultRedactor{})
+
+	ctx := assessmentCtx(ts.URL)
+
+	getReq := securityweb.PlannedRequest{RequestRef: "req-get", URL: ts.URL, Method: securityweb.MethodGET, ToolClass: securityweb.ToolClassManual}
+	getRes := exec.ExecuteApproved(ctx, getReq, testApproval(ctx, getReq))
+	if getRes.PolicyDecision != "allow" || getRes.StatusCode != http.StatusOK {
+		t.Fatalf("expected approved GET allow via injected real transport")
+	}
+
+	headReq := securityweb.PlannedRequest{RequestRef: "req-head", URL: ts.URL, Method: securityweb.MethodHEAD, ToolClass: securityweb.ToolClassManual}
+	headRes := exec.ExecuteApproved(ctx, headReq, testApproval(ctx, headReq))
+	if headRes.PolicyDecision != "allow" || headRes.StatusCode != http.StatusNoContent {
+		t.Fatalf("expected approved HEAD allow via injected real transport")
+	}
+}
+
+func assessmentCtx(rawURL string) securityweb.AssessmentSessionContext {
+	u, _ := url.Parse(rawURL)
+	host := u.Hostname()
+	return securityweb.AssessmentSessionContext{
+		SessionID:            "s-1",
+		ScopeRef:             "scope-1",
+		InScopeTargets:       []string{host},
+		ExecutionMode:        securityweb.ExecutionModeExecuteApproved,
+		Intensity:            securityweb.IntensityLow,
+		RateLimitPerMinute:   10,
+		RequestBudget:        2,
+		TimeoutSeconds:       5,
+		MaxResponseSizeBytes: 1024,
+		MaxPreviewSizeBytes:  256,
+		StopConditions:       []string{"max-errors"},
+	}
+}
+
+func testApproval(ctx securityweb.AssessmentSessionContext, req securityweb.PlannedRequest) *securityweb.ExecutionApproval {
+	return &securityweb.ExecutionApproval{
+		ApprovalID:            "ap-1",
+		ApprovedRequestID:     req.RequestRef,
+		ApprovedMethod:        req.Method,
+		ApprovedURL:           req.URL,
+		ApprovedScopeRef:      ctx.ScopeRef,
+		ApprovedExecutionMode: securityweb.ExecutionModeExecuteApproved,
+		ApprovedToolClass:     req.ToolClass,
+		ApprovedIntensity:     ctx.Intensity,
+		ApprovedAt:            time.Now().Add(-1 * time.Minute),
+		ApprovedBy:            "reviewer",
+		ExpiresAt:             time.Now().Add(10 * time.Minute),
+		TTLSeconds:            600,
+		ApprovalTextOrHash:    "hash",
+		MaxRequests:           2,
+		MaxDurationSeconds:    10,
+		RateLimitPerMinute:    10,
+		StopConditions:        []string{"max-errors"},
 	}
 }
