@@ -345,8 +345,26 @@ Minimal 6.5 roadmap note:
 - Added static contract tests in `internal/capabilities/security_contracts_test.go` for mandatory anchors, tool classes, canonical reference, and required per-skill semantics tokens.
 - Preserved flow stability: `assets/flows/web-assessment.yaml` left intact (no gate changes, no stage ID/order/graph changes).
 
+### Phase 7.5D — Web Assessment Report & Evidence Contract (completed)
+- Scope bounded to skills + fixtures/examples + static tests + docs (contract-first only).
+- Added explicit Evidence Contract anchors in `assets/skills/security/web-assessment-findings/SKILL.md`.
+- Added explicit Report Contract anchors in `assets/skills/security/web-assessment-report/SKILL.md`.
+- Added explicit traceability anchor in both skills:
+  - `authorization → scope → request/evidence → finding → report`.
+- Added web-assessment docs artifacts:
+  - `assets/docs/security/examples/web-assessment-report-example.md`
+  - `assets/docs/security/fixtures/web-assessment-report-golden.md`
+  - `assets/docs/security/fixtures/web-assessment-evidence-golden.md`
+- Updated `assets/docs/security/README.md` with dedicated `web-assessment contracts` section:
+  - distinction vs `source-security-review` fixtures,
+  - golden fixture listing,
+  - alignment rules between skills and fixtures,
+  - explicit prohibition of secrets/offensive payloads/live targets.
+- Added strict static tests in `internal/capabilities/security_contracts_test.go` for artifact existence, exact anchor tokens, report section ordering, traceability, and guardrails.
+- Preserved boundaries: no runtime/flow execution/tooling operation/live testing, no exploits/DoS/credential attacks, no secrets exposure, no MCP credential mutation, no autonomous mode.
+
 - Next Phase 7 tracks:
-- 7.5D Web Assessment routing/classifier hardening and gated UX handshake (next)
+- 7.5E Web Assessment routing/classifier hardening and gated UX handshake (next)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability

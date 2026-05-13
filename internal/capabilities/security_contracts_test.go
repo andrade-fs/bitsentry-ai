@@ -428,3 +428,147 @@ func TestWebAssessmentSkillsRequiredSemanticsAnchors(t *testing.T) {
 		}
 	}
 }
+
+func TestWebAssessmentDocsArtifactsExist(t *testing.T) {
+	paths := []string{
+		"../../assets/docs/security/examples/web-assessment-report-example.md",
+		"../../assets/docs/security/fixtures/web-assessment-report-golden.md",
+		"../../assets/docs/security/fixtures/web-assessment-evidence-golden.md",
+	}
+
+	for _, p := range paths {
+		if _, err := os.Stat(p); err != nil {
+			t.Fatalf("expected web-assessment docs artifact %s: %v", p, err)
+		}
+	}
+}
+
+func TestWebAssessmentEvidenceContractAnchors(t *testing.T) {
+	content := mustReadText(t, "../../assets/docs/security/fixtures/web-assessment-evidence-golden.md")
+	required := []string{
+		"- Evidence ID:",
+		"- Source:",
+		"- Target / URL:",
+		"- In scope confirmation:",
+		"- Authorization reference:",
+		"- Request method:",
+		"- Request purpose:",
+		"- Tool class:",
+		"- Intensity:",
+		"- Timestamp / testing window:",
+		"- Result summary:",
+		"- Relevant headers / status / behavior:",
+		"- Safety notes:",
+		"- Redactions:",
+		"- Linked finding IDs:",
+		"- Limitations:",
+	}
+
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-assessment evidence fixture missing required token %q", token)
+		}
+	}
+}
+
+func TestWebAssessmentReportContractAnchorsAndOrder(t *testing.T) {
+	content := mustReadText(t, "../../assets/docs/security/fixtures/web-assessment-report-golden.md")
+	sections := []string{
+		"# Title",
+		"## Authorization Summary",
+		"## Scope",
+		"## Out of Scope",
+		"## Methodology",
+		"## Tooling and Intensity",
+		"## Request / Evidence Log",
+		"## Risk Summary",
+		"## Findings",
+		"## Remediation Plan",
+		"## Verification Steps",
+		"## Assumptions and Limitations",
+		"## Next Steps",
+		"## Appendix",
+	}
+
+	last := -1
+	for _, s := range sections {
+		idx := strings.Index(content, s)
+		if idx == -1 {
+			t.Fatalf("web-assessment report golden missing section %q", s)
+		}
+		if idx <= last {
+			t.Fatalf("web-assessment report golden section out of order at %q", s)
+		}
+		last = idx
+	}
+}
+
+func TestWebAssessmentSkillsTraceabilityAnchor(t *testing.T) {
+	trace := "authorization → scope → request/evidence → finding → report"
+	for _, p := range []string{
+		"../../assets/skills/security/web-assessment-findings/SKILL.md",
+		"../../assets/skills/security/web-assessment-report/SKILL.md",
+	} {
+		content := mustReadText(t, p)
+		if !strings.Contains(content, trace) {
+			t.Fatalf("%s missing traceability anchor %q", p, trace)
+		}
+	}
+}
+
+func TestWebAssessmentContractsInSkills(t *testing.T) {
+	findings := mustReadText(t, "../../assets/skills/security/web-assessment-findings/SKILL.md")
+	for _, token := range []string{
+		"## Evidence Contract (minimum, exact anchors)",
+		"- Evidence ID",
+		"- Target / URL",
+		"- Relevant headers / status / behavior",
+		"- Linked finding IDs",
+	} {
+		if !strings.Contains(findings, token) {
+			t.Fatalf("web-assessment-findings missing token %q", token)
+		}
+	}
+
+	report := mustReadText(t, "../../assets/skills/security/web-assessment-report/SKILL.md")
+	for _, token := range []string{
+		"## Report Contract (minimum, exact anchors)",
+		"- Authorization Summary",
+		"- Out of Scope",
+		"- Request / Evidence Log",
+		"- Assumptions and Limitations",
+	} {
+		if !strings.Contains(report, token) {
+			t.Fatalf("web-assessment-report missing token %q", token)
+		}
+	}
+}
+
+func TestWebAssessmentReadmeContractSectionAndGuardrails(t *testing.T) {
+	content := mustReadText(t, "../../assets/docs/security/README.md")
+	for _, token := range []string{
+		"## web-assessment contracts",
+		"source-security-review",
+		"web-assessment-*",
+		"web-assessment-report-golden.md",
+		"web-assessment-evidence-golden.md",
+		"no runtime",
+		"no flow execution",
+		"no tooling operativo",
+		"no target testing vivo",
+		"no exploits",
+		"no DoS/load testing",
+		"no credential attacks",
+		"no secrets exposure",
+		"evidence must redact sensitive data",
+		"no MCP credential mutation",
+		"no autonomous mode",
+		"OpenCode-first",
+		"CLI debug/plumbing only",
+		"agent.bitsentry.permission.edit = deny",
+	} {
+		if !strings.Contains(content, token) {
+			t.Fatalf("security README missing web-assessment contract token %q", token)
+		}
+	}
+}

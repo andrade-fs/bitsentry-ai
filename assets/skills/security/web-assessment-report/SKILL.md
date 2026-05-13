@@ -50,6 +50,25 @@ Semantics:
 4. Define remediation prioritization and ownership hints.
 5. Emit final declarative report contract and closure checklist.
 
+## Report Contract (minimum, exact anchors)
+- Title
+- Authorization Summary
+- Scope
+- Out of Scope
+- Methodology
+- Tooling and Intensity
+- Request / Evidence Log
+- Risk Summary
+- Findings
+- Remediation Plan
+- Verification Steps
+- Assumptions and Limitations
+- Next Steps
+- Appendix
+
+## Traceability Contract
+- authorization → scope → request/evidence → finding → report
+
 ## Outputs
 - `web-assessment-report.md` with final report structure and closure checklist.
 - MUST include explicit reporting of authorization state, testing intensity profile, applied limits, and evidence anchors.

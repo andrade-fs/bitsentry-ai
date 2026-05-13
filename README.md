@@ -227,6 +227,22 @@ Execution Phases (per flow)
 - Added static anchor tests in `internal/capabilities/security_contracts_test.go`; no runtime flow/tool execution added.
 - Kept flow stability: `assets/flows/web-assessment.yaml` unchanged, same stage IDs/order and graph.
 
+### Phase 7.5D Web Assessment Report & Evidence Contract (OpenCode-only)
+
+- Defined contract-first report/evidence anchors for `web-assessment-*` via:
+  - `assets/skills/security/web-assessment-findings/SKILL.md`
+  - `assets/skills/security/web-assessment-report/SKILL.md`
+- Added web-assessment docs artifacts:
+  - `assets/docs/security/examples/web-assessment-report-example.md`
+  - `assets/docs/security/fixtures/web-assessment-report-golden.md`
+  - `assets/docs/security/fixtures/web-assessment-evidence-golden.md`
+- Added strict static tests for:
+  - evidence contract exact anchors,
+  - report contract required sections and order,
+  - explicit traceability anchor `authorization → scope → request/evidence → finding → report`,
+  - `assets/docs/security/README.md` web-assessment contract guidance and guardrails.
+- Preserved non-operational boundaries: no runtime, no flow execution, no tooling operation, no live-target testing, no exploits/DoS/credential attacks/destructive actions, no secrets exposure, no MCP credential mutation, no autonomous mode.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

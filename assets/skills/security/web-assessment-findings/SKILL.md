@@ -47,6 +47,27 @@ Semantics:
 4. Require assumptions/limitations for uncertain or partial evidence.
 5. Hand off normalized findings contract to report stage.
 
+## Evidence Contract (minimum, exact anchors)
+- Evidence ID
+- Source
+- Target / URL
+- In scope confirmation
+- Authorization reference
+- Request method
+- Request purpose
+- Tool class
+- Intensity
+- Timestamp / testing window
+- Result summary
+- Relevant headers / status / behavior
+- Safety notes
+- Redactions
+- Linked finding IDs
+- Limitations
+
+## Traceability Contract
+- authorization → scope → request/evidence → finding → report
+
 ## Outputs
 - `web-assessment-findings.md` with findings schema and calibration rules.
 
