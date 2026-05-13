@@ -155,6 +155,25 @@ func TestWebAssessmentManifestHasRequiredAuthorizationGates(t *testing.T) {
 		t.Fatalf("web-assessment flow id changed: %s", m.ID)
 	}
 
+	wantStages := []string{
+		"web-assessment-init",
+		"web-assessment-scope",
+		"web-assessment-recon-plan",
+		"web-assessment-map",
+		"web-assessment-test-plan",
+		"web-assessment-requests",
+		"web-assessment-findings",
+		"web-assessment-report",
+	}
+	if len(m.Stages) != len(wantStages) {
+		t.Fatalf("unexpected web-assessment stage count: got %d want %d", len(m.Stages), len(wantStages))
+	}
+	for i, want := range wantStages {
+		if m.Stages[i].ID != want {
+			t.Fatalf("unexpected web-assessment stage[%d]: got %q want %q", i, m.Stages[i].ID, want)
+		}
+	}
+
 	wantGates := map[string]bool{
 		"authorized_target_required":           true,
 		"owner_or_authorization_required":      true,

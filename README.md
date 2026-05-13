@@ -191,6 +191,30 @@ Execution Phases (per flow)
 - Added strong, testable authorization/safety gates in manifest (authorization, scope, environment, testing window, intensity, tool allowlist, prohibited actions, rate limits, credentials handling, explicit permission before requests, no exploit/DoS/credential attacks/destructive actions/secrets exposure).
 - Preserved strict boundaries in 7.5A: declarative-only, no runtime flow execution, no live target requests, no tooling execution.
 
+### Phase 7.5B Web Assessment Structural Skills (OpenCode-only)
+
+- Expanded `web-assessment` flow manifest to a fixed 8-stage declarative chain:
+  - `web-assessment-init`
+  - `web-assessment-scope`
+  - `web-assessment-recon-plan`
+  - `web-assessment-map`
+  - `web-assessment-test-plan`
+  - `web-assessment-requests`
+  - `web-assessment-findings`
+  - `web-assessment-report`
+- Reused existing structural skills where they fit:
+  - `security/security-init`
+  - `security/security-scope`
+- Added new structural-only web-assessment skills:
+  - `assets/skills/security/web-assessment-recon-plan/SKILL.md`
+  - `assets/skills/security/web-assessment-map/SKILL.md`
+  - `assets/skills/security/web-assessment-test-plan/SKILL.md`
+  - `assets/skills/security/web-assessment-requests/SKILL.md`
+  - `assets/skills/security/web-assessment-findings/SKILL.md`
+  - `assets/skills/security/web-assessment-report/SKILL.md`
+- Preserved boundaries and guardrails: authorization + exact scope required, explicit permission before requests, no runtime flow execution, no tooling execution, no exploit/DoS/credential attacks/destructive actions/secrets exposure, no MCP credential mutation, no autonomous mode, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
+- Kept intent default unchanged: `default_flow: source-security-review`.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |
@@ -198,7 +222,7 @@ Execution Phases (per flow)
 | **SDD** (Spec Driven Development) | Structured software/product change | init → explore → propose → spec → design → tasks → apply → verify → archive | Declarative |
 | **SDR** (Structured Discovery Research) | Research, notes, blog content, idea validation | capture → research → synthesis → questions → structure → validate → archive | Declarative |
 | **Source Security Review** | Source code/repo/read-only AppSec review | init → scope → map → review → findings → report | Declarative |
-| **Web Assessment** | Authorized live target web assessment (gated, declarative in 7.5A) | authorization/scope gate contract (no runtime execution in 7.5A) | Declarative |
+| **Web Assessment** | Authorized live target web assessment (gated, structural/declarative in 7.5B) | init → scope → recon-plan → map → test-plan → requests → findings → report (no runtime execution) | Declarative |
 | **Support** | Helper utilities (registry, review, testing, issues, PRs) | skill-registry, judgment-day, go-testing, skill-creator, issue-creation, branch-pr | Declarative |
 
 ---

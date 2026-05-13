@@ -55,14 +55,70 @@ persistence:
   opencode_root: "artifacts/web-assessment/{slug}"
 
 stages:
-  - id: authorization-gates
-    skill: security/security-scope
-    description: "Declarative-only authorization/scope/environment/tooling gate validation before any request/tooling."
+  - id: web-assessment-init
+    skill: security/security-init
+    description: "Initialize route framing with hard guardrails; confirm declarative-only boundaries."
     outputs:
-      - "web-assessment-gates.md"
+      - "web-assessment-init.md"
+
+  - id: web-assessment-scope
+    skill: security/security-scope
+    description: "Authorization/scope/environment/tooling gate validation before any request/tooling."
+    outputs:
+      - "web-assessment-scope.md"
+
+  - id: web-assessment-recon-plan
+    skill: security/web-assessment-recon-plan
+    description: "Create bounded recon strategy and evidence plan without executing tooling or requests."
+    outputs:
+      - "web-assessment-recon-plan.md"
+
+  - id: web-assessment-map
+    skill: security/web-assessment-map
+    description: "Map target surface and trust boundaries declaratively from authorized scope definition."
+    outputs:
+      - "web-assessment-map.md"
+
+  - id: web-assessment-test-plan
+    skill: security/web-assessment-test-plan
+    description: "Define safe test matrix, controls, and stop conditions before any request execution."
+    outputs:
+      - "web-assessment-test-plan.md"
+
+  - id: web-assessment-requests
+    skill: security/web-assessment-requests
+    description: "Prepare request approval contract and request templates; no runtime request execution."
+    outputs:
+      - "web-assessment-requests.md"
+
+  - id: web-assessment-findings
+    skill: security/web-assessment-findings
+    description: "Define findings structure, evidence expectations, and severity calibration contract."
+    outputs:
+      - "web-assessment-findings.md"
+
+  - id: web-assessment-report
+    skill: security/web-assessment-report
+    description: "Define final report contract and residual risk communication structure."
+    outputs:
+      - "web-assessment-report.md"
 
 stage_graph:
-  authorization-gates:
+  web-assessment-init:
+    next: [web-assessment-scope]
+  web-assessment-scope:
+    next: [web-assessment-recon-plan]
+  web-assessment-recon-plan:
+    next: [web-assessment-map]
+  web-assessment-map:
+    next: [web-assessment-test-plan]
+  web-assessment-test-plan:
+    next: [web-assessment-requests]
+  web-assessment-requests:
+    next: [web-assessment-findings]
+  web-assessment-findings:
+    next: [web-assessment-report]
+  web-assessment-report:
     next: []
 
 gates:

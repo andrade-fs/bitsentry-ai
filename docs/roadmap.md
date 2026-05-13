@@ -318,8 +318,25 @@ Minimal 6.5 roadmap note:
   - `authorized_target_required`, `owner_or_authorization_required`, `exact_scope_required`, `out_of_scope_required`, `environment_required`, `testing_window_required`, `intensity_required`, `allowed_tools_required`, `prohibited_actions_required`, `rate_limits_required`, `test_credentials_handling_required`, `emergency_contact_recommended`, `explicit_permission_before_requests`, `no_exploit_execution_by_default`, `no_dos_or_load_testing`, `no_credential_attacks`, `no_destructive_actions`, `no_secrets_exposure`.
 - Preserved 7.5A boundaries: no runtime flow execution, no tooling execution (curl/httpx/nuclei/browser), no live target testing, no exploit/DoS/credential attacks/destructive actions.
 
+### Phase 7.5B — Web Assessment Structural Skills (completed)
+- Expanded `assets/flows/web-assessment.yaml` from single gate-stage into fixed 8-stage declarative flow:
+  - `web-assessment-init`, `web-assessment-scope`, `web-assessment-recon-plan`, `web-assessment-map`, `web-assessment-test-plan`, `web-assessment-requests`, `web-assessment-findings`, `web-assessment-report`.
+- Reused existing structural skills for init/scope:
+  - `security/security-init`
+  - `security/security-scope`
+- Added new structural-only security skills for web-assessment stages:
+  - `assets/skills/security/web-assessment-recon-plan/SKILL.md`
+  - `assets/skills/security/web-assessment-map/SKILL.md`
+  - `assets/skills/security/web-assessment-test-plan/SKILL.md`
+  - `assets/skills/security/web-assessment-requests/SKILL.md`
+  - `assets/skills/security/web-assessment-findings/SKILL.md`
+  - `assets/skills/security/web-assessment-report/SKILL.md`
+- Preserved 7.5A authorization gate set intact (no additions/removals/semantic widening).
+- Preserved strict non-operational scope: no runtime flow execution, no live target requests, no tooling execution, no exploits/DoS/credential attacks/destructive actions.
+- Kept route default invariant: `default_flow: source-security-review`; `web-assessment` remains explicit authorized alternative.
+
 - Next Phase 7 tracks:
-- 7.5B Web Assessment routing/classifier hardening and gated UX handshake (next)
+- 7.5C Web Assessment routing/classifier hardening and gated UX handshake (next)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability
