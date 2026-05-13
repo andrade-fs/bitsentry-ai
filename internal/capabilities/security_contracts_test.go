@@ -628,3 +628,94 @@ func TestWebAssessmentReadmeContractSectionAndGuardrails(t *testing.T) {
 		}
 	}
 }
+
+func TestWebRequestAdapterPhase77CanonicalDesignAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/web-request-adapter.md")
+
+	anchors := []string{
+		"Purpose / Non-goals",
+		"Relationship to web-assessment lifecycle",
+		"Contract sources",
+		"web-assessment.yaml",
+		"web-assessment-requests/SKILL.md",
+		"Evidence/Report contracts",
+		"PolicyEvaluator",
+		"DryRunPlanner",
+		"EvidenceRecorder",
+		"Redactor",
+		"Executor (future, out of scope 7.7)",
+		"ControlledWebRequestAdapter",
+		"PlannedRequest",
+		"AssessmentSessionContext",
+		"PolicyDecision",
+		"EvidenceEntry",
+		"PolicyViolation",
+		"planning_only",
+		"dry_run",
+		"execute_approved",
+		"retest",
+		"scope validation",
+		"scheme validation",
+		"redirect policy",
+		"method policy",
+		"rate limits",
+		"request budget",
+		"timeout",
+		"max response size",
+		"stop conditions",
+		"redaction",
+		"evidence IDs",
+		"ErrMissingAuthorization",
+		"ErrScopeViolation",
+		"ErrOutOfScopeRedirect",
+		"ErrMissingRateLimit",
+		"ErrMissingStopConditions",
+		"ErrToolClassNotAllowed",
+		"ErrExecutionModeDenied",
+		"ErrMissingEvidencePlan",
+		"Evidence model + Markdown template",
+		"Layered test strategy",
+		"7.7B offline Go stubs",
+		"7.8 Passive Discovery MVP",
+		"7.9 Controlled Crawler MVP",
+		"7.10 Safe Check Modules",
+	}
+
+	for _, token := range anchors {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-request-adapter design missing anchor %q", token)
+		}
+	}
+}
+
+func TestWebRequestAdapterPhase77ContractualSafetyAnchors(t *testing.T) {
+	content := strings.ToLower(mustReadText(t, "../../docs/design/web-request-adapter.md"))
+
+	anchors := []string{
+		"no network requests",
+		"planning_only",
+		"dry_run",
+		"execute_approved",
+		"retest",
+		"policyevaluator",
+		"dryrunplanner",
+		"evidencerecorder",
+		"redactor",
+		"authorized target required",
+		"explicit approval per request",
+		"get/head default",
+		"no secrets in logs",
+		"out-of-scope redirects denied",
+		"request budget",
+		"rate limits",
+		"timeout",
+		"max response size",
+		"stop conditions",
+	}
+
+	for _, token := range anchors {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-request-adapter design missing contractual safety anchor %q", token)
+		}
+	}
+}

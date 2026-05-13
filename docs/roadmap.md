@@ -381,8 +381,36 @@ Minimal 6.5 roadmap note:
 - Evidence note:
   - manual live-environment evidence remains pending by environment constraints (contract validated, operations not enabled in 7.5E).
 
+### Phase 7.7 — Controlled Web Request Adapter Canonical Design + Contract Anchors (completed)
+- Added `docs/design/web-request-adapter.md` as canonical contract-first adapter design.
+- Documented mandatory sections:
+  - Purpose/Non-goals,
+  - lifecycle relationship,
+  - contract sources,
+  - conceptual architecture/API,
+  - execution modes,
+  - enforcement points,
+  - error model,
+  - evidence model template,
+  - layered testing,
+  - future phases.
+- Made source-of-truth mapping explicit:
+  - `assets/flows/web-assessment.yaml` = gates/stage contract.
+  - `assets/skills/security/web-assessment-requests/SKILL.md` = canonical operational policy.
+  - `docs/design/web-request-adapter.md` = architecture translation layer for future implementation.
+- Added lightweight contractual tests in `internal/capabilities/security_contracts_test.go` for critical anchors:
+  - non-operational boundary (no network execution in 7.7),
+  - execution modes (`planning_only`, `dry_run`, `execute_approved`, `retest`),
+  - adapter components (`PolicyEvaluator`, `DryRunPlanner`, `EvidenceRecorder`, `Redactor`),
+  - mandatory safety anchors (in-scope target required, explicit approval before requests, GET/HEAD default, no secrets in logs, out-of-scope redirect denial, request budget/rate limit/timeout/max response size/stop conditions).
+- Preserved strict boundaries: no stubs/runtime/flow execution/network requests/crawler/tooling live ops/exploits/new target-agent/credential mutation/refactor grande.
+
 - Next Phase 7 tracks:
-- 7.5F Web Assessment routing/classifier hardening and gated UX handshake (next)
+- 7.7B offline Go stubs (next)
+- 7.8 Passive Discovery MVP
+- 7.9 Controlled Crawler MVP
+- 7.10 Safe Check Modules
+- 7.5F Web Assessment routing/classifier hardening and gated UX handshake
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability

@@ -263,6 +263,20 @@ Execution Phases (per flow)
   - no live target interaction
 - Phase result for 7.5E: **PASS WITH NOTES** due to pending manual operational evidence constrained by environment.
 
+### Phase 7.7 Controlled Web Request Adapter Canonical Design (contract-first)
+
+- Added canonical architecture design document:
+  - `docs/design/web-request-adapter.md`
+- Scope is strictly contract-first and non-operational in 7.7:
+  - no network execution, no runtime, no flow execution, no Go stubs.
+- Established explicit source-of-truth mapping:
+  - `assets/flows/web-assessment.yaml` defines gates/stage contract.
+  - `assets/skills/security/web-assessment-requests/SKILL.md` defines canonical policy.
+  - `docs/design/web-request-adapter.md` translates those contracts to future adapter architecture.
+- Added lightweight contractual anchor tests in:
+  - `internal/capabilities/security_contracts_test.go`
+  - anchors include execution modes (`planning_only`, `dry_run`, `execute_approved`, `retest`), components (`PolicyEvaluator`, `DryRunPlanner`, `EvidenceRecorder`, `Redactor`), and critical guardrails (scope, approval, GET/HEAD default, redaction/no secrets in logs, redirect deny, request budget/rate limits/timeout/max response size/stop conditions).
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |
