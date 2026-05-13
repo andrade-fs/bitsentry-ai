@@ -30,7 +30,7 @@ func NewOfflineControlledExecutor(transport HTTPTransport, redactor Redactor) *O
 func (e *OfflineControlledExecutor) ExecuteApproved(ctx AssessmentSessionContext, req PlannedRequest, approval *ExecutionApproval) ExecutionResult {
 	result := ExecutionResult{
 		RequestID:      req.RequestRef,
-		EvidenceID:     "WEB-EV-" + req.RequestRef,
+		EvidenceID:     buildEvidenceID(req.RequestRef, approvalIDOrNA(approval)),
 		Method:         req.Method,
 		URL:            req.URL,
 		MaxPreviewSize: ctx.MaxPreviewSizeBytes,
@@ -64,9 +64,12 @@ func (e *OfflineControlledExecutor) ExecuteApproved(ctx AssessmentSessionContext
 	if req.Method != MethodGET && req.Method != MethodHEAD {
 		return denyResult(result, violation("approval_post_denied", ErrMethodDenied, "method"))
 	}
+	if req.ToolClass == ToolClassProhibited || isProhibitedTool(req.ToolClass, ctx.ProhibitedToolClasses) {
+		return denyResult(result, violation("prohibited_tool_class_denied", ErrToolClassNotAllowed, "tool_class"))
+	}
 	host, hErr := requestHost(req.URL)
 	if hErr != nil {
-		return denyResult(result, violation("request_url_invalid", ErrSchemeDenied, "url"))
+		return denyResult(result, violation("request_url_invalid", ErrRequestURLInvalid, "url"))
 	}
 	if !inScope(host, ctx.InScopeTargets) {
 		return denyResult(result, violation("target_out_of_scope", ErrScopeViolation, "url"))
@@ -293,11 +296,33 @@ func requestHost(raw string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("invalid url")
 	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return "", fmt.Errorf("invalid url")
+	}
 	host := strings.ToLower(strings.TrimSpace(u.Hostname()))
 	if host == "" {
 		return "", fmt.Errorf("invalid url")
 	}
 	return host, nil
+}
+
+func approvalIDOrNA(a *ExecutionApproval) string {
+	if a == nil || strings.TrimSpace(a.ApprovalID) == "" {
+		return "NOAPP"
+	}
+	return strings.TrimSpace(a.ApprovalID)
+}
+
+func buildEvidenceID(requestRef, approvalID string) string {
+	ref := strings.TrimSpace(requestRef)
+	if ref == "" {
+		ref = "unknown"
+	}
+	app := strings.TrimSpace(approvalID)
+	if app == "" {
+		app = "NOAPP"
+	}
+	return "WEB-EV-" + ref + "-" + app
 }
 
 func firstNonEmpty(a, b string) string {

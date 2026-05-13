@@ -10,6 +10,7 @@ import (
 type spyTransport struct {
 	mu      sync.Mutex
 	calls   int
+	lastReq PlannedRequest
 	resp    FakeTransportResponse
 	err     error
 	onCall  func()
@@ -18,6 +19,7 @@ type spyTransport struct {
 func (s *spyTransport) Execute(req PlannedRequest) (FakeTransportResponse, error) {
 	s.mu.Lock()
 	s.calls++
+	s.lastReq = req
 	s.mu.Unlock()
 	if s.onCall != nil {
 		s.onCall()
@@ -32,6 +34,12 @@ func (s *spyTransport) CallCount() int {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.calls
+}
+
+func (s *spyTransport) LastRequest() PlannedRequest {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.lastReq
 }
 
 func validApproval(req PlannedRequest) *ExecutionApproval {
@@ -351,6 +359,97 @@ func TestRedactionCoverageAndMetadataAndEvidenceID(t *testing.T) {
 	}
 	if len(res.RedactionsApplied) == 0 {
 		t.Fatalf("expected redactions applied metadata")
+	}
+}
+
+
+
+func TestInvalidURLDeniedBeforeTransport(t *testing.T) {
+	ctx := baseContext()
+	req := baseRequest()
+	req.URL = "ftp://"
+	tr := &spyTransport{}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, validApproval(req))
+	if !hasViolation(res.Violations, "request_url_invalid") {
+		t.Fatalf("expected request_url_invalid")
+	}
+	if tr.CallCount() != 0 {
+		t.Fatalf("transport should not execute for invalid URL")
+	}
+}
+
+func TestMissingLimitsDeniedBeforeTransport(t *testing.T) {
+	ctx := baseContext()
+	ctx.TimeoutSeconds = 0
+	req := baseRequest()
+	tr := &spyTransport{}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, validApproval(req))
+	if !hasViolation(res.Violations, "missing_timeout") {
+		t.Fatalf("expected missing_timeout")
+	}
+	if tr.CallCount() != 0 {
+		t.Fatalf("transport should not execute when limits are missing")
+	}
+}
+
+func TestProhibitedToolClassDeniedBeforeTransport(t *testing.T) {
+	ctx := baseContext()
+	req := baseRequest()
+	req.ToolClass = ToolClassProhibited
+	a := validApproval(req)
+	a.ApprovedToolClass = ToolClassProhibited
+	tr := &spyTransport{}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, a)
+	if !hasViolation(res.Violations, "prohibited_tool_class_denied") {
+		t.Fatalf("expected prohibited_tool_class_denied")
+	}
+	if tr.CallCount() != 0 {
+		t.Fatalf("transport should not execute for prohibited tool class")
+	}
+}
+
+func TestEvidenceIDDerivesFromRequestAndApproval(t *testing.T) {
+	ctx := baseContext()
+	req := baseRequest()
+	tr := NewFakeTransport()
+	tr.Register(req.RequestRef, req.Method, req.URL, FakeTransportResponse{StatusCode: 200, Body: "ok"})
+	ex := NewOfflineControlledExecutor(tr, DefaultRedactor{})
+	a1 := validApproval(req)
+	a1.ApprovalID = "ap-1"
+	a1.MaxRequests = 5
+	a2 := validApproval(req)
+	a2.ApprovalID = "ap-2"
+	a2.MaxRequests = 5
+
+	r1 := ex.ExecuteApproved(ctx, req, a1)
+	r2 := ex.ExecuteApproved(ctx, req, a1)
+	r3 := ex.ExecuteApproved(ctx, req, a2)
+
+	if r1.EvidenceID == "" {
+		t.Fatalf("evidence id required")
+	}
+	if r1.EvidenceID != r2.EvidenceID {
+		t.Fatalf("same request_ref+approval_id must yield same evidence id")
+	}
+	if r1.EvidenceID == r3.EvidenceID {
+		t.Fatalf("different approval_id must yield different evidence id")
+	}
+}
+
+func TestTransportReceivesRequestTraceFields(t *testing.T) {
+	ctx := baseContext()
+	req := baseRequest()
+	req.ToolClass = ToolClassSafeProbe
+	a := validApproval(req)
+	a.ApprovedToolClass = ToolClassSafeProbe
+	tr := &spyTransport{resp: FakeTransportResponse{StatusCode: 200, Body: "ok"}}
+	res := NewOfflineControlledExecutor(tr, DefaultRedactor{}).ExecuteApproved(ctx, req, a)
+	if res.PolicyDecision != "allow" {
+		t.Fatalf("expected allow")
+	}
+	got := tr.LastRequest()
+	if got.RequestRef != req.RequestRef || got.Method != req.Method || got.URL != req.URL || got.ToolClass != req.ToolClass {
+		t.Fatalf("transport request trace fields mismatch")
 	}
 }
 

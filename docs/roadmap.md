@@ -546,3 +546,11 @@ Minimal 6.5 roadmap note:
 - Added deny-path tests confirming transport is not invoked for invalid approval, POST deny, and out-of-scope target deny.
 - Added httptest-only integration coverage: approved GET/HEAD through injected real transport.
 - Aligned truncation semantics: `ExecutionResult.BodyTruncated` is true when executor cap truncates OR transport pre-truncation flag is true.
+
+
+### Phase 7.9D — Integration Hardening & Traceability Verify (completed)
+- Added explicit `request_url_invalid` deny semantics before transport invocation.
+- Expanded deny-before-transport coverage for approval/limits/scope/method/tool-class failures.
+- Hardened traceability with deterministic EvidenceID derived from `request_ref + approval_id`.
+- Added tests to verify transport invocation only on approved paths and request trace consistency.
+- Preserved offline-only boundaries and httptest-only integration stance.

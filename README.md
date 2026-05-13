@@ -427,6 +427,16 @@ Execution Phases (per flow)
 - Added integration coverage (httptest-only) proving approved GET/HEAD can execute through injected real `internal/securitywebhttp` transport.
 - Aligned truncation semantics: executor preserves `BodyTruncated` when marked by either preview cap or transport.
 
+
+
+### Phase 7.9D Integration Hardening & Traceability Verify (offline)
+
+- Hardened deny-before-transport matrix with explicit invalid URL denial (`request_url_invalid`).
+- Reinforced traceability chain `request_ref -> approval_id -> evidence_id -> execution_result`.
+- Updated EvidenceID strategy to include approval identity and reduce collisions across repeated approvals.
+- Added tests for transport non-invocation on deny paths (invalid URL, missing limits, prohibited tool class, approval issues).
+- Preserved strict offline boundary (no external network, no CLI/OpenCode execution path).
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

@@ -9,11 +9,13 @@ func baseContext() AssessmentSessionContext {
 		ScopeRef:             "scope-1",
 		InScopeTargets:       []string{"example.com"},
 		ExecutionMode:        ExecutionModeExecuteApproved,
+		Intensity:            IntensityLow,
 		ExplicitApproval:     true,
 		RateLimitPerMinute:   10,
 		RequestBudget:        20,
 		TimeoutSeconds:       5,
 		MaxResponseSizeBytes: 1024,
+		MaxPreviewSizeBytes:  256,
 		StopConditions:       []string{"max-errors"},
 		EvidencePlanRef:      "plan-1",
 	}

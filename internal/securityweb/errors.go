@@ -7,6 +7,7 @@ var (
 	ErrMissingExplicitApproval = errors.New("explicit approval required")
 	ErrScopeViolation          = errors.New("target out of scope")
 	ErrSchemeDenied            = errors.New("scheme must be http/https")
+	ErrRequestURLInvalid       = errors.New("request url invalid")
 	ErrMethodDenied            = errors.New("request method denied")
 	ErrMissingRateLimit        = errors.New("rate limit required")
 	ErrMissingRequestBudget    = errors.New("request budget required")

@@ -852,3 +852,19 @@ func TestControlledHTTPExecutorPhase79ABoundaryAnchors(t *testing.T) {
 		}
 	}
 }
+
+
+func TestControlledHTTPExecutorPhase79DHardeningAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/controlled-http-executor.md")
+	required := []string{
+		"7.9D Integration Hardening & Traceability Verify",
+		"request_url_invalid",
+		"request_ref -> approval_id -> evidence_id -> execution_result",
+		"deny before transport",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("controlled-http-executor design missing 7.9D token %q", token)
+		}
+	}
+}

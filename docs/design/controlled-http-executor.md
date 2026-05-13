@@ -245,3 +245,14 @@ Phase 7.9C keeps architecture boundaries intact while enabling runtime transport
   - `request_ref -> approval_id -> evidence_id` in `ExecutionResult`.
 - `BodyTruncated` semantics aligned:
   - executor now preserves truncation when either preview cap truncates OR the underlying transport already marks `BodyTruncated=true`.
+
+
+## 14) 7.9D Integration Hardening & Traceability Verify
+
+- Added explicit invalid URL deny code: `request_url_invalid` (empty URL, parse error, unsupported scheme, empty host).
+- Maintains **deny before transport** for invalid URL, missing approval, expired approval, out-of-scope, POST, missing limits, prohibited tool class.
+- EvidenceID strategy hardened to include `request_ref + approval_id` to reduce collisions across repeated approvals.
+- Traceability contract reinforced: `request_ref -> approval_id -> evidence_id -> execution_result`.
+- Result metadata required in tests: `RequestID`, `ApprovalID`, `EvidenceID`, `Method`, `URL`, `StatusCode`, `RedirectObserved`, `BodyTruncated`, `RedactionsApplied`, `SafetyNotes`.
+- Redirect handling hardening remains: `follow_redirects=false`, `redirect_location_invalid`, `redirect_out_of_scope`.
+- Boundary unchanged: offline-only + httptest-only integration tests, no external network tests.
