@@ -243,6 +243,26 @@ Execution Phases (per flow)
   - `assets/docs/security/README.md` web-assessment contract guidance and guardrails.
 - Preserved non-operational boundaries: no runtime, no flow execution, no tooling operation, no live-target testing, no exploits/DoS/credential attacks/destructive actions, no secrets exposure, no MCP credential mutation, no autonomous mode.
 
+### Phase 7.5E Web Assessment QA Smoke Protocol (OpenCode-only)
+
+- Added formal docs-only QA protocol:
+  - `docs/opencode-phase7-web-assessment-qa.md`
+- Scope is strictly contract/manual-smoke validation for `web-assessment` behavior and guardrails.
+- Includes required protocol blocks:
+  - Scope / Non-scope
+  - Guardrails
+  - Hard fail conditions
+  - Evidence capture rules
+  - PASS / PASS WITH NOTES / FAIL criteria
+  - 8 mandatory QA cases
+  - Go/No-Go checklist
+  - Pre-7.6 readiness gate
+- Explicit 7.5E boundary wording:
+  - no tooling real habilitado
+  - no runtime
+  - no live target interaction
+- Phase result for 7.5E: **PASS WITH NOTES** due to pending manual operational evidence constrained by environment.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

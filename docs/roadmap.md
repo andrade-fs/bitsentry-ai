@@ -363,8 +363,26 @@ Minimal 6.5 roadmap note:
 - Added strict static tests in `internal/capabilities/security_contracts_test.go` for artifact existence, exact anchor tokens, report section ordering, traceability, and guardrails.
 - Preserved boundaries: no runtime/flow execution/tooling operation/live testing, no exploits/DoS/credential attacks, no secrets exposure, no MCP credential mutation, no autonomous mode.
 
+### Phase 7.5E — Web Assessment QA Smoke Protocol (completed)
+- Status: **PASS WITH NOTES**
+- Added formal docs-only QA protocol:
+  - `docs/opencode-phase7-web-assessment-qa.md`
+- Defined strict sections and criteria:
+  - scope/non-scope/guardrails/hard-fail conditions
+  - evidence capture rules
+  - PASS / PASS WITH NOTES / FAIL criteria
+  - 8 mandatory QA smoke cases
+  - Go/No-Go checklist
+  - Pre-7.6 readiness gate
+- Explicitly documented non-operational boundary:
+  - no tooling real habilitado
+  - no runtime flow execution
+  - no live target interaction
+- Evidence note:
+  - manual live-environment evidence remains pending by environment constraints (contract validated, operations not enabled in 7.5E).
+
 - Next Phase 7 tracks:
-- 7.5E Web Assessment routing/classifier hardening and gated UX handshake (next)
+- 7.5F Web Assessment routing/classifier hardening and gated UX handshake (next)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability
