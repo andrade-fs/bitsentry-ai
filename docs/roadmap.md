@@ -494,3 +494,46 @@ Minimal 6.5 roadmap note:
 - Added redirect hardening with explicit invalid redirect denial (`redirect_location_invalid`) and out-of-scope denial (`redirect_out_of_scope`).
 - Expanded redaction edge-case handling and metadata (`RedactionsApplied`, safety notes, truncated preview metadata).
 - Kept strict offline boundary: no real network, no runtime execution, no live target interaction.
+
+### Phase 7.9A — Future Real HTTP Transport Boundary (completed)
+- Status: **PASS WITH NOTES**
+- Design is ready and boundary is explicitly defined without runtime implementation.
+- Declared package split for upcoming transport work:
+  - `internal/securityweb` = core offline-safe
+  - `internal/securitywebhttp` = future real transport (implementation deferred)
+- Locked unique PEP contract:
+  - `Policy Enforcement Point`
+  - `OfflineControlledExecutor is the single Policy Enforcement Point`
+  - real transport must not decide policy
+  - deny before transport
+  - transport receives only policy-approved requests
+- Preserved execution and safety invariants for future transport:
+  - `execute_approved` only
+  - per-request approval
+  - GET/HEAD only first MVP
+  - `follow_redirects=false` / no redirects followed by default
+  - no full response stored by default
+  - body preview capped and redacted
+- Added contractual anchors for future tests:
+  - no external network tests
+  - `httptest` only for future real transport tests
+- Notes:
+  - real transport implementation is pending for **7.9B**
+  - no real network, no runtime flow execution, no live target testing in 7.9A
+
+### Phase 7.9B — Real HTTP Transport Skeleton (completed)
+- Implemented `internal/securitywebhttp` with a minimal real HTTP transport compatible with `securityweb.HTTPTransport` / `FakeTransportResponse`.
+- Kept policy boundary strict:
+  - `internal/securityweb` remains unique PEP,
+  - transport performs only HTTP I/O and response mapping,
+  - no scope/approval/method/tool/rate/budget policy decisions in transport.
+- Added transport safeguards:
+  - timeout required,
+  - redirect not followed by default,
+  - `Location` captured,
+  - body preview capped,
+  - `BodyTruncated` flagged when capped,
+  - no full response stored by default,
+  - normalized safe transport errors.
+- Added `httptest`-only test coverage for GET/HEAD, redirect no-follow/location capture, preview cap/truncation, timeout enforcement, and policy-agnostic transport behavior.
+- Added static import guard for `internal/securitywebhttp` forbidding `os/exec` and `syscall`.

@@ -110,6 +110,70 @@ This section intentionally preserves prior 7.8B anchor wording:
 - `FakeTransport only for future tests`
 - `no real network in 7.8B`
 
+## 9) 7.9A Future Real HTTP Transport Boundary (design-only)
+
+This phase is design-only and keeps runtime behavior unchanged.
+
+### Explicit package separation
+
+- `internal/securityweb` = core offline-safe.
+- `internal/securitywebhttp` = future real transport package (not implemented in 7.9A).
+
+### Policy Enforcement Point (PEP)
+
+- **Policy Enforcement Point**
+- **OfflineControlledExecutor is the single Policy Enforcement Point**
+- **real transport must not decide policy**
+- **deny before transport**
+- **transport receives only policy-approved requests**
+
+This means the future transport layer executes only what the executor has already approved under policy; it never upgrades, relaxes, or bypasses approvals.
+
+### Execution contract preserved for future transport
+
+- `execute_approved only`
+- `per-request approval`
+- `GET/HEAD only first MVP`
+- `follow_redirects=false`
+- `no redirects followed by default`
+- `no full response stored by default`
+- `body preview capped and redacted`
+
+### Testing strategy for future real transport
+
+- `no external network tests`
+- `httptest only for future real transport tests`
+
+7.9A does not introduce `net/http`, real requests, runtime flow execution, crawler behavior, or live target testing.
+
+### 10) 7.9B Real HTTP transport skeleton (httptest-only)
+
+Phase 7.9B introduces a minimal real transport implementation in:
+
+- `internal/securitywebhttp/transport.go`
+
+Boundary and invariants:
+
+- **OfflineControlledExecutor remains the single Policy Enforcement Point**.
+- **transport does not enforce scope/approval/method/tool/rate/budget policy**.
+- transport executes request I/O only (HTTP send/receive + normalized response mapping).
+- redirect not followed by default.
+- Location captured.
+- body preview capped.
+- `BodyTruncated` marked when cap is exceeded.
+- no full response stored by default.
+- timeout required in transport constructor.
+- transport errors normalized safely (no sensitive target details by default).
+
+Testing contract for 7.9B:
+
+- `httptest` only.
+- no external network tests.
+- GET/HEAD pass coverage.
+- redirect no-follow + Location capture coverage.
+- timeout enforcement coverage.
+- static import guard in `internal/securitywebhttp/static_imports_test.go` denying `os/exec` and `syscall`.
+
 
 ## 13) 7.8D Hardening Addendum
 

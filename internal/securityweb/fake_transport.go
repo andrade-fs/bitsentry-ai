@@ -10,6 +10,7 @@ type FakeTransportResponse struct {
 	FinalURL         string
 	Headers          map[string]string
 	Body             string
+	BodyTruncated    bool
 	RedirectObserved bool
 	RedirectLocation string
 }

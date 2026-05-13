@@ -46,6 +46,37 @@ func TestWebRequestAdapterDesignHas77BImplementedMappingAnchor(t *testing.T) {
 	}
 }
 
+func TestControlledHTTPExecutorDesignHas79BPEPAndNoPolicyTransportAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/controlled-http-executor.md")
+	required := []string{
+		"### 10) 7.9B Real HTTP transport skeleton (httptest-only)",
+		"OfflineControlledExecutor remains the single Policy Enforcement Point",
+		"transport does not enforce scope/approval/method/tool/rate/budget policy",
+		"redirect not followed by default",
+		"Location captured",
+		"no full response stored by default",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("controlled-http-executor design missing 7.9B anchor token %q", token)
+		}
+	}
+}
+
+func TestWebRequestAdapterHas79BTransportBoundaryAnchor(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/web-request-adapter.md")
+	required := []string{
+		"### 17) 7.9B minimal real transport note",
+		"internal/securitywebhttp",
+		"PEP remains unique in internal/securityweb",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-request-adapter design missing 7.9B boundary token %q", token)
+		}
+	}
+}
+
 func TestSecurityFindingsSkillSeverityAndConfidenceEnums(t *testing.T) {
 	content := mustReadText(t, "../../assets/skills/security/security-findings/SKILL.md")
 
@@ -791,6 +822,33 @@ func TestControlledHTTPExecutorPhase78DHardeningAnchors(t *testing.T) {
 	for _, token := range required {
 		if !strings.Contains(content, token) {
 			t.Fatalf("controlled-http-executor design missing 7.8D hardening token %q", token)
+		}
+	}
+}
+
+func TestControlledHTTPExecutorPhase79ABoundaryAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/controlled-http-executor.md")
+	required := []string{
+		"internal/securitywebhttp",
+		"core offline-safe",
+		"Policy Enforcement Point",
+		"OfflineControlledExecutor is the single Policy Enforcement Point",
+		"real transport must not decide policy",
+		"deny before transport",
+		"transport receives only policy-approved requests",
+		"execute_approved only",
+		"per-request approval",
+		"GET/HEAD only first MVP",
+		"follow_redirects=false",
+		"no external network tests",
+		"httptest only for future real transport tests",
+		"no redirects followed by default",
+		"no full response stored by default",
+		"body preview capped and redacted",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("controlled-http-executor design missing 7.9A boundary token %q", token)
 		}
 	}
 }

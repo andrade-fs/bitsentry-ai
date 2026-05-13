@@ -378,6 +378,42 @@ Execution Phases (per flow)
 - Preserved offline boundaries:
   - no real network, no `net/http`, no runtime flow execution.
 
+### Phase 7.9A Future Real HTTP Transport Boundary (design-only)
+
+- Defined explicit future separation:
+  - `internal/securityweb` as core offline-safe policy/execution boundary.
+  - `internal/securitywebhttp` reserved for future real transport implementation.
+- Locked PEP contract:
+  - `Policy Enforcement Point`
+  - `OfflineControlledExecutor is the single Policy Enforcement Point`
+  - `real transport must not decide policy`
+  - `deny before transport`
+  - `transport receives only policy-approved requests`
+- Reaffirmed execution invariants for the first real-transport MVP:
+  - `execute_approved` only, per-request approval,
+  - GET/HEAD only,
+  - `follow_redirects=false`, no redirects followed by default,
+  - no full response stored by default,
+  - body preview capped and redacted.
+- Added future test-boundary anchors:
+  - no external network tests,
+  - `httptest` only for future real transport tests.
+- Kept 7.9A non-operational scope:
+  - no `net/http`, no real requests, no runtime/flow execution, no live target testing.
+
+### Phase 7.9B Real HTTP Transport Skeleton (httptest-only)
+
+- Added `internal/securitywebhttp` minimal transport using `securityweb.HTTPTransport` / `FakeTransportResponse` compatibility.
+- Enforced transport-only responsibility (no policy/scope/approval/tool/method/rate/budget decisions in transport).
+- Added required runtime safeguards in transport:
+  - mandatory timeout,
+  - redirect not followed by default,
+  - `Location` captured,
+  - body preview cap + `BodyTruncated`,
+  - no full response stored by default,
+  - normalized safe transport errors.
+- Added test coverage using `httptest` only (GET/HEAD, redirect behavior, body capping/truncation, timeout) and static import guards forbidding `os/exec`/`syscall` in `internal/securitywebhttp`.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

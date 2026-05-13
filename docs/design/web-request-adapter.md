@@ -253,5 +253,19 @@ Phase 7.8B adds a dedicated design-only contract document:
 
 Boundary remains strict: no real network, no `net/http`, no runtime flow execution.
 
+### 16) 7.9A boundary note (future real transport)
+
+- The executor boundary remains policy-first and offline-safe in `internal/securityweb`.
+- Future real transport is explicitly separated into `internal/securitywebhttp`.
+- Policy Enforcement Point remains unique: `OfflineControlledExecutor is the single Policy Enforcement Point`.
+
+### 17) 7.9B minimal real transport note
+
+- `internal/securitywebhttp` contains the minimal real HTTP transport skeleton for request I/O.
+- PEP remains unique in internal/securityweb.
+- transport remains policy-agnostic (no approval/scope/tool/method/rate/budget decisions).
+- tests remain `httptest`-only with no external network usage.
+- Real transport must execute only policy-approved requests and must not decide policy.
+
 
 - See also: `docs/design/controlled-http-executor.md` for the dedicated execution-layer design and 7.8D hardening constraints.
