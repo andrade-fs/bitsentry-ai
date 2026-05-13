@@ -19,6 +19,13 @@ metadata:
 ## Purpose
 Create a controlled test matrix for authorized web assessment, including guardrails, approvals, and abort criteria.
 
+## Assessment Session Context
+- Intent: transition from Mapping to Test Plan with contract-first constraints.
+- Scope and ownership/autorización remain mandatory anchors.
+- Controlled Checks are planned only; no runtime, no tooling real, no live requests.
+- Expert skills can be referenced as planning aids only.
+- Execution mode drives depth: planning_only, dry_run, execute_approved, retest.
+
 ## Tooling Policy / Command Safety
 This stage defines controls only and defers full command safety semantics to `security/web-assessment-requests`.
 - no execution by default
@@ -45,9 +52,10 @@ Semantics:
 ## Workflow
 1. Define test objectives per prioritized area.
 2. Build test matrix with methods, expected evidence, and risk level.
-3. Attach mandatory approval checkpoints before request execution.
+3. Controlled Checks: attach mandatory approval checkpoints before request execution.
 4. Define abort conditions and escalation paths.
-5. Hand off approved declarative test plan to requests stage.
+5. Validate: confirm prohibited actions remain blocked by default.
+6. Hand off approved declarative test plan to requests stage.
 
 ## Outputs
 - `web-assessment-test-plan.md` with matrix, checkpoints, and abort criteria.

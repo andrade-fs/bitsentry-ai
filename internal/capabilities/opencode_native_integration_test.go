@@ -389,6 +389,13 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 		"for narrow direct requests",
 		"open file X and show Y",
 		"SDR brief audit -> compact SDD corrections",
+		"web-assessment planning is allowed",
+		"planning without live interaction",
+		"authorized synthetic planning",
+		"no over-refusal for planning",
+		"allowed without live interaction",
+		"gated live interaction",
+		"prohibited by default",
 		"Route decision MUST be visible in chat BEFORE any non-trivial discovery",
 		"updated route decision only if findings change",
 		"separate permission before apply/edit planning and before persistence",
@@ -397,6 +404,74 @@ func TestBitsentryPromptClassifiesRoutesAndDirectOption(t *testing.T) {
 	} {
 		if !strings.Contains(prompt, token) {
 			t.Fatalf("route classification missing %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptWebAssessmentPlanningAllowedWithoutLiveInteraction(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"web-assessment planning is allowed",
+		"planning without live interaction",
+		"authorized synthetic planning",
+		"assessment session context",
+		"planning_only",
+		"dry_run",
+		"execute_approved",
+		"retest",
+		"no over-refusal for planning",
+		"allowed without live interaction",
+		"analysis of provided synthetic evidence",
+		"scope/out-of-scope",
+		"rate limits",
+		"stop conditions",
+		"evidence logging plan",
+		"defensive checklist",
+		"report template",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected web-assessment planning token %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptWebAssessmentExecutionRemainsGated(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"no execution by default",
+		"explicit approval before requests",
+		"no live requests without complete gates",
+		"no tooling without explicit approval",
+		"gated live interaction",
+		"before any request/tooling",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected web-assessment gate token %q", token)
+		}
+	}
+}
+
+func TestBitsentryPromptWebAssessmentHardGuardrailsPreserved(t *testing.T) {
+	prompt := strings.ToLower(buildBitsentryAgentPrompt())
+	required := []string{
+		"prohibited by default",
+		"exploit execution",
+		"dos/load testing",
+		"credential attacks",
+		"brute force",
+		"password spraying",
+		"aggressive fuzzing",
+		"mass scanning",
+		"out-of-scope scanning",
+		"destructive actions",
+		"exfiltration",
+		"secrets exposure",
+	}
+	for _, token := range required {
+		if !strings.Contains(prompt, token) {
+			t.Fatalf("expected hard guardrail token %q", token)
 		}
 	}
 }

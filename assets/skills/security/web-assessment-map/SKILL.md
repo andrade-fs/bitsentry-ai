@@ -19,6 +19,12 @@ metadata:
 ## Purpose
 Produce a structured map of in-scope web surface, trust boundaries, and priority areas from declared target context.
 
+## Assessment Session Context
+- Intent and Scope remain the source of truth for Mapping decisions.
+- Discovery and Mapping are declarative: no crawler/scanner real and no live requests.
+- Surface Ranking must be explicit and tied to in-scope assets only.
+- Execution mode respected: planning_only / dry_run / execute_approved / retest.
+
 ## Tooling Policy / Command Safety
 This stage uses only authorized evidence and follows canonical safety in `security/web-assessment-requests`.
 - no execution by default
@@ -41,11 +47,12 @@ Semantics:
 - Explicitly declared in-scope subdomains/paths/assets.
 
 ## Workflow
-1. Enumerate in-scope assets and trust boundaries from authorized scope.
-2. Classify attack surface components and data-flow touchpoints.
-3. Flag high-priority zones based on business impact and exposure.
-4. Record assumptions and missing context requiring clarification.
-5. Hand off prioritized map to test-plan stage.
+1. Discovery: enumerate in-scope assets and trust boundaries from authorized scope.
+2. Mapping: classify surface components and data-flow touchpoints.
+3. Surface Ranking: flag high-priority zones by impact/exposure.
+4. Risk Hypotheses: document what should be validated later.
+5. Record assumptions and ask technical clarifying questions when detail is missing.
+6. Hand off prioritized map to test-plan stage.
 
 ## Outputs
 - `web-assessment-map.md` with asset map, trust boundaries, priorities, and assumptions.

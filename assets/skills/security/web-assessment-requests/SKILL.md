@@ -19,6 +19,12 @@ metadata:
 ## Purpose
 Define the request approval workflow and template structure, ensuring no live request is executed by default.
 
+## Assessment Session Context
+- This is the canonical gate for execution mode changes: planning_only -> dry_run -> execute_approved -> retest.
+- planning_only and dry_run remain non-operational in this phase.
+- execute_approved requires explicit approval before live requests/tooling.
+- Retest intent must preserve original scope/authorization and evidence log continuity.
+
 ## Tooling Policy / Command Safety
 This skill is the canonical source for web-assessment request/tooling safety policy.
 
@@ -39,6 +45,10 @@ This skill is the canonical source for web-assessment request/tooling safety pol
 - no mass scanning
 - no out-of-scope scanning
 - no secrets exposure
+- no brute force
+- no password spraying
+- no aggressive fuzzing
+- no exfiltration
 
 ### Tool Classes (explicit)
 - Passive inspection
@@ -55,6 +65,7 @@ Every proposed request MUST include:
 4. Intensity/rate profile and stop condition reference.
 5. Expected evidence artifact(s) and logging destination.
 6. Explicit per-request approval record before execution.
+7. Assessment Session Context execution mode and rationale.
 
 Default deny rules:
 - Deny when authorization is missing, stale, or ambiguous.
@@ -62,6 +73,7 @@ Default deny rules:
 - Deny when tool class maps to prohibited activity without separate explicit approval.
 - Deny when evidence logging plan is absent.
 - Deny when stop conditions are undefined.
+- Deny when requested action conflicts with hard guardrails.
 
 ### Canonical Delegation Rule
 Other web-assessment skills MUST summarize only the subset relevant to their stage and defer full command safety semantics to `security/web-assessment-requests`.

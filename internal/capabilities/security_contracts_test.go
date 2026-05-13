@@ -362,6 +362,10 @@ func TestWebAssessmentRequestsCanonicalToolingPolicyAnchors(t *testing.T) {
 		"no mass scanning",
 		"no out-of-scope scanning",
 		"no secrets exposure",
+		"no brute force",
+		"no password spraying",
+		"no aggressive fuzzing",
+		"no exfiltration",
 	}
 
 	for _, token := range requiredAnchors {
@@ -536,10 +540,62 @@ func TestWebAssessmentContractsInSkills(t *testing.T) {
 		"- Authorization Summary",
 		"- Out of Scope",
 		"- Request / Evidence Log",
+		"- Impact Chain",
+		"- Retest",
 		"- Assumptions and Limitations",
 	} {
 		if !strings.Contains(report, token) {
 			t.Fatalf("web-assessment-report missing token %q", token)
+		}
+	}
+}
+
+func TestWebAssessmentPhase76LifecycleAnchors(t *testing.T) {
+	recon := mustReadText(t, "../../assets/skills/security/web-assessment-recon-plan/SKILL.md")
+	for _, token := range []string{
+		"Assessment Session Context",
+		"Intent",
+		"Scope",
+		"Discovery",
+		"Surface Ranking",
+		"Risk Hypotheses",
+		"planning_only",
+		"dry_run",
+		"execute_approved",
+		"retest",
+		"recon / hunt / validate / report",
+		"evidence log",
+	} {
+		if !strings.Contains(recon, token) {
+			t.Fatalf("web-assessment-recon-plan missing phase 7.6 anchor %q", token)
+		}
+	}
+
+	mapSkill := mustReadText(t, "../../assets/skills/security/web-assessment-map/SKILL.md")
+	for _, token := range []string{"Mapping", "surface", "Surface Ranking", "Risk Hypotheses"} {
+		if !strings.Contains(mapSkill, token) {
+			t.Fatalf("web-assessment-map missing phase 7.6 anchor %q", token)
+		}
+	}
+
+	findings := mustReadText(t, "../../assets/skills/security/web-assessment-findings/SKILL.md")
+	for _, token := range []string{
+		"Retest Contract (subphase inside findings/report)",
+		"Retest plan",
+		"Retest status",
+		"fixed / partially fixed / still vulnerable / not tested",
+		"retest evidence",
+		"impact chaining",
+	} {
+		if !strings.Contains(strings.ToLower(findings), strings.ToLower(token)) {
+			t.Fatalf("web-assessment-findings missing phase 7.6 anchor %q", token)
+		}
+	}
+
+	report := mustReadText(t, "../../assets/skills/security/web-assessment-report/SKILL.md")
+	for _, token := range []string{"Impact Chain", "Retest", "lifecycle anchors", "impact chaining", "evidence log"} {
+		if !strings.Contains(report, token) {
+			t.Fatalf("web-assessment-report missing phase 7.6 anchor %q", token)
 		}
 	}
 }

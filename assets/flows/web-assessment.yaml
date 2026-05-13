@@ -6,6 +6,7 @@ top_level_flow: true
 description: >
   Declarative authorized web-target assessment flow for OpenCode bitsentry.
   This flow is for explicitly authorized live targets only and is gated before any request/tooling.
+  Contract-first lifecycle for pentest-assisted UX planning with hard guardrails and no runtime execution.
 family: security
 skill_pack: security
 orchestrator_skill: security/security-init
@@ -143,6 +144,8 @@ gates:
 
 notes:
   - "This is declarative-only in Phase 7.5A: no runtime flow execution and no tooling execution."
+  - "Phase 7.6 introduces Assessment Session Context and lifecycle anchors without changing stage IDs/order."
+  - "Execution mode anchors: planning_only, dry_run, execute_approved, retest."
   - "No curl/httpx/nuclei/browser execution, no exploit execution, no DoS/load testing, no credential attacks."
   - "Requires explicit authorization and exact scope before any request/tooling in future phases."
   - "Source-security-review remains the default for repository/source read-only AppSec review."

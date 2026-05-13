@@ -19,6 +19,11 @@ metadata:
 ## Purpose
 Normalize how web-assessment findings are captured, validated, and communicated with evidence and confidence.
 
+## Assessment Session Context
+- Findings must reference Intent, Scope, Discovery, Mapping, Surface Ranking, Risk Hypotheses, Test Plan, Controlled Checks, and Validate anchors when applicable.
+- Findings include impact chaining to explain business/system consequence.
+- Retest is modeled here as a contractual subphase (not a new stage).
+
 ## Tooling Policy / Command Safety
 This stage consumes only authorized evidence and follows canonical request/tooling policy in `security/web-assessment-requests`.
 - no execution by default
@@ -46,6 +51,12 @@ Semantics:
 3. Define deduplication and evidence grouping rules.
 4. Require assumptions/limitations for uncertain or partial evidence.
 5. Hand off normalized findings contract to report stage.
+
+## Retest Contract (subphase inside findings/report)
+- Retest plan
+- Retest status
+- fixed / partially fixed / still vulnerable / not tested
+- retest evidence
 
 ## Evidence Contract (minimum, exact anchors)
 - Evidence ID

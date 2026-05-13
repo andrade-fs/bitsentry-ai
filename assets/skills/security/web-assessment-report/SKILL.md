@@ -19,6 +19,11 @@ metadata:
 ## Purpose
 Produce a consistent final reporting contract summarizing risk posture, findings, and residual risk without enabling operational runtime behavior.
 
+## Assessment Session Context
+- Report must preserve lifecycle traceability: Intent -> Scope -> Discovery -> Mapping -> Surface Ranking -> Risk Hypotheses -> Test Plan -> Controlled Checks -> Validate -> Findings -> Impact Chain -> Report -> Retest.
+- Keep pentest-assisted UX concise: avoid repetitive legal-heavy forms after ownership/scope are declared.
+- Ask technical clarification questions only when information is missing.
+
 ## Tooling Policy / Command Safety
 This stage reports boundaries and evidence provenance, and references canonical policy in `security/web-assessment-requests`.
 - no execution by default
@@ -58,8 +63,10 @@ Semantics:
 - Methodology
 - Tooling and Intensity
 - Request / Evidence Log
+- Impact Chain
 - Risk Summary
 - Findings
+- Retest
 - Remediation Plan
 - Verification Steps
 - Assumptions and Limitations
@@ -68,6 +75,7 @@ Semantics:
 
 ## Traceability Contract
 - authorization → scope → request/evidence → finding → report
+- lifecycle anchors: recon / hunt / validate / report, surface ranking, impact chaining, evidence log
 
 ## Outputs
 - `web-assessment-report.md` with final report structure and closure checklist.

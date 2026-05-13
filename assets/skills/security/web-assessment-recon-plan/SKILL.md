@@ -19,6 +19,14 @@ metadata:
 ## Purpose
 Define a structured reconnaissance approach for an authorized web target while staying strictly declarative and non-operational.
 
+## Assessment Session Context
+- Intent: recon / hunt / validate / report
+- Scope: target/scope declarados + ownership/autorización declarada
+- Default intensity: low-noise
+- Execution mode: planning_only | dry_run | execute_approved | retest
+- Preguntas técnicas útiles cuando falte detalle (sin formulario legal pesado repetitivo)
+- Hard guardrails preserved and inherited from `security/web-assessment-requests`
+
 ## Tooling Policy / Command Safety
 This stage is planning-only and follows the canonical policy in `security/web-assessment-requests`.
 - no execution by default
@@ -42,11 +50,12 @@ Semantics:
 - Environment, testing window, and intensity constraints.
 
 ## Workflow
-1. Confirm hard gates remain active from prior stages.
-2. Define recon objectives, hypotheses, and evidence collection expectations.
-3. Specify allowed/prohibited request classes and required approvals.
-4. Produce a staged recon checklist with stop conditions.
-5. Hand off a declarative recon plan to mapping stage.
+1. Confirm Assessment Session Context and hard gates remain active from prior stages.
+2. Discovery: define recon objectives and evidence log expectations.
+3. Surface Ranking: prioritize likely exposure surfaces and constraints.
+4. Risk Hypotheses: model bounded hypotheses for validate/report phases.
+5. Produce staged checklist (recon / hunt / validate / report) with stop conditions.
+6. Hand off declarative recon plan to mapping stage.
 
 ## Outputs
 - `web-assessment-recon-plan.md` with objectives, checklist, approvals, and stop conditions.
