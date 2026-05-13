@@ -19,6 +19,18 @@ metadata:
 ## Purpose
 Normalize how web-assessment findings are captured, validated, and communicated with evidence and confidence.
 
+## Tooling Policy / Command Safety
+This stage consumes only authorized evidence and follows canonical request/tooling policy in `security/web-assessment-requests`.
+- no execution by default
+- authorized target required
+- exact scope required
+- prohibited actions required
+- evidence logging required
+- no secrets exposure
+
+Semantics:
+- web-assessment-findings: findings solo con evidencia autorizada.
+
 ## Use When
 - Request-stage contract exists and permitted activity boundaries are explicit.
 - Findings need consistent structure for final reporting.
@@ -71,6 +83,7 @@ Findings contract defined with calibration and evidence requirements.
 
 ## Handoffs
 - to `security/web-assessment-report` with normalized findings contract.
+- Command safety canonical source: `security/web-assessment-requests`.
 
 ## Quality Checklist
 - [ ] Finding schema includes scope, evidence, and confidence.

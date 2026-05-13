@@ -19,6 +19,20 @@ metadata:
 ## Purpose
 Create a controlled test matrix for authorized web assessment, including guardrails, approvals, and abort criteria.
 
+## Tooling Policy / Command Safety
+This stage defines controls only and defers full command safety semantics to `security/web-assessment-requests`.
+- no execution by default
+- explicit approval per request
+- authorized target required
+- exact scope required
+- rate limits required
+- stop conditions required
+- evidence logging required
+- no DoS/load testing
+
+Semantics:
+- web-assessment-test-plan: define intensidad, rate limits, stop conditions y logging plan.
+
 ## Use When
 - Mapping is complete and priorities are known.
 - The team needs an explicit, safe sequence before any request activity.
@@ -71,6 +85,7 @@ Test plan defined with explicit checkpoints and non-destructive controls.
 
 ## Handoffs
 - to `security/web-assessment-requests` with approved test matrix.
+- Command safety canonical source: `security/web-assessment-requests`.
 
 ## Quality Checklist
 - [ ] Every test line has evidence expectation and risk label.

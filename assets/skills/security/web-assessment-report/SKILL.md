@@ -19,6 +19,21 @@ metadata:
 ## Purpose
 Produce a consistent final reporting contract summarizing risk posture, findings, and residual risk without enabling operational runtime behavior.
 
+## Tooling Policy / Command Safety
+This stage reports boundaries and evidence provenance, and references canonical policy in `security/web-assessment-requests`.
+- no execution by default
+- authorized target required
+- exact scope required
+- explicit approval per request
+- rate limits required
+- stop conditions required
+- evidence logging required
+- no exploit execution
+- no destructive actions
+
+Semantics:
+- web-assessment-report: reporta límites, autorización, intensidad y evidencia.
+
 ## Use When
 - Findings contract is finalized.
 - Stakeholders need executive and technical reporting structure.
@@ -37,6 +52,7 @@ Produce a consistent final reporting contract summarizing risk posture, findings
 
 ## Outputs
 - `web-assessment-report.md` with final report structure and closure checklist.
+- MUST include explicit reporting of authorization state, testing intensity profile, applied limits, and evidence anchors.
 
 ## Boundaries
 - Authorization required before live target interaction.
@@ -71,6 +87,7 @@ Report contract defined with traceability, limitations, and residual risk commun
 
 ## Handoffs
 - to `support/issue-creation` for remediation tracking artifact creation when requested.
+- Command safety canonical source: `security/web-assessment-requests`.
 
 ## Quality Checklist
 - [ ] Report sections are explicit and complete.

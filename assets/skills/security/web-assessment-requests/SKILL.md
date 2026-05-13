@@ -19,6 +19,53 @@ metadata:
 ## Purpose
 Define the request approval workflow and template structure, ensuring no live request is executed by default.
 
+## Tooling Policy / Command Safety
+This skill is the canonical source for web-assessment request/tooling safety policy.
+
+### Core Safety Anchors (mandatory)
+- no execution by default
+- explicit approval per request
+- authorized target required
+- exact scope required
+- allowed tools required
+- prohibited actions required
+- rate limits required
+- stop conditions required
+- evidence logging required
+- no exploit execution
+- no destructive actions
+- no DoS/load testing
+- no credential attacks
+- no mass scanning
+- no out-of-scope scanning
+- no secrets exposure
+
+### Tool Classes (explicit)
+- Passive inspection
+- Single-request verification
+- Low-noise mapping
+- Authenticated test with provided test credentials
+- Prohibited / requires separate explicit approval
+
+### Request Safety Contract
+Every proposed request MUST include:
+1. Authorization evidence reference.
+2. Exact scope anchor (target/environment/path/asset).
+3. Tool class and specific allowed tool selection.
+4. Intensity/rate profile and stop condition reference.
+5. Expected evidence artifact(s) and logging destination.
+6. Explicit per-request approval record before execution.
+
+Default deny rules:
+- Deny when authorization is missing, stale, or ambiguous.
+- Deny when scope is broad/implicit/open-ended.
+- Deny when tool class maps to prohibited activity without separate explicit approval.
+- Deny when evidence logging plan is absent.
+- Deny when stop conditions are undefined.
+
+### Canonical Delegation Rule
+Other web-assessment skills MUST summarize only the subset relevant to their stage and defer full command safety semantics to `security/web-assessment-requests`.
+
 ## Use When
 - Test plan is approved and safety boundaries are explicit.
 - A formal request gate is needed before any target interaction.
@@ -76,3 +123,5 @@ Request gate and templates defined; execution remains explicitly disabled by def
 - [ ] Explicit approval required before each request.
 - [ ] Deny conditions cover out-of-scope and prohibited actions.
 - [ ] No runtime tooling/request execution is implied.
+- [ ] Core Safety Anchors are preserved with exact tokens.
+- [ ] Tool Classes are listed explicitly and mapped to approvals.

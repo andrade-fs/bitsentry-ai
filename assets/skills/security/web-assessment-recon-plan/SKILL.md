@@ -19,6 +19,19 @@ metadata:
 ## Purpose
 Define a structured reconnaissance approach for an authorized web target while staying strictly declarative and non-operational.
 
+## Tooling Policy / Command Safety
+This stage is planning-only and follows the canonical policy in `security/web-assessment-requests`.
+- no execution by default
+- explicit approval per request
+- authorized target required
+- exact scope required
+- no out-of-scope scanning
+- no mass scanning
+- evidence logging required
+
+Semantics:
+- web-assessment-recon-plan: planifica, no ejecuta.
+
 ## Use When
 - Authorization and exact scope are explicitly validated.
 - The assessment requires planning of surface discovery before any live interaction.
@@ -71,6 +84,7 @@ Recon strategy defined with explicit approvals and non-operational guardrails.
 
 ## Handoffs
 - to `security/web-assessment-map` with approved recon strategy constraints.
+- Command safety canonical source: `security/web-assessment-requests`.
 
 ## Quality Checklist
 - [ ] Recon plan is declarative only (no tooling/runtime execution).

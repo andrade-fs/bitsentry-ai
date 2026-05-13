@@ -19,6 +19,18 @@ metadata:
 ## Purpose
 Produce a structured map of in-scope web surface, trust boundaries, and priority areas from declared target context.
 
+## Tooling Policy / Command Safety
+This stage uses only authorized evidence and follows canonical safety in `security/web-assessment-requests`.
+- no execution by default
+- authorized target required
+- exact scope required
+- allowed tools required
+- prohibited actions required
+- no out-of-scope scanning
+
+Semantics:
+- web-assessment-map: mapea desde evidencia autorizada, no escanea fuera de scope.
+
 ## Use When
 - Recon plan exists and remains within approved scope.
 - The team needs prioritization before defining tests.
@@ -71,6 +83,7 @@ Web surface map prepared with prioritized zones and explicit assumptions.
 
 ## Handoffs
 - to `security/web-assessment-test-plan` with prioritized map and assumptions.
+- Command safety canonical source: `security/web-assessment-requests`.
 
 ## Quality Checklist
 - [ ] In-scope assets are explicit and bounded.

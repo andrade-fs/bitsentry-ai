@@ -340,3 +340,91 @@ func mustReadText(t *testing.T, path string) string {
 	}
 	return string(raw)
 }
+
+func TestWebAssessmentRequestsCanonicalToolingPolicyAnchors(t *testing.T) {
+	content := mustReadText(t, "../../assets/skills/security/web-assessment-requests/SKILL.md")
+
+	requiredAnchors := []string{
+		"Tooling Policy / Command Safety",
+		"no execution by default",
+		"explicit approval per request",
+		"authorized target required",
+		"exact scope required",
+		"allowed tools required",
+		"prohibited actions required",
+		"rate limits required",
+		"stop conditions required",
+		"evidence logging required",
+		"no exploit execution",
+		"no destructive actions",
+		"no DoS/load testing",
+		"no credential attacks",
+		"no mass scanning",
+		"no out-of-scope scanning",
+		"no secrets exposure",
+	}
+
+	for _, token := range requiredAnchors {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-assessment-requests missing mandatory policy anchor %q", token)
+		}
+	}
+}
+
+func TestWebAssessmentRequestsToolClassesContract(t *testing.T) {
+	content := mustReadText(t, "../../assets/skills/security/web-assessment-requests/SKILL.md")
+
+	toolClasses := []string{
+		"Passive inspection",
+		"Single-request verification",
+		"Low-noise mapping",
+		"Authenticated test with provided test credentials",
+		"Prohibited / requires separate explicit approval",
+	}
+
+	for _, token := range toolClasses {
+		if !strings.Contains(content, token) {
+			t.Fatalf("web-assessment-requests missing tool class %q", token)
+		}
+	}
+}
+
+func TestWebAssessmentSkillsPolicySummaryAndCanonicalReference(t *testing.T) {
+	paths := []string{
+		"../../assets/skills/security/web-assessment-recon-plan/SKILL.md",
+		"../../assets/skills/security/web-assessment-map/SKILL.md",
+		"../../assets/skills/security/web-assessment-test-plan/SKILL.md",
+		"../../assets/skills/security/web-assessment-findings/SKILL.md",
+		"../../assets/skills/security/web-assessment-report/SKILL.md",
+	}
+
+	for _, p := range paths {
+		content := mustReadText(t, p)
+		for _, token := range []string{
+			"Tooling Policy / Command Safety",
+			"no execution by default",
+			"security/web-assessment-requests",
+		} {
+			if !strings.Contains(content, token) {
+				t.Fatalf("%s missing policy summary/canonical reference token %q", p, token)
+			}
+		}
+	}
+}
+
+func TestWebAssessmentSkillsRequiredSemanticsAnchors(t *testing.T) {
+	checks := map[string]string{
+		"../../assets/skills/security/web-assessment-recon-plan/SKILL.md": "web-assessment-recon-plan: planifica, no ejecuta.",
+		"../../assets/skills/security/web-assessment-map/SKILL.md":        "web-assessment-map: mapea desde evidencia autorizada, no escanea fuera de scope.",
+		"../../assets/skills/security/web-assessment-test-plan/SKILL.md":  "web-assessment-test-plan: define intensidad, rate limits, stop conditions y logging plan.",
+		"../../assets/skills/security/web-assessment-findings/SKILL.md":   "web-assessment-findings: findings solo con evidencia autorizada.",
+		"../../assets/skills/security/web-assessment-report/SKILL.md":     "web-assessment-report: reporta límites, autorización, intensidad y evidencia.",
+	}
+
+	for path, token := range checks {
+		content := mustReadText(t, path)
+		if !strings.Contains(content, token) {
+			t.Fatalf("%s missing required semantics anchor %q", path, token)
+		}
+	}
+}

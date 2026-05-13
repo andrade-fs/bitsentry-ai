@@ -215,6 +215,18 @@ Execution Phases (per flow)
 - Preserved boundaries and guardrails: authorization + exact scope required, explicit permission before requests, no runtime flow execution, no tooling execution, no exploit/DoS/credential attacks/destructive actions/secrets exposure, no MCP credential mutation, no autonomous mode, OpenCode-first, CLI debug/plumbing only, `agent.bitsentry.permission.edit=deny`.
 - Kept intent default unchanged: `default_flow: source-security-review`.
 
+### Phase 7.5C Web Assessment Tooling Policy / Command Safety Contract (OpenCode-only)
+
+- Defined canonical request/tooling safety contract in:
+  - `assets/skills/security/web-assessment-requests/SKILL.md`
+- Added mandatory exact-token anchors for command safety policy:
+  - `Tooling Policy / Command Safety`, `no execution by default`, `explicit approval per request`, `authorized target required`, `exact scope required`, `allowed tools required`, `prohibited actions required`, `rate limits required`, `stop conditions required`, `evidence logging required`, `no exploit execution`, `no destructive actions`, `no DoS/load testing`, `no credential attacks`, `no mass scanning`, `no out-of-scope scanning`, `no secrets exposure`.
+- Added explicit tool classes contract:
+  - `Passive inspection`, `Single-request verification`, `Low-noise mapping`, `Authenticated test with provided test credentials`, `Prohibited / requires separate explicit approval`.
+- Updated non-canonical web-assessment skills to include policy summary + canonical reference to `security/web-assessment-requests` with required stage semantics.
+- Added static anchor tests in `internal/capabilities/security_contracts_test.go`; no runtime flow/tool execution added.
+- Kept flow stability: `assets/flows/web-assessment.yaml` unchanged, same stage IDs/order and graph.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

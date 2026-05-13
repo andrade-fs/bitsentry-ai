@@ -335,8 +335,18 @@ Minimal 6.5 roadmap note:
 - Preserved strict non-operational scope: no runtime flow execution, no live target requests, no tooling execution, no exploits/DoS/credential attacks/destructive actions.
 - Kept route default invariant: `default_flow: source-security-review`; `web-assessment` remains explicit authorized alternative.
 
+### Phase 7.5C — Web Assessment Tooling Policy / Command Safety Contract (completed)
+- Scope bounded to skills + tests + docs (no runtime and no live execution).
+- Defined canonical safety policy in `assets/skills/security/web-assessment-requests/SKILL.md` with exact mandatory anchors:
+  - `Tooling Policy / Command Safety`, `no execution by default`, `explicit approval per request`, `authorized target required`, `exact scope required`, `allowed tools required`, `prohibited actions required`, `rate limits required`, `stop conditions required`, `evidence logging required`, `no exploit execution`, `no destructive actions`, `no DoS/load testing`, `no credential attacks`, `no mass scanning`, `no out-of-scope scanning`, `no secrets exposure`.
+- Added explicit tool classes contract:
+  - `Passive inspection`, `Single-request verification`, `Low-noise mapping`, `Authenticated test with provided test credentials`, `Prohibited / requires separate explicit approval`.
+- Updated web-assessment recon/map/test-plan/findings/report skills to keep only summary policy semantics and explicit canonical delegation to `security/web-assessment-requests`.
+- Added static contract tests in `internal/capabilities/security_contracts_test.go` for mandatory anchors, tool classes, canonical reference, and required per-skill semantics tokens.
+- Preserved flow stability: `assets/flows/web-assessment.yaml` left intact (no gate changes, no stage ID/order/graph changes).
+
 - Next Phase 7 tracks:
-- 7.5C Web Assessment routing/classifier hardening and gated UX handshake (next)
+- 7.5D Web Assessment routing/classifier hardening and gated UX handshake (next)
 - Profile composition and inheritance
 - Dynamic model/provider routing by task type
 - Policy controls for cost, latency, and capability
