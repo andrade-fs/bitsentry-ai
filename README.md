@@ -299,6 +299,68 @@ Execution Phases (per flow)
   - no live target testing,
   - no execute method introduced in 7.7B.
 
+### Phase 7.8A Passive Discovery Planner (offline-only MVP)
+
+- Added deterministic offline `DiscoveryPlan` contract in `internal/securityweb` for passive discovery planning only.
+- MVP planned paths are fixed and explicit:
+  - `HEAD /`
+  - `GET /`
+  - `GET /robots.txt`
+  - `GET /sitemap.xml`
+  - `GET /.well-known/security.txt`
+- Explicitly excluded optional paths for this MVP:
+  - `/favicon.ico`
+  - `/.well-known/change-password`
+- Planner scope remains non-operational and safety-gated:
+  - no runtime/network execution,
+  - `would_execute=false` always,
+  - policy validation for every planned request,
+  - evidence template generated for every planned request,
+  - GET/HEAD only; no payloads, no fuzzing, no wordlists, no crawling, no automatic redirects.
+
+### Phase 7.8B Controlled HTTP Executor Design (design-only)
+
+- Added dedicated design contract document:
+  - `docs/design/controlled-http-executor.md`
+- Defined strict per-request `ExecutionApproval` model and policy enforcement order for future execution phases.
+- Locked redirect/default posture anchors:
+  - `follow_redirects=false`
+  - no redirects followed by default
+  - out-of-scope redirect requires new approval
+- Locked first executable MVP constraints (future):
+  - GET/HEAD only first MVP
+  - one request at a time
+  - no POST, no payloads, no crawler, no scanner, no background execution
+- Added lightweight contractual anchor tests in `internal/capabilities/security_contracts_test.go`.
+- Scope remains strictly non-operational in 7.8B:
+  - no `net/http`, no runtime flow execution, no live target testing, no real network.
+
+### Phase 7.8C Controlled HTTP Executor Offline Contracts (implemented)
+
+- Added offline executable contracts in `internal/securityweb`:
+  - `OfflineControlledExecutor` (separate component)
+  - `ExecutionApproval` / `ExecutionResult` contracts
+  - deterministic `FakeTransport` (primary `RequestRef`, fallback `Method+URL` only when `RequestRef` is empty)
+- Enforced approval gate and mismatch/expiry denies:
+  - approval required,
+  - request ID mismatch denied,
+  - method mismatch denied,
+  - URL mismatch denied,
+  - missing or expired `ExpiresAt` denied.
+- Enforced execution constraints:
+  - GET/HEAD allowed with valid approval,
+  - POST denied,
+  - one request at a time,
+  - `follow_redirects=false` default,
+  - out-of-scope redirect denied/requires new approval.
+- Enforced evidence/redaction result metadata:
+  - `EvidenceID`,
+  - `BodyTruncated`, `BodyPreviewRedacted`, `ResponseSize`, `MaxPreviewSize`,
+  - redaction coverage for `Authorization`, `Cookie`, `Set-Cookie`, Bearer tokens, sensitive query values.
+- Added offline contract tests in `internal/securityweb/executor_test.go` + static import guards:
+  - no `net/http` import,
+  - no `os/exec` import.
+
 ### Available Flows
 
 | Flow | Purpose | Skills | Status |

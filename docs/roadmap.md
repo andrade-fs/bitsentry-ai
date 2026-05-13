@@ -426,3 +426,61 @@ Minimal 6.5 roadmap note:
   - no `ExecuteApproved` method
   - no runtime flow/network/tool execution
 - Added focused tests for policy denies, redaction, evidence contract fields, and static import safety (`net/http`, `os/exec` denied in package).
+
+### Phase 7.8A — Passive Discovery Planner Offline MVP (completed)
+- Added `DiscoveryPlan` as a separate offline type in `internal/securityweb/types.go`.
+- Implemented deterministic passive discovery planner output in `internal/securityweb/dryrun.go` with fixed MVP requests:
+  - `HEAD /`
+  - `GET /`
+  - `GET /robots.txt`
+  - `GET /sitemap.xml`
+  - `GET /.well-known/security.txt`
+- Kept optional paths out of scope for 7.8A MVP (`/favicon.ico`, `/.well-known/change-password`).
+- Enforced non-operational boundary:
+  - planner contract-only for `planning_only`/`dry_run`
+  - `would_execute=false` always
+  - no runtime/network/DNS/TLS/http-client execution
+  - no payloads/fuzzing/wordlists/crawling/redirect-following
+- Added tests in `internal/securityweb/discovery_planner_test.go` for MVP paths, method constraints, scope validation, out-of-scope denial, mode behavior, and evidence-template-per-request contract.
+
+### Phase 7.8B — Controlled HTTP Executor Design + Contract Anchors (completed)
+- Added dedicated design-only document:
+  - `docs/design/controlled-http-executor.md`
+- Documented required 7.8B contract scope:
+  - purpose/non-goals,
+  - lifecycle + adapter relationship,
+  - conceptual executor architecture,
+  - strict per-request `ExecutionApproval` fields,
+  - policy enforcement order,
+  - redirect deny-by-default policy,
+  - first executable MVP constraints,
+  - future `ExecutionResult` schema with redaction/storage limits,
+  - future FakeTransport-only testing strategy.
+- Updated `docs/design/web-request-adapter.md` with explicit 7.8B design reference.
+- Added lightweight contractual anchor tests in `internal/capabilities/security_contracts_test.go` for 7.8B required tokens.
+- Preserved strict boundaries:
+  - docs + tests only,
+  - no executor runtime implementation,
+  - no `net/http`, no real network, no live target testing, no crawler/scanner/runtime execution.
+
+### Phase 7.8C — Controlled HTTP Executor Offline Executable Contracts (completed)
+- Implemented offline executor contracts in `internal/securityweb`:
+  - `ExecutionApproval`, `ExecutionResult`
+  - separate `OfflineControlledExecutor`
+  - deterministic `FakeTransport` (RequestRef-first, fallback Method+URL only when RequestRef is empty)
+- Enforced mandatory policy/approval invariants:
+  - approval required for execute_approved
+  - request ID, method, and URL must match approval
+  - missing/expired `ExpiresAt` denied (`TTLSeconds` kept as metadata/audit)
+  - GET/HEAD valid with approval, POST denied
+  - one request at a time
+  - `follow_redirects=false` default
+  - out-of-scope redirects denied and require new approval
+- Added additive violation code families without breaking existing ones:
+  - `approval_*`, `redirect_*`, `limiter_*`
+- Added response preview/redaction metadata behavior:
+  - preview truncation via max response size
+  - `BodyTruncated`, `BodyPreviewRedacted`, `ResponseSize`, `MaxPreviewSize`
+  - sensitive header/body/query redaction coverage
+  - evidence linkage via `EvidenceID`
+- Added/updated tests in `internal/securityweb/executor_test.go` and validated static guardrails (no `net/http`, no `os/exec` imports).

@@ -207,3 +207,48 @@ Explicitly out of 7.7B scope:
 - no `ExecuteApproved`
 - no network execution
 - no live target testing/tooling execution
+
+### 13) 7.8A Passive Discovery Planner (offline-only)
+
+7.8A introduces an offline `DiscoveryPlan` artifact in `internal/securityweb` for deterministic passive discovery planning only.
+
+Implemented MVP request set (fixed order):
+- `HEAD /`
+- `GET /`
+- `GET /robots.txt`
+- `GET /sitemap.xml`
+- `GET /.well-known/security.txt`
+
+Explicitly excluded in 7.8A MVP:
+- `/favicon.ico`
+- `/.well-known/change-password`
+
+7.8A safety/behavior rules:
+- planner operates only as offline planning contract (no runtime execution)
+- valid operating modes are `planning_only` and `dry_run` for this planner
+- `would_execute = false` always
+- GET/HEAD only, no payloads
+- no dynamic query params, no fuzzing, no wordlists, no crawling
+- no automatic redirect following
+- every planned request is policy-validated
+- every planned request receives an evidence template entry with stable reference IDs
+
+### 14) 7.8B Controlled HTTP Executor design reference
+
+Phase 7.8B adds a dedicated design-only contract document:
+
+- `docs/design/controlled-http-executor.md`
+
+7.8B is intentionally limited to docs + lightweight contractual anchors and does **not** introduce runtime executor behavior, `net/http`, or real network execution.
+
+### 15) 7.8C Offline Controlled Executor implementation note
+
+7.8C introduces an offline executable component in `internal/securityweb`:
+
+- `OfflineControlledExecutor` (separate from planner/adapter)
+- `ExecutionApproval` with `expires_at` authoritative and `ttl_seconds` as metadata/audit
+- `FakeTransport` deterministic lookup (primary `request_ref`, fallback `method+url` only if `request_ref` is empty)
+- additive violation-code prefixes: `approval_*`, `redirect_*`, `limiter_*`
+- `ExecutionResult` metadata contract including `evidence_id`, `body_truncated`, `body_preview_redacted`, `response_size`, `max_preview_size`
+
+Boundary remains strict: no real network, no `net/http`, no runtime flow execution.

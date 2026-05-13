@@ -1,5 +1,7 @@
 package securityweb
 
+import "time"
+
 type ExecutionMode string
 
 const (
@@ -75,6 +77,21 @@ type PlannedRequest struct {
 	Headers    map[string]string
 }
 
+type DiscoveryPlanItem struct {
+	Request          PlannedRequest
+	PolicyDecision   PolicyDecision
+	PolicyViolations []PolicyViolation
+	EvidenceTemplate EvidenceEntry
+}
+
+type DiscoveryPlan struct {
+	PlanRef       string
+	Target        string
+	ExecutionMode ExecutionMode
+	WouldExecute  bool
+	Items         []DiscoveryPlanItem
+}
+
 type PolicyDecision struct {
 	Allowed    bool
 	Reason     string
@@ -123,6 +140,47 @@ type OfflineAdapter struct {
 	evaluator PolicyEvaluator
 	planner   DryRunPlanner
 	recorder  EvidenceRecorder
+}
+
+type ExecutionApproval struct {
+	ApprovalID            string
+	ApprovedRequestID     string
+	ApprovedMethod        RequestMethod
+	ApprovedURL           string
+	ApprovedScopeRef      string
+	ApprovedExecutionMode ExecutionMode
+	ApprovedToolClass     ToolClass
+	ApprovedIntensity     Intensity
+	ApprovedAt            time.Time
+	ApprovedBy            string
+	ExpiresAt             time.Time
+	TTLSeconds            int
+	ApprovalTextOrHash    string
+	MaxRequests           int
+	MaxDurationSeconds    int
+	RateLimitPerMinute    int
+	StopConditions        []string
+}
+
+type ExecutionResult struct {
+	RequestID            string
+	EvidenceID           string
+	Method               RequestMethod
+	URL                  string
+	StatusCode           int
+	FinalURL             string
+	RedirectObserved     bool
+	RedirectLocation     string
+	HeadersRedacted      map[string]string
+	BodyPreviewRedacted  string
+	BodyTruncated        bool
+	ResponseSize         int64
+	MaxPreviewSize       int64
+	PolicyDecision       string
+	Violations           []PolicyViolation
+	LinkedFindingIDs     []string
+	FollowRedirects      bool
+	SensitiveDataRedacted bool
 }
 
 func NewOfflineAdapter(evaluator PolicyEvaluator, planner DryRunPlanner, recorder EvidenceRecorder) *OfflineAdapter {
