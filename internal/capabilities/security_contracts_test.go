@@ -944,3 +944,26 @@ func TestSecurityContracts_FirstOwnedTargetHeadDryRunGate(t *testing.T) {
 		}
 	}
 }
+
+
+func TestSecurityContracts_FirstOwnedTargetEvidenceNormalization(t *testing.T) {
+	content := mustReadText(t, "../../docs/evidence/web-assessment/phase-7-17c-normalized-pipeline.md")
+	required := []string{
+		"Phase 7.17C — First Owned Target Evidence Normalization",
+		"evidence normalization only",
+		"no request executed in 7.17C",
+		"candidate not confirmed",
+		"WebTestPlan remains planning_only",
+		"no active checks",
+		"no new requests",
+		"HEAD-only evidence",
+		"hf-referrer-weak",
+		"headers-security-review",
+		"evidence_id preserved",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("first-owned-target evidence normalization missing anchor %q", token)
+		}
+	}
+}

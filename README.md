@@ -1296,3 +1296,20 @@ bitsentry-ai doctor
   - no live target execution
   - dry-run gate ready
   - future manual execution pending
+
+
+### Phase 7.17C — First Owned Target Evidence Normalization
+
+- Added evidence artifacts:
+  - `docs/evidence/web-assessment/phase-7-17b-first-owned-head.md`
+  - `docs/evidence/web-assessment/phase-7-17c-normalized-pipeline.md`
+- Split factual run evidence (7.17B) from normalized pipeline interpretation (7.17C).
+- Preserved constraints:
+  - evidence normalization only
+  - no runtime
+  - no live target execution
+  - no new request
+  - candidate finding not confirmed (`hf-referrer-weak` remains candidate)
+  - WebTestPlan planning_only
+- Status:
+  - completed / PASS WITH NOTES

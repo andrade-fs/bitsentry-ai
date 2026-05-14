@@ -649,3 +649,16 @@ Minimal 6.5 roadmap note:
   - no live target execution
   - dry-run gate ready
   - future manual execution pending
+
+
+### Phase 7.17C — First Owned Target Evidence Normalization
+- Added factual evidence record for first owned-target HEAD run in `docs/evidence/web-assessment/phase-7-17b-first-owned-head.md`.
+- Added normalized pipeline artifact in `docs/evidence/web-assessment/phase-7-17c-normalized-pipeline.md`.
+- Preserved strict boundaries:
+  - completed / PASS WITH NOTES
+  - evidence normalization only
+  - no runtime
+  - no live target execution
+  - no new request
+  - candidate finding not confirmed
+  - WebTestPlan planning_only
