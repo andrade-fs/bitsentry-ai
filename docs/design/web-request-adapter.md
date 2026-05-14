@@ -324,3 +324,11 @@ Passive planning pipeline now includes:
 `RiskHypothesisSet -> WebTestPlan`
 
 This step prepares non-executing, safety-gated test plan items with traceability and explicit scope/approval blockers.
+
+### 24) 7.15 Controlled plan bridge mapping
+
+Added a non-executing bridge layer:
+
+`WebTestPlan -> ControlledCheckPlan (dry_run artifacts)`
+
+This bridge creates planned request artifacts, future-facing approvals, policy decisions, and evidence templates without network execution.

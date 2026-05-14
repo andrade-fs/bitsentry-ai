@@ -595,3 +595,9 @@ Minimal 6.5 roadmap note:
 - Added status-aware plan items (`planned`, `blocked_needs_scope`, `blocked_needs_approval`, `not_applicable`) and future-facing required approvals.
 - Preserved traceability across hypothesis IDs, evidence IDs, and suggested expert skills/next checks.
 - Preserved strict boundaries: no active checks, no request execution, no runtime operations.
+
+### Phase 7.15 — Controlled Check Plan / Request Plan Bridge (completed)
+- Implemented `ControlledCheckPlan` builder from `WebTestPlan` with deterministic `PlanID` and dry-run-only artifacts.
+- Added MVP-safe conversion for headers/robots/sitemap/security.txt next-check tokens into `PlannedRequest` contracts.
+- Added future-facing required approvals, evidence templates, policy decisions, and explicit bridge violations.
+- Preserved strict boundaries: no execution, no executor/transport invocation, no active checks.

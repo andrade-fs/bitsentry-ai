@@ -378,3 +378,24 @@ Safety boundaries preserved:
 - no active checks,
 - no crawler/scanner/fuzzing,
 - no confirmed findings.
+
+## 21) 7.15 Controlled Check Plan / Request Plan Bridge (implemented)
+
+Added controlled dry-run bridge in `internal/securityweb/check_plan_bridge.go`:
+- `BuildControlledCheckPlanFromWebTestPlan(plan WebTestPlan, ctx AssessmentSessionContext, baseTarget string) ControlledCheckPlan`
+
+MVP conversion map (planning-only):
+- `headers-hardening-review-dry-run` -> `HEAD /`
+- `robots-exposure-review-dry-run` -> `GET /robots.txt`
+- `sitemap-exposure-review-dry-run` -> `GET /sitemap.xml`
+- `securitytxt-governance-review-dry-run` -> `GET /.well-known/security.txt`
+
+Safety/contract guarantees:
+- execution mode fixed to `dry_run`
+- `WouldExecute=false` always
+- no executor invocation
+- no transport invocation
+- no active checks
+- no POST/query/payload/crawler behavior
+- non-convertible items emit `bridge_item_not_convertible_yet`
+- policy decisions are retained even when dry-run denies execution

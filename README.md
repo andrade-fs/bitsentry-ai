@@ -1215,3 +1215,10 @@ bitsentry-ai doctor
 - Added `WebTestPlan` builder from `RiskHypothesisSet` in `internal/securityweb/test_plan.go`.
 - Produces deterministic, planning-only test plan items with hypothesis/evidence/skill traceability.
 - Preserves safety posture: no execution, no request-ready defaults, no confirmed findings.
+
+### Phase 7.15 — Controlled Check Plan / Request Plan Bridge
+
+- Added `ControlledCheckPlan` bridge from `WebTestPlan` in `internal/securityweb/check_plan_bridge.go`.
+- Bridge converts a limited safe subset of dry-run checks into `PlannedRequest` artifacts only.
+- Preserves strict non-execution boundaries: `dry_run`, `WouldExecute=false`, no executor/transport invocation.
+- Emits future-facing required approvals, policy decisions, evidence templates, and violations for blocked/non-convertible items.

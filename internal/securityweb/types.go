@@ -492,3 +492,37 @@ type WebTestPlan struct {
 	RequiredApprovals    []RequiredApproval
 	Limitations          []string
 }
+
+type ControlledCheckPlanItem struct {
+	TestPlanItemID string
+	RequestRef     string
+	Planned        bool
+	Reason         string
+}
+
+type RequestPlanBridgeViolation struct {
+	ItemID string
+	Code   string
+	Reason string
+	Field  string
+}
+
+type RequestPlanPolicyDecision struct {
+	ItemID   string
+	RequestRef string
+	Decision PolicyDecision
+}
+
+type ControlledCheckPlan struct {
+	PlanID            string
+	FromWebTestPlanID string
+	ExecutionMode     ExecutionMode
+	WouldExecute      bool
+	PlannedRequests   []PlannedRequest
+	PlannedItems      []ControlledCheckPlanItem
+	RequiredApprovals []RequiredApproval
+	EvidenceTemplates []EvidenceEntry
+	PolicyDecisions   []RequestPlanPolicyDecision
+	Violations        []RequestPlanBridgeViolation
+	Limitations       []string
+}
