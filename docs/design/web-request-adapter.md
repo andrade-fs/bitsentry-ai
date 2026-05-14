@@ -332,3 +332,43 @@ Added a non-executing bridge layer:
 `WebTestPlan -> ControlledCheckPlan (dry_run artifacts)`
 
 This bridge creates planned request artifacts, future-facing approvals, policy decisions, and evidence templates without network execution.
+
+### 25) 7.16A controlled execution integration mapping (httptest-only)
+
+A test-only integration loop validates that bridged dry-run plan artifacts can be explicitly promoted (with approval) to executor validation in a safe test boundary:
+
+`ControlledCheckPlanItem -> explicit approval -> ExecuteApproved -> passive check`
+
+This is strictly non-operational in production pathways and remains httptest-only.
+
+
+### 18) 7.16B integration contract note (httptest-only)
+
+The adapter/executor transport boundary is now covered by end-to-end passive pipeline integration tests in `internal/securitywebhttp` using only `httptest` + real `securitywebhttp.Transport`.
+
+Validated chain:
+- `ExecutionResult` generation via `ExecuteApproved` with explicit per-request approval
+- passive evaluators for headers/robots/sitemap/security.txt
+- `SurfaceMap` candidate areas and signals
+- `RiskHypothesisSet` synthesis with suggested skills/checks
+- final `WebTestPlan` in `planning_only` mode
+
+Boundary remains unchanged:
+- no external-network tests
+- no operational live-target execution
+- no runtime flow execution
+
+
+### 26) 7.16C operational execution gate mapping (design-only)
+
+Added design contract reference:
+- `docs/design/operational-execution-gate.md`
+
+Adapter/executor mapping for future manual owned-target gate:
+- Session context does not grant execution alone (`execution_allowed=false by default`).
+- Per-request approval remains mandatory with exact `request_ref + method + url` match.
+- Manual boundary requires explicit approval token: `APPROVE request_ref=... method=... url=...`.
+- Ambiguous approvals are insufficient for concrete requests.
+- First owned-target run profile is one request only (`HEAD /` preferred, `GET /robots.txt` secondary).
+
+7.16C remains design-only and does not enable operational execution.

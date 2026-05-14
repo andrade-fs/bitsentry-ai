@@ -399,3 +399,63 @@ Safety/contract guarantees:
 - no POST/query/payload/crawler behavior
 - non-convertible items emit `bridge_item_not_convertible_yet`
 - policy decisions are retained even when dry-run denies execution
+
+## 22) 7.16A Execute Approved Controlled Check against httptest-only (integration tests)
+
+Added internal integration coverage (`internal/securityweb/integration_controlled_check_test.go`) to validate a controlled transition path:
+
+`WebTestPlanItem -> PlannedRequest (bridge dry_run) -> explicit ExecutionApproval -> ExecuteApproved (executor) -> ExecutionResult -> PassiveCheckResult`
+
+Scope and boundaries:
+- httptest-only transport execution for integration scenarios.
+- no external network tests.
+- no CLI/OpenCode/runtime flow execution.
+- no execute_approved auto-transition from planning; approval is explicit in tests only.
+
+Key assertions:
+- original `ControlledCheckPlan` remains `dry_run` and `WouldExecute=false`.
+- executor path uses `execute_approved` only with explicit per-request approval.
+- deny-before-transport holds for invalid/expired approval.
+- traceability chain preserved: request_ref -> approval_id -> evidence_id -> passive_check_result.
+
+
+## 16) 7.16B End-to-End Passive Pipeline over `httptest` (implemented)
+
+Phase 7.16B validates the internal integration loop using real `securitywebhttp.Transport` against `httptest` only:
+
+`ExecuteApproved -> passive checks -> SurfaceMap -> RiskHypothesisSet -> WebTestPlan`
+
+Key enforced constraints in integration tests:
+- `ControlledCheckPlan` remains `dry_run` + `WouldExecute=false`
+- transition to `execute_approved` occurs only inside test with explicit per-request approval
+- no external network, no CLI/OpenCode execution, no runtime flow execution
+- GET/HEAD only, no redirects followed, no auth/cookies, no crawler/scanner
+- traceability preserved: `request_ref -> approval_id -> evidence_id` and propagated into passive/surface/risk/plan artifacts
+- final `WebTestPlan.ExecutionMode` remains `planning_only`
+- generated outputs remain hypothesis/planning artifacts (no confirmed findings)
+
+
+## 23) 7.16C Operational Execution Gate Design (design-only)
+
+Design reference added:
+- `docs/design/operational-execution-gate.md`
+
+7.16C clarifies staged operational gating without enabling runtime behavior:
+- Level 0 `planning_only`
+- Level 1 `dry_run`
+- Level 2 `httptest execute_approved`
+- Level 3 `manual owned-target execute_approved` (future manual gate)
+- Levels 4-5 future-only (not enabled)
+
+Contract highlights:
+- `execution_allowed=false by default`
+- per-request approval required
+- no generic approval
+- exact manual token required for concrete requests: `APPROVE request_ref=... method=... url=...`
+- any mismatch => deny-before-transport
+- first owned-target run one request only (`HEAD /` preferred, `GET /robots.txt` secondary)
+
+Boundary remains unchanged in 7.16C:
+- design-only
+- no runtime
+- no live target execution

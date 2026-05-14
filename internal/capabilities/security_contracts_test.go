@@ -868,3 +868,33 @@ func TestControlledHTTPExecutorPhase79DHardeningAnchors(t *testing.T) {
 		}
 	}
 }
+
+
+func TestOperationalExecutionGateDesignAnchors(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/operational-execution-gate.md")
+	required := []string{
+		"Operational Execution Gate",
+		"execution_allowed=false by default",
+		"per-request approval required",
+		"no generic approval",
+		"manual boundary",
+		"APPROVE request_ref=",
+		"method=",
+		"url=",
+		"first owned-target run one request only",
+		"HEAD / preferred",
+		"GET /robots.txt secondary",
+		"no autonomous pentest",
+		"no background execution",
+		"audit trail",
+		"session_id",
+		"request_ref",
+		"approval_id",
+		"evidence_id",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("operational-execution-gate design missing anchor %q", token)
+		}
+	}
+}

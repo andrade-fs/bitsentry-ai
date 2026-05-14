@@ -601,3 +601,24 @@ Minimal 6.5 roadmap note:
 - Added MVP-safe conversion for headers/robots/sitemap/security.txt next-check tokens into `PlannedRequest` contracts.
 - Added future-facing required approvals, evidence templates, policy decisions, and explicit bridge violations.
 - Preserved strict boundaries: no execution, no executor/transport invocation, no active checks.
+
+### Phase 7.16A — Execute Approved Controlled Check against httptest only (completed)
+- Added httptest-only integration loop tests from bridged plan items to explicit approved executor calls.
+- Validated headers/robots passive check outcomes from execution results under controlled approval.
+- Validated deny-before-transport behavior with invalid/expired approval.
+- Preserved strict boundaries: no external network, no runtime execution, no operational CLI/OpenCode path.
+
+
+### Phase 7.16B — End-to-End Passive Pipeline over `httptest` (completed)
+- Added E2E passive pipeline integration tests with real `securitywebhttp.Transport` and `httptest` only.
+- Validated `ExecutionResult -> PassiveCheckResult -> SurfaceMap -> RiskHypothesisSet -> WebTestPlan` chain.
+- Preserved non-operational boundaries: no external network, no runtime flow execution, no live target testing.
+- Confirmed final planning artifacts remain `planning_only` and dry-run-oriented.
+
+
+### Phase 7.16C — Operational Execution Gate Design (completed / PASS WITH NOTES)
+- Added design-only operational gate contract in `docs/design/operational-execution-gate.md`.
+- Documented Level 0–5 gate model; 7.16C covers design up to Level 3 only.
+- Added explicit manual approval contract for concrete requests (`APPROVE request_ref=... method=... url=...`).
+- Added first owned-target run profile (one request only; `HEAD /` preferred, `GET /robots.txt` secondary).
+- Preserved strict boundaries: no runtime, no live target execution, operational run deferred to future phase.

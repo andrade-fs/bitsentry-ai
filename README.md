@@ -1222,3 +1222,41 @@ bitsentry-ai doctor
 - Bridge converts a limited safe subset of dry-run checks into `PlannedRequest` artifacts only.
 - Preserves strict non-execution boundaries: `dry_run`, `WouldExecute=false`, no executor/transport invocation.
 - Emits future-facing required approvals, policy decisions, evidence templates, and violations for blocked/non-convertible items.
+
+### Phase 7.16A — Execute Approved Controlled Check against httptest only
+
+- Added integration tests validating explicit approval execution path over `httptest` only.
+- Preserved planning boundary: `ControlledCheckPlan` remains `dry_run` and `WouldExecute=false`.
+- Verified traceability and deny-before-transport invariants from approved execution to passive check outputs.
+- No external network, no CLI/OpenCode runtime execution.
+
+
+### Phase 7.16B — End-to-End Passive Pipeline over `httptest` (completed)
+
+- Added `internal/securitywebhttp/integration_passive_pipeline_test.go` with two integration tests:
+  - happy coverage pipeline
+  - traceability/contracts pipeline
+- Uses real `securitywebhttp.Transport` + `httptest` only (no external network).
+- Validates chain: `ExecuteApproved -> PassiveCheckResult -> SurfaceMap -> RiskHypothesisSet -> WebTestPlan`.
+- Enforces safety contracts:
+  - `ControlledCheckPlan` remains `dry_run`
+  - `execute_approved` only inside tests with explicit per-request approval
+  - final `WebTestPlan.ExecutionMode = planning_only`
+  - suggested next checks remain dry-run/planning-only semantics
+  - no confirmed findings generation in this phase
+
+
+### Phase 7.16C — Operational Execution Gate Design (completed / PASS WITH NOTES)
+
+- Added design-only gate contract: `docs/design/operational-execution-gate.md`.
+- Defined Level 0–5 model and limited 7.16C scope to design up to Level 3 (manual owned-target gate).
+- Enforced contract anchors:
+  - `execution_allowed=false by default`
+  - per-request approval required
+  - no generic approval
+  - exact manual approval token: `APPROVE request_ref=... method=... url=...`
+  - first owned-target run one request only (`HEAD /` preferred, `GET /robots.txt` secondary)
+- Clarified this phase remains design-only:
+  - no runtime
+  - no live target execution
+  - operational run pending future phase
