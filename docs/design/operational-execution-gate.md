@@ -185,3 +185,15 @@ Design reference added:
 - `docs/design/manual-owned-target-run-protocol.md`
 
 This protocol defines the manual pre-run checklist, exact approval token validation, PASS/FAIL criteria, and evidence/audit expectations for a first future owned-target run without enabling runtime behavior in 7.16D.
+
+
+## 12) 7.17A First Owned Target HEAD Dry-Run Gate (design-only)
+
+Runbook reference:
+- `docs/runbooks/first-owned-target-head-dry-run.md`
+
+7.17A defines a dry-run operational preparation for Level 3 manual owned-target execution without enabling runtime:
+- no request is executed in 7.17A
+- one active request only: `first-owned-head-root` (`HEAD https://bitsentry.xyz/`)
+- exact approval token required for any future execution phase
+- `first-owned-robots` is not part of the active gate

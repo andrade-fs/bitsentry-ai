@@ -202,3 +202,15 @@ FAIL if:
 - no live target execution
 - protocol ready
 - future operational run pending
+
+
+### 14) 7.17A First Owned Target HEAD Dry-Run Gate
+
+Runbook reference:
+- `docs/runbooks/first-owned-target-head-dry-run.md`
+
+7.17A prepares the first owned-target manual gate as a dry-run artifact only.
+- no request is executed in 7.17A
+- active gate request is only `first-owned-head-root` (`HEAD https://bitsentry.xyz/`)
+- `first-owned-robots` is not part of the active gate and remains secondary/future
+- exact approval token remains mandatory for any future execution step

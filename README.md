@@ -1274,3 +1274,25 @@ bitsentry-ai doctor
   - no live target execution
   - protocol ready
   - future operational run pending
+
+
+### Phase 7.17A — First Owned Target HEAD / Manual Run Dry-Run Gate
+
+- Added dedicated runbook: `docs/runbooks/first-owned-target-head-dry-run.md`.
+- Defined concrete dry-run artifacts for owned-target manual gate preparation:
+  - assessment session context
+  - one-request active plan (`first-owned-head-root`, `HEAD https://bitsentry.xyz/`)
+  - approval draft (`approval-first-owned-head-root-001`)
+  - exact approval token requirement
+  - limits, stop conditions, expected result shape, and PASS/FAIL criteria
+- Clarified boundaries:
+  - no request is executed in 7.17A
+  - `first-owned-robots` is not part of the active gate
+  - generic approval rejected
+- Status:
+  - completed / PASS WITH NOTES
+  - design-only
+  - no runtime
+  - no live target execution
+  - dry-run gate ready
+  - future manual execution pending

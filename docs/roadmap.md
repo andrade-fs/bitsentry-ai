@@ -635,3 +635,17 @@ Minimal 6.5 roadmap note:
   - no live target execution
   - protocol ready
   - future operational run pending
+
+
+### Phase 7.17A — First Owned Target HEAD / Manual Run Dry-Run Gate
+- Added runbook `docs/runbooks/first-owned-target-head-dry-run.md` for the first owned-target dry-run gate.
+- Locked active plan to one request only: `first-owned-head-root` (`HEAD https://bitsentry.xyz/`).
+- Added exact approval draft/token contract (`approval-first-owned-head-root-001` + exact `APPROVE request_ref=... method=... url=...`).
+- Clarified `first-owned-robots` is secondary and not part of the active gate.
+- Status:
+  - completed / PASS WITH NOTES
+  - design-only
+  - no runtime
+  - no live target execution
+  - dry-run gate ready
+  - future manual execution pending

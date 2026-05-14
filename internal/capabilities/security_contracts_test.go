@@ -921,3 +921,26 @@ func TestSecurityContracts_ManualOwnedTargetRunProtocol(t *testing.T) {
 		}
 	}
 }
+
+
+func TestSecurityContracts_FirstOwnedTargetHeadDryRunGate(t *testing.T) {
+	content := mustReadText(t, "../../docs/runbooks/first-owned-target-head-dry-run.md")
+	required := []string{
+		"First Owned Target HEAD Dry-Run Gate",
+		"no request is executed in 7.17A",
+		"exact approval token is required",
+		"approval-first-owned-head-root-001",
+		"one request only",
+		"first-owned-head-root",
+		"HEAD https://bitsentry.xyz/",
+		"execution_allowed=false by default",
+		"generic approval rejected",
+		"no confirmed finding by default",
+		"first-owned-robots is not part of the active gate",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("first-owned-target dry-run gate missing anchor %q", token)
+		}
+	}
+}
