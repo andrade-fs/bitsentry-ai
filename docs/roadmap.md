@@ -662,3 +662,34 @@ Minimal 6.5 roadmap note:
   - no new request
   - candidate finding not confirmed
   - WebTestPlan planning_only
+
+
+### Phase 7.17D — First Owned Target Passive Report Draft
+- Added passive report artifact `docs/evidence/web-assessment/phase-7-17d-passive-report.md`.
+- Consolidated evidence-only reporting from 7.17B factual run + 7.17C normalized pipeline.
+- Preserved constraints:
+  - candidate finding, not confirmed vulnerability (`hf-referrer-weak`)
+  - no new request
+  - WebTestPlan remains planning_only
+- Status:
+  - completed / PASS WITH NOTES
+  - passive reporting only
+  - no runtime
+  - no live target execution
+  - no new request
+
+
+### Phase 7.17E — Close First Owned Target Run / Lessons Learned
+- Added closure artifact `docs/evidence/web-assessment/phase-7-17e-lessons-learned.md`.
+- Documented explicit distinction between blocked pre-transport attempt and final successful one-request execution.
+- Captured operational lessons and safeguards:
+  - no fabricated evidence
+  - candidate finding not confirmed
+  - exact approval UX must be preserved
+  - entrypoint formalization required
+- Status:
+  - completed / PASS WITH NOTES
+  - lessons learned only
+  - no runtime
+  - no live target execution
+  - no new request

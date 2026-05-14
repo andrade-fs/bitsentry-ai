@@ -967,3 +967,44 @@ func TestSecurityContracts_FirstOwnedTargetEvidenceNormalization(t *testing.T) {
 		}
 	}
 }
+
+
+func TestSecurityContracts_FirstOwnedTargetPassiveReportDraft(t *testing.T) {
+	content := mustReadText(t, "../../docs/evidence/web-assessment/phase-7-17d-passive-report.md")
+	required := []string{
+		"Phase 7.17D — First Owned Target Passive Report Draft",
+		"candidate finding, not confirmed vulnerability",
+		"HEAD-only evidence",
+		"no new requests",
+		"no body fetched",
+		"hf-referrer-weak",
+		"evidence_id preserved",
+		"WebTestPlan remains planning_only",
+		"passive reporting only",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("first-owned-target passive report missing anchor %q", token)
+		}
+	}
+}
+
+
+func TestSecurityContracts_FirstOwnedTargetLessonsLearned(t *testing.T) {
+	content := mustReadText(t, "../../docs/evidence/web-assessment/phase-7-17e-lessons-learned.md")
+	required := []string{
+		"Phase 7.17E — Close First Owned Target Run / Lessons Learned",
+		"first owned-target run closed",
+		"missing_max_preview_size blocked pre-transport",
+		"no fabricated evidence",
+		"candidate finding not confirmed",
+		"exact approval UX must be preserved",
+		"no new request in 7.17E",
+		"entrypoint formalization required",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("first-owned-target lessons learned missing anchor %q", token)
+		}
+	}
+}

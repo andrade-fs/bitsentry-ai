@@ -1313,3 +1313,40 @@ bitsentry-ai doctor
   - WebTestPlan planning_only
 - Status:
   - completed / PASS WITH NOTES
+
+
+### Phase 7.17D — First Owned Target Passive Report Draft
+
+- Added passive report artifact:
+  - `docs/evidence/web-assessment/phase-7-17d-passive-report.md`
+- Report is derived from prior normalized evidence only (7.17B/7.17C).
+- Preserved constraints:
+  - `hf-referrer-weak` remains candidate finding, not confirmed vulnerability
+  - no new request
+  - no runtime
+  - no live target execution
+  - WebTestPlan remains planning_only
+- Status:
+  - completed / PASS WITH NOTES
+  - passive reporting only
+  - no runtime
+  - no live target execution
+  - no new request
+
+
+### Phase 7.17E — Close First Owned Target Run / Lessons Learned
+
+- Added closure/lessons artifact:
+  - `docs/evidence/web-assessment/phase-7-17e-lessons-learned.md`
+- Explicitly separated blocked pre-transport attempt from final successful single HEAD execution.
+- Preserved conclusions:
+  - no fabricated evidence
+  - `hf-referrer-weak` remains candidate finding not confirmed
+  - exact approval UX must be preserved
+  - entrypoint formalization required
+- Status:
+  - completed / PASS WITH NOTES
+  - lessons learned only
+  - no runtime
+  - no live target execution
+  - no new request
