@@ -308,3 +308,19 @@ Passive evidence now supports a non-executing aggregation layer:
 `ExecutionResult + PassiveCheckResult[] -> SurfaceMap`
 
 This layer captures observed surface topology and candidate areas for future hypothesis stages while preserving strict no-network boundaries.
+
+### 22) 7.13 Risk hypotheses mapping
+
+A passive-only hypothesis layer now maps:
+
+`SurfaceMap -> RiskHypothesisSet`
+
+This layer routes candidate areas to suggested expert skills and dry-run next checks without executing requests or confirming vulnerabilities.
+
+### 23) 7.14 Web test plan mapping
+
+Passive planning pipeline now includes:
+
+`RiskHypothesisSet -> WebTestPlan`
+
+This step prepares non-executing, safety-gated test plan items with traceability and explicit scope/approval blockers.

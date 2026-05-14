@@ -373,3 +373,122 @@ type SurfaceMap struct {
 	EvidenceIDs     []string
 	Limitations     []string
 }
+
+type RiskHypothesisStatus string
+
+const (
+	RiskHypothesisProposed          RiskHypothesisStatus = "proposed"
+	RiskHypothesisNeedsMoreEvidence RiskHypothesisStatus = "needs_more_evidence"
+	RiskHypothesisNotApplicable     RiskHypothesisStatus = "not_applicable"
+)
+
+type RiskPriority string
+
+const (
+	RiskPriorityHigh   RiskPriority = "high"
+	RiskPriorityMedium RiskPriority = "medium"
+	RiskPriorityLow    RiskPriority = "low"
+)
+
+type SuggestedExpertSkill string
+
+const (
+	SkillHeadersSecurityReview SuggestedExpertSkill = "headers-security-review"
+	SkillAuthSecurityReview    SuggestedExpertSkill = "auth-security-review"
+	SkillXSSReview             SuggestedExpertSkill = "xss-review"
+	SkillGraphQLSecurityReview SuggestedExpertSkill = "graphql-security-review"
+	SkillFileUploadReview      SuggestedExpertSkill = "file-upload-review"
+	SkillSSRFReview            SuggestedExpertSkill = "ssrf-review"
+	SkillExposureReview        SuggestedExpertSkill = "exposure-review"
+	SkillAccessControlReview   SuggestedExpertSkill = "access-control-review"
+	SkillSecurityTxtReview     SuggestedExpertSkill = "securitytxt-review"
+)
+
+type SuggestedNextCheck string
+
+const (
+	NextHeadersHardeningReview     SuggestedNextCheck = "headers-hardening-review-dry-run"
+	NextRobotsExposureReview       SuggestedNextCheck = "robots-exposure-review-dry-run"
+	NextSitemapExposureReview      SuggestedNextCheck = "sitemap-exposure-review-dry-run"
+	NextScopeClarification         SuggestedNextCheck = "scope-clarification-dry-run"
+	NextSecurityTxtGovernance      SuggestedNextCheck = "securitytxt-governance-review-dry-run"
+	NextAuthBoundaryReview         SuggestedNextCheck = "auth-boundary-review-dry-run"
+	NextAccessControlReviewDryRun  SuggestedNextCheck = "access-control-review-dry-run"
+)
+
+type RiskHypothesis struct {
+	HypothesisID            string
+	Title                   string
+	Category                FindingCategory
+	Priority                RiskPriority
+	ConfidenceHint          ConfidenceHint
+	SourceCandidateAreaIDs  []string
+	SourceSignalIDs         []string
+	EvidenceIDs             []string
+	AffectedURLs            []string
+	AffectedPaths           []string
+	SuggestedExpertSkills   []SuggestedExpertSkill
+	SuggestedNextChecks     []SuggestedNextCheck
+	Reason                  string
+	Limitations             []string
+	Status                  RiskHypothesisStatus
+}
+
+type RiskHypothesisSet struct {
+	SetID       string
+	FromMapID   string
+	Hypotheses  []RiskHypothesis
+	EvidenceIDs []string
+	Limitations []string
+}
+
+type WebTestPlanStatus string
+
+const (
+	WebTestPlanStatusPlanned             WebTestPlanStatus = "planned"
+	WebTestPlanStatusBlockedNeedsScope   WebTestPlanStatus = "blocked_needs_scope"
+	WebTestPlanStatusBlockedNeedsApproval WebTestPlanStatus = "blocked_needs_approval"
+	WebTestPlanStatusNotApplicable       WebTestPlanStatus = "not_applicable"
+)
+
+type RequiredApproval struct {
+	ApprovalID    string
+	HypothesisID  string
+	Reason        string
+	RequiredMode  ExecutionMode
+	RequiredScope string
+	Notes         []string
+}
+
+type WebTestPlanItem struct {
+	ItemID                string
+	HypothesisID          string
+	Title                 string
+	Category              FindingCategory
+	Priority              RiskPriority
+	SuggestedExpertSkills []SuggestedExpertSkill
+	SuggestedNextCheck    SuggestedNextCheck
+	ExecutionMode         ExecutionMode
+	ToolClass             string
+	ProposedMethod        string
+	ProposedTarget        string
+	RequiresApproval      bool
+	ExpectedEvidence      string
+	SafetyNotes           []string
+	StopConditions        []string
+	EvidenceIDs           []string
+	Status                WebTestPlanStatus
+}
+
+type WebTestPlan struct {
+	PlanID               string
+	FromHypothesisSetID  string
+	ExecutionMode        ExecutionMode
+	Intensity            Intensity
+	RequestBudget        int
+	RateLimitPerMinute   int
+	StopConditions       []string
+	TestPlanItems        []WebTestPlanItem
+	RequiredApprovals    []RequiredApproval
+	Limitations          []string
+}

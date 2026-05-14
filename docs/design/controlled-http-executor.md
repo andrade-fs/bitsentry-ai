@@ -343,3 +343,38 @@ Boundaries:
 - no URL following.
 - no crawling/scanning.
 - no confirmed findings emitted by surface mapping.
+
+## 19) 7.13 Risk Hypotheses + Expert Skill Routing from SurfaceMap (implemented)
+
+Added non-executing hypothesis layer in `internal/securityweb/risk_hypotheses.go`:
+- `BuildRiskHypothesesFromSurfaceMap(SurfaceMap) RiskHypothesisSet`
+
+Contract:
+- hypotheses are triage proposals, not confirmed findings.
+- priority is triage order, not vulnerability severity.
+- confidence is derived from passive evidence only.
+- suggested checks are planning/dry-run only.
+
+Safety boundaries preserved:
+- no network requests,
+- no active checks,
+- no crawling/scanning/fuzzing,
+- no runtime execution.
+
+## 20) 7.14 Web Test Plan Builder from Risk Hypotheses (implemented)
+
+Added planning-only test-plan layer in `internal/securityweb/test_plan.go`:
+- `BuildWebTestPlanFromHypotheses(h RiskHypothesisSet, ctx *AssessmentSessionContext) WebTestPlan`
+
+Contract:
+- converts hypotheses into safe planning artifacts only.
+- no requests are executed or prepared as request-ready by default.
+- global execution mode defaults to `planning_only`.
+- `ProposedMethod` remains empty by default in MVP.
+- required approvals are future-facing and generated only for `blocked_needs_approval` items.
+
+Safety boundaries preserved:
+- no network requests,
+- no active checks,
+- no crawler/scanner/fuzzing,
+- no confirmed findings.

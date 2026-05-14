@@ -583,3 +583,15 @@ Minimal 6.5 roadmap note:
 - Added host/url/path deduplication, scope-status handling, surface signals, and candidate areas.
 - Added deterministic map id `surface-map-static-mvp` for stable tests.
 - Preserved strict non-executing boundaries: no new requests, no crawling, no runtime execution.
+
+### Phase 7.13 — Risk Hypotheses + Expert Skill Routing from SurfaceMap (completed)
+- Implemented `RiskHypothesisSet` from `SurfaceMap` with conservative triage-oriented hypothesis outputs.
+- Added candidate-area to expert-skill routing and dry-run/planning next-check tokens.
+- Preserved traceability: evidence IDs, source candidate areas, and source signals.
+- Preserved strict boundaries: no active checks, no new requests, no runtime execution.
+
+### Phase 7.14 — Test Plan Builder from Risk Hypotheses (completed)
+- Implemented `WebTestPlan` builder from `RiskHypothesisSet` with deterministic `PlanID` and planning-only defaults.
+- Added status-aware plan items (`planned`, `blocked_needs_scope`, `blocked_needs_approval`, `not_applicable`) and future-facing required approvals.
+- Preserved traceability across hypothesis IDs, evidence IDs, and suggested expert skills/next checks.
+- Preserved strict boundaries: no active checks, no request execution, no runtime operations.

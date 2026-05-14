@@ -1203,3 +1203,15 @@ bitsentry-ai doctor
 - Surface map builds hosts, URLs, paths, signals, candidate areas, and evidence references from passive evidence only.
 - Preserves conservative posture: signals/candidate areas only, no confirmed findings.
 - Kept strict boundaries: no network, no follow-up requests, no crawling/scanning.
+
+### Phase 7.13 — Risk Hypotheses + Expert Skill Routing from SurfaceMap
+
+- Added passive-only `RiskHypothesisSet` builder from `SurfaceMap`.
+- Produces triage hypotheses with priority/confidence hints, evidence traceability, source area/signal linkage, suggested expert skills, and dry-run next checks.
+- Hypotheses are not confirmed findings and do not trigger active checks.
+
+### Phase 7.14 — Test Plan Builder from Risk Hypotheses
+
+- Added `WebTestPlan` builder from `RiskHypothesisSet` in `internal/securityweb/test_plan.go`.
+- Produces deterministic, planning-only test plan items with hypothesis/evidence/skill traceability.
+- Preserves safety posture: no execution, no request-ready defaults, no confirmed findings.
