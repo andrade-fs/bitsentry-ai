@@ -214,3 +214,16 @@ Runbook reference:
 - active gate request is only `first-owned-head-root` (`HEAD https://bitsentry.xyz/`)
 - `first-owned-robots` is not part of the active gate and remains secondary/future
 - exact approval token remains mandatory for any future execution step
+
+
+### 15) 7.18A Manual Execution Entrypoint Formalization (preflight-only)
+
+7.18A introduces a formal CLI entrypoint for manual execution preflight only:
+- `bitsentry-ai securityweb manual-preflight`
+
+Contract in 7.18A:
+- preflight only (`would_execute=false` always)
+- no transport invocation
+- no network execution
+- exact approval token required and matched against request_ref/method/url
+- method restricted to HEAD and path restricted to `/` for MVP

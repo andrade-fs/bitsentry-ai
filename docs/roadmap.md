@@ -693,3 +693,18 @@ Minimal 6.5 roadmap note:
   - no runtime
   - no live target execution
   - no new request
+
+
+### Phase 7.18A — Manual Execution Entrypoint Formalization
+- Added formal preflight command `bitsentry-ai securityweb manual-preflight`.
+- Implemented `internal/securityweb` preflight service and CLI adapter with strict one-request HEAD/root/approval checks.
+- Enforced non-execution behavior in this phase:
+  - `would_execute=false`
+  - no transport invocation
+  - no external network
+- Status:
+  - completed / PASS WITH NOTES
+  - preflight only
+  - no runtime
+  - no live target execution
+  - no execution path added

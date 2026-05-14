@@ -40,6 +40,7 @@ func NewRootCmd() (*cobra.Command, error) {
 		newProfileCmd(rt),
 		newComponentsCmd(rt),
 		newCapabilitiesCmd(rt),
+		newSecuritywebCmd(),
 		newConfigCmd(),
 	)
 

@@ -97,3 +97,14 @@ FAIL if:
 - no live target execution
 - dry-run gate ready
 - future manual execution pending
+
+
+### 10) 7.18A Formal preflight command
+
+Formal entrypoint for manual dry-run validation:
+
+`bitsentry-ai securityweb manual-preflight --request-ref first-owned-head-root --method HEAD --url https://bitsentry.xyz/ --approval "APPROVE request_ref=first-owned-head-root method=HEAD url=https://bitsentry.xyz/" --dry-run`
+
+Notes:
+- 7.18A preflight does not execute requests (`would_execute=false`).
+- Any approval mismatch returns deny.

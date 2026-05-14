@@ -197,3 +197,18 @@ Runbook reference:
 - one active request only: `first-owned-head-root` (`HEAD https://bitsentry.xyz/`)
 - exact approval token required for any future execution phase
 - `first-owned-robots` is not part of the active gate
+
+
+## 13) 7.18A Manual Execution Entrypoint Formalization (preflight-only)
+
+7.18A adds a formal manual preflight entrypoint without enabling runtime execution:
+- command: `bitsentry-ai securityweb manual-preflight`
+- `execution_backend_available=true`
+- `entrypoint_available=true`
+- `would_execute=false`
+
+Scope guardrails:
+- no `manual-execute` path in 7.18A
+- no transport invocation
+- no external network requests
+- strict exact approval token matching

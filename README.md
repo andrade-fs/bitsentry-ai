@@ -1350,3 +1350,25 @@ bitsentry-ai doctor
   - no runtime
   - no live target execution
   - no new request
+
+
+### Phase 7.18A — Manual Execution Entrypoint Formalization
+
+- Added formal manual preflight entrypoint (no live execution):
+  - `bitsentry-ai securityweb manual-preflight`
+- Implemented shared preflight service in `internal/securityweb` and CLI wrapper in `internal/cli` with strict validations:
+  - exact approval token required
+  - method HEAD only
+  - root path `/` only
+  - request_budget must be `1`
+  - required limits and stop conditions enforced
+- Preflight contract outputs:
+  - `execution_backend_available=true`
+  - `entrypoint_available=true`
+  - `would_execute=false`
+- Status:
+  - completed / PASS WITH NOTES
+  - preflight only
+  - no runtime
+  - no live target execution
+  - no execution path added
