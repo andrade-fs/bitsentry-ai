@@ -269,3 +269,17 @@ Boundary remains strict: no real network, no `net/http`, no runtime flow executi
 
 
 - See also: `docs/design/controlled-http-executor.md` for the dedicated execution-layer design and 7.8D hardening constraints.
+
+### 18) 7.10A Passive Headers Check MVP mapping
+
+A first passive check module is now modeled in `internal/securityweb` as a pure post-execution analysis contract:
+
+- Input: `ExecutionResult` / response metadata.
+- Output: `HeaderCheckResult` with:
+  - `observations` (`present | missing | weak | not_applicable`)
+  - conservative `candidate findings`
+  - explicit `limitations`
+  - evidence linkage via `evidence_id`
+
+The module does not execute requests and does not alter approval/policy transport flow.
+It consumes already approved/executed evidence only.

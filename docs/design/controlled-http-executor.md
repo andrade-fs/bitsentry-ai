@@ -256,3 +256,31 @@ Phase 7.9C keeps architecture boundaries intact while enabling runtime transport
 - Result metadata required in tests: `RequestID`, `ApprovalID`, `EvidenceID`, `Method`, `URL`, `StatusCode`, `RedirectObserved`, `BodyTruncated`, `RedactionsApplied`, `SafetyNotes`.
 - Redirect handling hardening remains: `follow_redirects=false`, `redirect_location_invalid`, `redirect_out_of_scope`.
 - Boundary unchanged: offline-only + httptest-only integration tests, no external network tests.
+
+## 15) 7.10A Passive Headers Check MVP (implemented)
+
+This phase adds a **pure passive header analysis module** in `internal/securityweb`:
+
+- `check_headers.go`
+- `check_headers_test.go`
+
+Contract:
+- input is `ExecutionResult` metadata only (no new request execution).
+- output is `HeaderCheckResult` containing observations and conservative candidate findings.
+- `evidence_id` is required for traceability and is propagated to each candidate finding.
+- headers are evaluated case-insensitively.
+
+Safety/boundary invariants preserved:
+- no CLI/OpenCode execution changes.
+- no crawler/scanner/fuzzing/payloads.
+- no POST/auth/cookies.
+- no redirect following changes.
+- no runtime flow execution.
+- no external network tests.
+
+Behavior highlights:
+- missing CSP is not auto-High (conservative low/medium posture).
+- missing HSTS is only applicable on HTTPS.
+- clickjacking finding is deduplicated when CSP `frame-ancestors` covers missing X-Frame-Options.
+- explicit limitations are emitted when context is insufficient.
+- HEAD-only posture can emit a limitation note: `GET fallback may be needed in a future approved request` (planning-only; no execution).

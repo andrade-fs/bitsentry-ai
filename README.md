@@ -1165,3 +1165,13 @@ bitsentry-ai doctor
 - [Installation guide](docs/install.md)
 - [Architecture overview](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
+
+### Phase 7.10A — Passive Headers Check MVP (OpenCode-only safety boundary)
+
+- Added a pure passive security header check in `internal/securityweb`:
+  - `check_headers.go`
+  - `check_headers_test.go`
+- Input is `ExecutionResult` metadata; no additional request execution is performed.
+- Output provides observations and conservative candidate findings with severity/confidence hints.
+- Evidence traceability is preserved via `evidence_id` linkage in check results and finding candidates.
+- Boundaries remain unchanged: no CLI live testing, no crawler/scanner/fuzzing, no runtime flow execution, no external network tests.

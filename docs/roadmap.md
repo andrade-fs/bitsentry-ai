@@ -554,3 +554,13 @@ Minimal 6.5 roadmap note:
 - Hardened traceability with deterministic EvidenceID derived from `request_ref + approval_id`.
 - Added tests to verify transport invocation only on approved paths and request trace consistency.
 - Preserved offline-only boundaries and httptest-only integration stance.
+
+### Phase 7.10A — Passive Headers Check MVP (completed)
+- Implemented first passive web security check module in `internal/securityweb`.
+- Added `HeaderCheckResult` contract with:
+  - observation statuses (`present`, `missing`, `weak`, `not_applicable`),
+  - conservative candidate findings,
+  - explicit limitations,
+  - mandatory evidence linkage (`evidence_id`).
+- Added rule coverage for CSP, HSTS applicability, X-Content-Type-Options, clickjacking dedup (XFO vs CSP frame-ancestors), Referrer-Policy, and COOP/CORP/COEP/Permissions-Policy presence checks.
+- Kept strict boundaries: no runtime flow execution, no live target testing, no external network tests.
