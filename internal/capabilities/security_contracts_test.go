@@ -898,3 +898,26 @@ func TestOperationalExecutionGateDesignAnchors(t *testing.T) {
 		}
 	}
 }
+
+
+func TestSecurityContracts_ManualOwnedTargetRunProtocol(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/manual-owned-target-run-protocol.md")
+	required := []string{
+		"Manual Owned Target Run Protocol",
+		"one request only",
+		"first-owned-head-root",
+		"first-owned-robots",
+		"APPROVE request_ref=first-owned-head-root method=HEAD url=https://bitsentry.xyz/",
+		"generic approval invalid",
+		"observe only, do not follow",
+		"no confirmed finding by default",
+		"PASS/FAIL Protocol",
+		"design-only",
+		"no live target execution",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("manual-owned-target protocol missing anchor %q", token)
+		}
+	}
+}

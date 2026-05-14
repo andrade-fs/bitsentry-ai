@@ -372,3 +372,18 @@ Adapter/executor mapping for future manual owned-target gate:
 - First owned-target run profile is one request only (`HEAD /` preferred, `GET /robots.txt` secondary).
 
 7.16C remains design-only and does not enable operational execution.
+
+
+### 27) 7.16D manual owned-target run mapping (design-only)
+
+Added protocol reference:
+- `docs/design/manual-owned-target-run-protocol.md`
+
+Contract mapping:
+- request-plan rendering must be exact and human-reviewable
+- per-request manual approval remains exact-match (`request_ref + method + url`)
+- generic approvals are invalid
+- first future owned-target profile is one request only (`first-owned-head-root` preferred, `first-owned-robots` secondary)
+- redirects are observe only, do not follow
+
+7.16D remains design-only and does not enable operational execution.

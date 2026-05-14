@@ -622,3 +622,16 @@ Minimal 6.5 roadmap note:
 - Added explicit manual approval contract for concrete requests (`APPROVE request_ref=... method=... url=...`).
 - Added first owned-target run profile (one request only; `HEAD /` preferred, `GET /robots.txt` secondary).
 - Preserved strict boundaries: no runtime, no live target execution, operational run deferred to future phase.
+
+
+### Phase 7.16D — Manual Owned Target Run Protocol
+- Added design-only protocol document `docs/design/manual-owned-target-run-protocol.md`.
+- Documented first owned-target manual run shape: one request only, exact approval token, strict stop/limit controls, redacted evidence, and PASS/FAIL criteria.
+- Clarified `bitsentry.xyz` usage is documentation-only example in 7.16D (no execution).
+- Status:
+  - completed / PASS WITH NOTES
+  - design-only
+  - no runtime
+  - no live target execution
+  - protocol ready
+  - future operational run pending

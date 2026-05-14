@@ -459,3 +459,21 @@ Boundary remains unchanged in 7.16C:
 - design-only
 - no runtime
 - no live target execution
+
+
+## 24) 7.16D Manual Owned Target Run Protocol (design-only)
+
+Added manual protocol reference:
+- `docs/design/manual-owned-target-run-protocol.md`
+
+7.16D does not introduce executor runtime changes. It specifies how a future Level 3 owned-target manual run must be prepared and validated:
+- one request only
+- exact approval token required
+- deny-before-transport on any mismatch
+- observe redirects only (do not follow)
+- evidence redaction + audit trail mandatory
+
+Boundary remains unchanged:
+- design-only
+- no runtime
+- no live target execution

@@ -1260,3 +1260,17 @@ bitsentry-ai doctor
   - no runtime
   - no live target execution
   - operational run pending future phase
+
+
+### Phase 7.16D — Manual Owned Target Run Protocol
+
+- Added design-only manual protocol in `docs/design/manual-owned-target-run-protocol.md`.
+- Defined pre-run checklist, exact approval-token policy, validation rules, limits, expected evidence, output envelope, stop conditions, and PASS/FAIL protocol.
+- Included explicit documentation-only examples using `bitsentry.xyz` and clarified no execution in 7.16D.
+- Kept strict boundary:
+  - completed / PASS WITH NOTES
+  - design-only
+  - no runtime
+  - no live target execution
+  - protocol ready
+  - future operational run pending

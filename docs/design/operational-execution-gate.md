@@ -177,3 +177,11 @@ Minimum audit trail fields:
 - no runtime
 - no live target execution
 - operational run pending future phase
+
+
+## 11) 7.16D Manual Owned Target Run Protocol (design-only)
+
+Design reference added:
+- `docs/design/manual-owned-target-run-protocol.md`
+
+This protocol defines the manual pre-run checklist, exact approval token validation, PASS/FAIL criteria, and evidence/audit expectations for a first future owned-target run without enabling runtime behavior in 7.16D.
