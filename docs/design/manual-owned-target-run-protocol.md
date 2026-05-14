@@ -227,3 +227,11 @@ Contract in 7.18A:
 - no network execution
 - exact approval token required and matched against request_ref/method/url
 - method restricted to HEAD and path restricted to `/` for MVP
+
+
+### 16) 7.18B Manual execute design reference (design-only)
+
+Design contract reference:
+- `docs/design/manual-execution-entrypoint.md`
+
+This phase freezes future execute-entrypoint rules without implementing runtime command paths.

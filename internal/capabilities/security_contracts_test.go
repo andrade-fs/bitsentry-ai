@@ -1008,3 +1008,34 @@ func TestSecurityContracts_FirstOwnedTargetLessonsLearned(t *testing.T) {
 		}
 	}
 }
+
+
+func TestSecurityContracts_ManualExecutionEntrypointExecuteDesign(t *testing.T) {
+	content := mustReadText(t, "../../docs/design/manual-execution-entrypoint.md")
+	required := []string{
+		"Manual Execution Entrypoint Execute Design",
+		"manual-execute is not implemented in 7.18B",
+		"No claim execution unless ExecutionResult exists",
+		"No fabricated evidence",
+		"preflight deny stops before transport",
+		"--confirm-execute required",
+		"one request only",
+		"HEAD only first MVP",
+		"path / only first MVP",
+		"Candidate findings are not confirmed vulnerabilities",
+		"PREFLIGHT_DENIED",
+		"APPROVAL_DENIED",
+		"EXECUTION_DENIED_PRE_TRANSPORT",
+		"TRANSPORT_ERROR",
+		"EXECUTED",
+		"COMPLETED_WITH_CANDIDATES",
+		"COMPLETED_NO_CANDIDATES",
+		"7.18C httptest-only implementation",
+		"7.18D owned-target manual execution",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("manual execute design missing anchor %q", token)
+		}
+	}
+}

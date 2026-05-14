@@ -708,3 +708,15 @@ Minimal 6.5 roadmap note:
   - no runtime
   - no live target execution
   - no execution path added
+
+
+### Phase 7.18B — Manual Execution Entrypoint Execute Design
+- Added design-only execute entrypoint contract in `docs/design/manual-execution-entrypoint.md`.
+- Frozen required flags, preflight-first execution flow, output contract, canonical result states, and anti-footgun rules.
+- Confirmed boundary: manual-execute is not implemented in 7.18B.
+- Status:
+  - completed / PASS WITH NOTES
+  - execute design only
+  - no runtime
+  - no live target execution
+  - no execute path implemented

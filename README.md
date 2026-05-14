@@ -1372,3 +1372,21 @@ bitsentry-ai doctor
   - no runtime
   - no live target execution
   - no execution path added
+
+
+### Phase 7.18B — Manual Execution Entrypoint Execute Design
+
+- Added design contract document:
+  - `docs/design/manual-execution-entrypoint.md`
+- Frozen future `manual-execute` contract:
+  - required flags and strict preflight-before-transport flow
+  - canonical result state enums
+  - deny/output/evidence anti-footgun rules
+- Explicitly preserved boundary:
+  - manual-execute is not implemented in 7.18B
+- Status:
+  - completed / PASS WITH NOTES
+  - execute design only
+  - no runtime
+  - no live target execution
+  - no execute path implemented

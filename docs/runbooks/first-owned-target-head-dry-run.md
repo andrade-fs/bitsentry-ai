@@ -108,3 +108,10 @@ Formal entrypoint for manual dry-run validation:
 Notes:
 - 7.18A preflight does not execute requests (`would_execute=false`).
 - Any approval mismatch returns deny.
+
+
+### 11) 7.18B transition note
+
+- 7.18B defines execute-entrypoint contract only (design-only).
+- No `manual-execute` implementation is added in this phase.
+- Continue using `manual-preflight` as the only formal command path.

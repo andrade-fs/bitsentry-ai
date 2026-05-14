@@ -212,3 +212,12 @@ Scope guardrails:
 - no transport invocation
 - no external network requests
 - strict exact approval token matching
+
+
+## 14) 7.18B Manual execute entrypoint design (design-only)
+
+Design contract reference:
+- `docs/design/manual-execution-entrypoint.md`
+
+7.18B does not implement manual-execute command paths.
+It freezes canonical execution states and safety rules for future phases.
