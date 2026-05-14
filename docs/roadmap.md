@@ -564,3 +564,22 @@ Minimal 6.5 roadmap note:
   - mandatory evidence linkage (`evidence_id`).
 - Added rule coverage for CSP, HSTS applicability, X-Content-Type-Options, clickjacking dedup (XFO vs CSP frame-ancestors), Referrer-Policy, and COOP/CORP/COEP/Permissions-Policy presence checks.
 - Kept strict boundaries: no runtime flow execution, no live target testing, no external network tests.
+
+### Phase 7.10B — Passive Discovery Findings MVP (completed)
+- Normalized shared passive findings model in `internal/securityweb`.
+- Added common contracts for observations/candidate findings/check results with evidence linkage and source-check traceability.
+- Added `needs_context` observation status for conservative passive interpretation.
+- Migrated headers check to shared model while preserving function/result compatibility via alias.
+- Kept strict boundaries: no new requests, no runtime execution, no external network tests.
+
+### Phase 7.11 — Robots/Sitemap/Security.txt Passive Check MVP (completed)
+- Implemented passive checks for robots/sitemap/security.txt in `internal/securityweb` using the shared passive findings model.
+- Added conservative observations/candidate findings with explicit evidence linkage and source-check traceability.
+- Added safe sitemap XML parsing behavior with no panic on invalid input and no follow-up requests.
+- Kept strict boundaries: no new HTTP requests, no crawling/scanning/fuzzing, no runtime execution.
+
+### Phase 7.12 — Surface Mapping from Passive Responses MVP (completed)
+- Implemented `SurfaceMap` model and builder from passive evidence (`ExecutionResult` + `PassiveCheckResult`).
+- Added host/url/path deduplication, scope-status handling, surface signals, and candidate areas.
+- Added deterministic map id `surface-map-static-mvp` for stable tests.
+- Preserved strict non-executing boundaries: no new requests, no crawling, no runtime execution.

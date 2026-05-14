@@ -283,3 +283,28 @@ A first passive check module is now modeled in `internal/securityweb` as a pure 
 
 The module does not execute requests and does not alter approval/policy transport flow.
 It consumes already approved/executed evidence only.
+
+### 19) 7.10B Passive findings normalization mapping
+
+Passive post-execution checks now target a common result pipeline:
+
+`ExecutionResult -> PassiveObservation[] -> CandidateFinding[] -> PassiveCheckResult`
+
+This enables future checks (robots/sitemap/security.txt/TLS/redirect/cookies/forms) to share the same evidence-linked and dedup-friendly contract without adding network execution.
+
+### 20) 7.11 Passive discovery files mapping
+
+The passive post-execution pipeline now includes discovery-file analyzers for:
+- robots.txt
+- sitemap.xml
+- /.well-known/security.txt
+
+These analyzers are pure evidence consumers (`ExecutionResult -> PassiveCheckResult`) and keep execution boundaries unchanged (no new requests, no runtime execution).
+
+### 21) 7.12 Surface map aggregation mapping
+
+Passive evidence now supports a non-executing aggregation layer:
+
+`ExecutionResult + PassiveCheckResult[] -> SurfaceMap`
+
+This layer captures observed surface topology and candidate areas for future hypothesis stages while preserving strict no-network boundaries.

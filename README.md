@@ -1175,3 +1175,31 @@ bitsentry-ai doctor
 - Output provides observations and conservative candidate findings with severity/confidence hints.
 - Evidence traceability is preserved via `evidence_id` linkage in check results and finding candidates.
 - Boundaries remain unchanged: no CLI live testing, no crawler/scanner/fuzzing, no runtime flow execution, no external network tests.
+
+### Phase 7.10B — Passive Discovery Findings MVP (shared model)
+
+- Introduced shared passive findings contract in `internal/securityweb`:
+  - `PassiveObservation`, `CandidateFinding`, `PassiveCheckResult`
+  - `ObservationStatus`: `present|missing|weak|not_applicable|needs_context`
+  - shared `SeverityHint` / `ConfidenceHint`
+- Preserved compatibility for headers:
+  - `type HeaderCheckResult = PassiveCheckResult`
+  - `EvaluatePassiveHeaders(...) HeaderCheckResult` unchanged.
+- Candidate findings remain conservative and evidence-linked (not confirmed findings by default).
+
+### Phase 7.11 — Robots/Sitemap/Security.txt Passive Check MVP
+
+- Added passive discovery-file checks in `internal/securityweb/check_discovery_files.go`.
+- Checks consume only `ExecutionResult` and return `PassiveCheckResult` with shared observation/finding contract.
+- Added conservative parsing/analysis for:
+  - `robots.txt`
+  - `sitemap.xml`
+  - `/.well-known/security.txt`
+- Maintained strict safety boundaries: no follow-up requests, no crawling, no scanner/fuzzing/runtime execution.
+
+### Phase 7.12 — Surface Mapping from Passive Responses MVP
+
+- Added `SurfaceMap` aggregation in `internal/securityweb/surface_map.go`.
+- Surface map builds hosts, URLs, paths, signals, candidate areas, and evidence references from passive evidence only.
+- Preserves conservative posture: signals/candidate areas only, no confirmed findings.
+- Kept strict boundaries: no network, no follow-up requests, no crawling/scanning.

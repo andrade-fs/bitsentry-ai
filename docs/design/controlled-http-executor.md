@@ -284,3 +284,62 @@ Behavior highlights:
 - clickjacking finding is deduplicated when CSP `frame-ancestors` covers missing X-Frame-Options.
 - explicit limitations are emitted when context is insufficient.
 - HEAD-only posture can emit a limitation note: `GET fallback may be needed in a future approved request` (planning-only; no execution).
+
+## 16) 7.10B Passive Discovery Findings MVP (implemented)
+
+This phase normalizes a shared passive findings contract for future passive checks.
+
+Shared model (internal/securityweb):
+- `PassiveObservation`
+- `CandidateFinding`
+- `PassiveCheckResult`
+- `ObservationStatus` now includes: `present`, `missing`, `weak`, `not_applicable`, `needs_context`
+- `PassiveCheckID`, `FindingCategory`, `SeverityHint`, `ConfidenceHint`
+
+Compatibility:
+- `HeaderCheckResult` is now an alias of the shared result model:
+  - `type HeaderCheckResult = PassiveCheckResult`
+- `EvaluatePassiveHeaders(...) HeaderCheckResult` remains stable.
+
+Traceability and calibration:
+- observation and candidate finding include `EvidenceID` linkage.
+- candidate findings include `RelatedObservationIDs` and `SourceCheckID`.
+- candidate findings are not confirmed findings; severity/confidence are hints.
+
+## 17) 7.11 Robots/Sitemap/Security.txt Passive Check MVP (implemented)
+
+Added passive discovery-file checks in `internal/securityweb/check_discovery_files.go`:
+- `EvaluatePassiveRobots(ExecutionResult)`
+- `EvaluatePassiveSitemap(ExecutionResult, inScopeHosts []string)`
+- `EvaluatePassiveSecurityTxt(ExecutionResult, now func() time.Time)`
+
+Contract and boundaries:
+- consume existing `ExecutionResult` only.
+- return `PassiveCheckResult` only.
+- no new requests, no URL following, no crawler/scanner behavior.
+- no external validation of discovered links or contacts.
+
+Traceability:
+- all observations and candidate findings preserve `EvidenceID` linkage.
+- candidate findings include `RelatedObservationIDs` and `SourceCheckID`.
+
+Source check IDs:
+- `passive_robots_mvp`
+- `passive_sitemap_mvp`
+- `passive_securitytxt_mvp`
+
+## 18) 7.12 Surface Mapping from Passive Responses MVP (implemented)
+
+Added passive surface mapping in `internal/securityweb/surface_map.go`:
+- `BuildSurfaceMap(results []ExecutionResult, checks []PassiveCheckResult, scopeHosts []string) SurfaceMap`
+
+Contract:
+- consumes only existing passive evidence (`ExecutionResult` + `PassiveCheckResult`).
+- produces an aggregated `SurfaceMap` with hosts/urls/paths/signals/candidate areas.
+- deterministic map id for MVP: `surface-map-static-mvp`.
+
+Boundaries:
+- no network requests.
+- no URL following.
+- no crawling/scanning.
+- no confirmed findings emitted by surface mapping.

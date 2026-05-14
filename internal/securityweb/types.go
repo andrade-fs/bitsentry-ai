@@ -202,3 +202,174 @@ type HTTPTransport interface {
 func NewOfflineAdapter(evaluator PolicyEvaluator, planner DryRunPlanner, recorder EvidenceRecorder) *OfflineAdapter {
 	return &OfflineAdapter{evaluator: evaluator, planner: planner, recorder: recorder}
 }
+
+type ObservationStatus string
+
+const (
+	ObservationStatusPresent       ObservationStatus = "present"
+	ObservationStatusMissing       ObservationStatus = "missing"
+	ObservationStatusWeak          ObservationStatus = "weak"
+	ObservationStatusNotApplicable ObservationStatus = "not_applicable"
+	ObservationStatusNeedsContext  ObservationStatus = "needs_context"
+)
+
+type PassiveCheckID string
+
+const (
+	PassiveCheckIDHeadersMVP     PassiveCheckID = "passive_headers_mvp"
+	PassiveCheckIDRobotsMVP      PassiveCheckID = "passive_robots_mvp"
+	PassiveCheckIDSitemapMVP     PassiveCheckID = "passive_sitemap_mvp"
+	PassiveCheckIDSecurityTxtMVP PassiveCheckID = "passive_securitytxt_mvp"
+)
+
+type FindingCategory string
+
+const (
+	FindingCategoryConfiguration FindingCategory = "Configuration"
+	FindingCategoryExposure      FindingCategory = "Exposure"
+	FindingCategoryInformational FindingCategory = "Informational"
+)
+
+type SeverityHint string
+
+const (
+	SeverityCritical      SeverityHint = "Critical"
+	SeverityHigh          SeverityHint = "High"
+	SeverityMedium        SeverityHint = "Medium"
+	SeverityLow           SeverityHint = "Low"
+	SeverityInformational SeverityHint = "Informational"
+)
+
+type ConfidenceHint string
+
+const (
+	ConfidenceHigh   ConfidenceHint = "High"
+	ConfidenceMedium ConfidenceHint = "Medium"
+	ConfidenceLow    ConfidenceHint = "Low"
+)
+
+type PassiveObservation struct {
+	ObservationID     string
+	Title             string
+	Status            ObservationStatus
+	EvidenceID        string
+	AffectedURL       string
+	AffectedComponent string
+	ObservedValue     string
+	SeverityHint      SeverityHint
+	ConfidenceHint    ConfidenceHint
+	Notes             string
+	SourceCheckID     PassiveCheckID
+}
+
+type CandidateFinding struct {
+	CandidateID           string
+	Title                 string
+	Category              FindingCategory
+	SeverityHint          SeverityHint
+	ConfidenceHint        ConfidenceHint
+	EvidenceID            string
+	RelatedObservationIDs []string
+	AffectedURL           string
+	AffectedComponent     string
+	Impact                string
+	Likelihood            string
+	Remediation           string
+	Verification          string
+	Limitations           []string
+	SourceCheckID         PassiveCheckID
+}
+
+type PassiveCheckResult struct {
+	CheckID           PassiveCheckID
+	EvidenceID        string
+	Observations      []PassiveObservation
+	CandidateFindings []CandidateFinding
+	Limitations       []string
+}
+
+type HeaderCheckResult = PassiveCheckResult
+
+type SurfaceScopeStatus string
+
+const (
+	SurfaceScopeInScope      SurfaceScopeStatus = "in_scope"
+	SurfaceScopeOutOfScope   SurfaceScopeStatus = "out_of_scope"
+	SurfaceScopeUnknownScope SurfaceScopeStatus = "unknown_scope"
+)
+
+type SensitivityHint string
+
+const (
+	SensitivityNone    SensitivityHint = "none"
+	SensitivityAdmin   SensitivityHint = "admin"
+	SensitivityBackup  SensitivityHint = "backup"
+	SensitivityPrivate SensitivityHint = "private"
+	SensitivityStaging SensitivityHint = "staging"
+	SensitivityAuth    SensitivityHint = "auth"
+	SensitivityUnknown SensitivityHint = "unknown"
+)
+
+type SurfaceSource string
+
+const (
+	SurfaceSourceSitemap         SurfaceSource = "sitemap"
+	SurfaceSourceRobots          SurfaceSource = "robots"
+	SurfaceSourceSecurityTxt     SurfaceSource = "securitytxt"
+	SurfaceSourceExecutionResult SurfaceSource = "execution_result"
+	SurfaceSourceHeaders         SurfaceSource = "headers"
+)
+
+type SurfaceHost struct {
+	Host        string
+	ScopeStatus SurfaceScopeStatus
+	EvidenceIDs []string
+	Sources     []SurfaceSource
+}
+
+type SurfaceURL struct {
+	URL         string
+	Host        string
+	Path        string
+	ScopeStatus SurfaceScopeStatus
+	Source      SurfaceSource
+	EvidenceIDs []string
+}
+
+type SurfacePath struct {
+	Path            string
+	Source          SurfaceSource
+	SensitivityHint SensitivityHint
+	EvidenceIDs     []string
+}
+
+type SurfaceSignal struct {
+	SignalID               string
+	Title                  string
+	Category               FindingCategory
+	EvidenceID             string
+	SourceCheckID          PassiveCheckID
+	RelatedObservationIDs  []string
+	Notes                  string
+}
+
+type SurfaceCandidateArea struct {
+	AreaID              string
+	Category            FindingCategory
+	Reason              string
+	EvidenceIDs         []string
+	SuggestedNextCheck  string
+	ConfidenceHint      ConfidenceHint
+}
+
+type SurfaceMap struct {
+	MapID           string
+	ScopeHosts      []string
+	Hosts           []SurfaceHost
+	URLs            []SurfaceURL
+	Paths           []SurfacePath
+	Signals         []SurfaceSignal
+	CandidateAreas  []SurfaceCandidateArea
+	EvidenceIDs     []string
+	Limitations     []string
+}
