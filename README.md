@@ -1416,3 +1416,17 @@ bitsentry-ai doctor
 - Next phase:
   - 7.18D = owned-target CLI gate
   - 7.18D.2 = manual-preflight scope-host alignment (contractual scope host + normalized hostname checks, preflight-only boundary preserved)
+
+### Phase 7.18D.4 — First Formal CLI Owned-Target Manual-Execute Evidence (Documentation)
+
+- Added formal evidence normalization artifact:
+  - `docs/evidence/web-assessment/phase-7-18d3b-cli-manual-execute-head.md`
+- Captures first CLI formal manual-execute owned-target run documentation with traceable identifiers and result facts.
+- Scope constraints preserved:
+  - CLI evidence normalization only
+  - no runtime
+  - no new request
+- Status:
+  - completed / PASS WITH NOTES
+  - first formal CLI owned-target run documented
+

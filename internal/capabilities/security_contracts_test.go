@@ -1039,3 +1039,24 @@ func TestSecurityContracts_ManualExecutionEntrypointExecuteDesign(t *testing.T) 
 		}
 	}
 }
+
+func TestSecurityContracts_CLIManualExecuteEvidenceNormalization(t *testing.T) {
+	content := mustReadText(t, "../../docs/evidence/web-assessment/phase-7-18d3b-cli-manual-execute-head.md")
+	required := []string{
+		"Phase 7.18D.4 — CLI Execution Evidence Normalization",
+		"first CLI manual-execute owned-target run",
+		"executed=true",
+		"COMPLETED_WITH_CANDIDATES",
+		"PassiveHeaderCheck only after real ExecutionResult",
+		"no fabricated evidence",
+		"candidate finding, not confirmed vulnerability",
+		"no new requests in 7.18D.4",
+		"evidence_id preserved",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("CLI manual-execute evidence normalization missing anchor %q", token)
+		}
+	}
+}
+

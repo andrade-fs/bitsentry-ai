@@ -745,3 +745,14 @@ Minimal 6.5 roadmap note:
 - Next phase:
   - 7.18D = owned-target CLI gate
   - 7.18D.2 = manual-preflight scope-host alignment (gap closure for 7.18D.1 evidence note)
+
+### Phase 7.18D.4 — First Formal CLI Owned-Target Manual-Execute Evidence (Documentation)
+- Added `docs/evidence/web-assessment/phase-7-18d3b-cli-manual-execute-head.md` as the formal CLI evidence normalization artifact for the first owned-target manual-execute chain.
+- Scope constraints preserved:
+  - CLI evidence normalization only
+  - no runtime
+  - no new request
+- Status:
+  - completed / PASS WITH NOTES
+  - first formal CLI owned-target run documented
+
