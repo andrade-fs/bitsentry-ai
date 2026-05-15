@@ -10,6 +10,7 @@ type ManualPreflightInput struct {
 	RequestRef         string
 	Method             string
 	URL                string
+	ScopeHost          string
 	ApprovalToken      string
 	TimeoutSeconds     int
 	MaxResponseSize    int64
@@ -25,6 +26,8 @@ type ManualPreflightResult struct {
 	RequestRef                string   `json:"request_ref"`
 	Method                    string   `json:"method"`
 	URL                       string   `json:"url"`
+	ScopeHost                 string   `json:"scope_host"`
+	ScopeValid                bool     `json:"scope_valid"`
 	ApprovalValid             bool     `json:"approval_valid"`
 	LimitsComplete            bool     `json:"limits_complete"`
 	WouldExecute              bool     `json:"would_execute"`
@@ -40,6 +43,7 @@ func ManualPreflight(in ManualPreflightInput) ManualPreflightResult {
 	method := strings.ToUpper(strings.TrimSpace(in.Method))
 	reqRef := strings.TrimSpace(in.RequestRef)
 	rawURL := strings.TrimSpace(in.URL)
+	scopeHost := strings.ToLower(strings.TrimSpace(in.ScopeHost))
 	token := strings.TrimSpace(in.ApprovalToken)
 
 	violations := []string{}
@@ -61,6 +65,9 @@ func ManualPreflight(in ManualPreflightInput) ManualPreflightResult {
 	if rawURL == "" {
 		violations = append(violations, "url_required")
 	}
+	if scopeHost == "" {
+		violations = append(violations, "missing_scope_host")
+	}
 	if token == "" {
 		violations = append(violations, "approval_token_required")
 	}
@@ -69,12 +76,19 @@ func ManualPreflight(in ManualPreflightInput) ManualPreflightResult {
 		violations = append(violations, "method_not_allowed_only_HEAD")
 	}
 
+	scopeValid := false
 	if rawURL != "" {
 		u, err := url.Parse(rawURL)
 		if err != nil || strings.TrimSpace(u.Scheme) == "" || strings.TrimSpace(u.Host) == "" {
 			violations = append(violations, "url_invalid")
 		} else if strings.TrimSpace(u.Path) != "/" {
 			violations = append(violations, "path_not_allowed_only_root")
+		} else {
+			urlHost := strings.ToLower(strings.TrimSpace(u.Hostname()))
+			scopeValid = scopeHost != "" && urlHost == scopeHost
+			if !scopeValid {
+				violations = append(violations, "scope_host_mismatch")
+			}
 		}
 	}
 
@@ -115,6 +129,8 @@ func ManualPreflight(in ManualPreflightInput) ManualPreflightResult {
 		RequestRef:                reqRef,
 		Method:                    method,
 		URL:                       rawURL,
+		ScopeHost:                 scopeHost,
+		ScopeValid:                scopeValid,
 		ApprovalValid:             approvalValid,
 		LimitsComplete:            limitsComplete,
 		WouldExecute:              false,

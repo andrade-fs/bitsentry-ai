@@ -698,6 +698,11 @@ Minimal 6.5 roadmap note:
 ### Phase 7.18A — Manual Execution Entrypoint Formalization
 - Added formal preflight command `bitsentry-ai securityweb manual-preflight`.
 - Implemented `internal/securityweb` preflight service and CLI adapter with strict one-request HEAD/root/approval checks.
+- 7.18D.2 alignment tightened preflight scope enforcement:
+  - `--scope-host` is contractual and required
+  - missing scope host => deny `missing_scope_host`
+  - URL hostname mismatch vs scope host => deny `scope_host_mismatch`
+  - matching semantics use `url.Hostname()` with normalized lower+trim behavior
 - Enforced non-execution behavior in this phase:
   - `would_execute=false`
   - no transport invocation
@@ -720,3 +725,23 @@ Minimal 6.5 roadmap note:
   - no runtime
   - no live target execution
   - no execute path implemented
+
+
+### Phase 7.18C — Manual Execution Entrypoint Execute Implementation
+- Implemented `bitsentry-ai securityweb manual-execute` and closed 7.18C as **completed / PASS**.
+- Preserved historical note: 7.18B remained design-only; implementation was deferred to 7.18C.
+- Enforced execution invariants:
+  - `--confirm-execute` required
+  - `executed=true` only when `ExecutionResult` exists
+  - deny paths do not run PassiveHeaderCheck
+  - no fabricated evidence
+- Preserved strict boundaries:
+  - automated tests are `httptest`/fake-transport only
+  - no external network in automated tests
+  - no live target execution
+  - no OpenCode runtime execution
+- Package safety boundary preserved:
+  - `internal/securityweb` remains offline-safe with no `net/http` imports
+- Next phase:
+  - 7.18D = owned-target CLI gate
+  - 7.18D.2 = manual-preflight scope-host alignment (gap closure for 7.18D.1 evidence note)

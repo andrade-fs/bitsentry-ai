@@ -7,6 +7,7 @@ func validPreflightInput() ManualPreflightInput {
 		RequestRef:         "first-owned-head-root",
 		Method:             "HEAD",
 		URL:                "https://bitsentry.xyz/",
+		ScopeHost:          "bitsentry.xyz",
 		ApprovalToken:      "APPROVE request_ref=first-owned-head-root method=HEAD url=https://bitsentry.xyz/",
 		TimeoutSeconds:     10,
 		MaxResponseSize:    4096,
@@ -28,8 +29,8 @@ func hasViolationCode(vs []string, target string) bool {
 
 func TestManualPreflight_ExactApprovalPass(t *testing.T) {
 	res := ManualPreflight(validPreflightInput())
-	if res.PolicyDecision != "allow" || !res.ApprovalValid || !res.LimitsComplete {
-		t.Fatalf("expected allow/valid/limits complete, got %+v", res)
+	if res.PolicyDecision != "allow" || !res.ApprovalValid || !res.LimitsComplete || !res.ScopeValid {
+		t.Fatalf("expected allow/valid/limits complete/scope valid, got %+v", res)
 	}
 	if !res.ExecutionBackendAvailable || !res.EntrypointAvailable || !res.ExactApprovalRequired {
 		t.Fatalf("expected backend/entrypoint/exact approval flags true")
@@ -126,5 +127,36 @@ func TestManualPreflight_WouldExecuteAlwaysFalse(t *testing.T) {
 	res := ManualPreflight(validPreflightInput())
 	if res.WouldExecute {
 		t.Fatalf("expected would_execute false")
+	}
+}
+
+
+func TestManualPreflight_MissingScopeHostRejected(t *testing.T) {
+	in := validPreflightInput()
+	in.ScopeHost = ""
+	res := ManualPreflight(in)
+	if res.PolicyDecision != "deny" || !hasViolationCode(res.Violations, "missing_scope_host") {
+		t.Fatalf("expected missing scope host deny, got %+v", res)
+	}
+}
+
+func TestManualPreflight_ScopeHostMismatchRejected(t *testing.T) {
+	in := validPreflightInput()
+	in.ScopeHost = "example.com"
+	res := ManualPreflight(in)
+	if res.PolicyDecision != "deny" || !hasViolationCode(res.Violations, "scope_host_mismatch") {
+		t.Fatalf("expected scope host mismatch deny, got %+v", res)
+	}
+}
+
+func TestManualPreflight_ScopeHostMatchAllows(t *testing.T) {
+	in := validPreflightInput()
+	in.ScopeHost = "  BITSENTRY.XYZ  "
+	res := ManualPreflight(in)
+	if res.PolicyDecision != "allow" || !res.ScopeValid {
+		t.Fatalf("expected allow with valid scope, got %+v", res)
+	}
+	if res.ScopeHost != "bitsentry.xyz" {
+		t.Fatalf("expected normalized scope host, got %q", res.ScopeHost)
 	}
 }

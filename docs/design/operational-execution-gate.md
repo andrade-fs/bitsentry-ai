@@ -221,3 +221,36 @@ Design contract reference:
 
 7.18B does not implement manual-execute command paths.
 It freezes canonical execution states and safety rules for future phases.
+
+
+## 15) 7.18C implementation closure (completed / PASS)
+
+7.18C implemented `manual-execute` with safety invariants aligned to this gate design:
+- automated tests are `httptest`/fake-transport only
+- no external network in automated tests
+- no live target execution in this phase
+- no OpenCode runtime execution in this phase
+- `--confirm-execute` required
+- `executed=true` only when `ExecutionResult` exists
+- deny-before-transport paths do not run PassiveHeaderCheck
+- no fabricated evidence
+- `internal/securityweb` remains offline-safe (`no net/http` in package)
+
+Future phase remains:
+- 7.18D = owned-target CLI gate
+
+
+## 16) 7.18D.2 manual-preflight scope-host contract alignment
+
+Phase 7.18D.2 aligns manual preflight scope checks as explicit contract requirements:
+- `--scope-host` is required for `manual-preflight`
+- missing scope host => deny `missing_scope_host`
+- URL hostname mismatch vs scope host => deny `scope_host_mismatch`
+- matching uses `url.Hostname()` with normalized lower+trim semantics
+
+This remains a preflight-only alignment:
+- `would_execute=false`
+- no transport invocation
+- no network activity
+- no `ExecuteApproved`
+- no live execution claims

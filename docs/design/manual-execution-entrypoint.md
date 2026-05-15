@@ -124,3 +124,26 @@ Required tests in 7.18C/7.18D pipeline:
 
 Anchor:
 - 7.18D owned-target manual execution
+
+
+### 10) 7.18C implementation update (completed / PASS)
+- `manual-execute` is implemented in 7.18C.
+- Historical note retained: 7.18B remained design-only and did not implement runtime command paths.
+- Automated tests are `httptest`/fake-transport only.
+- No external network is used in automated tests.
+- No live target execution is part of 7.18C.
+- No OpenCode runtime execution is part of 7.18C.
+- `--confirm-execute` is mandatory.
+- `executed=true` is emitted only when `ExecutionResult` exists.
+- Deny paths do not run `PassiveHeaderCheck`.
+- No fabricated evidence is allowed in deny or execute paths.
+- `internal/securityweb` remains offline-safe and does not import `net/http`.
+- 7.18D remains the future owned-target CLI gate phase.
+
+
+### 11) Phase 7.18D.2 preflight scope-host alignment (manual-preflight, contract-only)
+- `--scope-host` is contractual and required for `manual-preflight`.
+- Missing scope host must deny with `missing_scope_host`.
+- URL hostname mismatch against scope host must deny with `scope_host_mismatch`.
+- Host matching semantics are defined as `url.Hostname()` with normalized lower+trim behavior before comparison.
+- Boundary unchanged: preflight-only contract (`would_execute=false`), no transport/network invocation, no `ExecuteApproved`, no live execution.

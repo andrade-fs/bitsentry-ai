@@ -103,7 +103,7 @@ FAIL if:
 
 Formal entrypoint for manual dry-run validation:
 
-`bitsentry-ai securityweb manual-preflight --request-ref first-owned-head-root --method HEAD --url https://bitsentry.xyz/ --approval "APPROVE request_ref=first-owned-head-root method=HEAD url=https://bitsentry.xyz/" --dry-run`
+`bitsentry-ai securityweb manual-preflight --request-ref first-owned-head-root --method HEAD --url https://bitsentry.xyz/ --scope-host bitsentry.xyz --approval "APPROVE request_ref=first-owned-head-root method=HEAD url=https://bitsentry.xyz/" --dry-run`
 
 Notes:
 - 7.18A preflight does not execute requests (`would_execute=false`).
@@ -115,3 +115,11 @@ Notes:
 - 7.18B defines execute-entrypoint contract only (design-only).
 - No `manual-execute` implementation is added in this phase.
 - Continue using `manual-preflight` as the only formal command path.
+
+
+### 12) 7.18D.2 scope-host alignment note
+- `--scope-host` is now contractual and required for `manual-preflight`.
+- Missing scope host must deny with `missing_scope_host`.
+- URL hostname mismatch vs scope host must deny with `scope_host_mismatch`.
+- Host check uses `url.Hostname()` with normalized lower+trim semantics.
+- This remains preflight-only (`would_execute=false`): no transport/network/`ExecuteApproved`, no live execution.

@@ -235,3 +235,33 @@ Design contract reference:
 - `docs/design/manual-execution-entrypoint.md`
 
 This phase freezes future execute-entrypoint rules without implementing runtime command paths.
+
+
+### 17) 7.18C alignment note
+
+7.18C completed / PASS and implemented `manual-execute` under controlled CLI gates, while keeping this document's owned-target runtime boundary unchanged:
+- no live target execution in 7.18C
+- no OpenCode runtime execution in 7.18C
+- no external network in automated tests (`httptest`/fake-transport only)
+- `--confirm-execute` required
+- `executed=true` only when `ExecutionResult` exists
+- deny paths must not run PassiveHeaderCheck
+- no fabricated evidence
+
+Future scope remains unchanged:
+- 7.18D = owned-target CLI gate
+
+
+### 18) 7.18D.2 manual-preflight scope-host alignment
+
+For `bitsentry-ai securityweb manual-preflight`, scope host is now contractual:
+- `--scope-host` required
+- missing scope host => deny `missing_scope_host`
+- URL hostname mismatch vs scope host => deny `scope_host_mismatch`
+- comparison uses `url.Hostname()` with normalized lower+trim semantics
+
+Boundary remains unchanged:
+- preflight only (`would_execute=false`)
+- no transport/network
+- no `ExecuteApproved`
+- no live execution in this alignment phase

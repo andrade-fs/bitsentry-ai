@@ -1358,6 +1358,10 @@ bitsentry-ai doctor
   - `bitsentry-ai securityweb manual-preflight`
 - Implemented shared preflight service in `internal/securityweb` and CLI wrapper in `internal/cli` with strict validations:
   - exact approval token required
+  - `--scope-host` required (contractual)
+  - missing scope host => deny `missing_scope_host`
+  - URL hostname mismatch vs scope host => deny `scope_host_mismatch`
+  - matching semantics use `url.Hostname()` with normalized lower+trim behavior
   - method HEAD only
   - root path `/` only
   - request_budget must be `1`
@@ -1390,3 +1394,25 @@ bitsentry-ai doctor
   - no runtime
   - no live target execution
   - no execute path implemented
+
+
+### Phase 7.18C — Manual Execution Entrypoint Execute Implementation
+
+- Status: **completed / PASS**
+- Implemented `bitsentry-ai securityweb manual-execute` with strict execution gate semantics.
+- Preserved 7.18B historical boundary (design-only in 7.18B); implementation happened in 7.18C.
+- Enforced execution/evidence safety rules:
+  - `--confirm-execute` required
+  - `executed=true` only when `ExecutionResult` exists
+  - deny paths do not run PassiveHeaderCheck
+  - no fabricated evidence
+- Test/runtime boundaries in 7.18C:
+  - automated tests are `httptest`/fake-transport only
+  - no external network in automated tests
+  - no live target execution
+  - no OpenCode runtime execution
+- Package boundary preserved:
+  - `internal/securityweb` remains offline-safe with no `net/http` in package
+- Next phase:
+  - 7.18D = owned-target CLI gate
+  - 7.18D.2 = manual-preflight scope-host alignment (contractual scope host + normalized hostname checks, preflight-only boundary preserved)
