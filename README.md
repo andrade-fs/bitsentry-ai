@@ -46,6 +46,18 @@ References:
 3. You confirm manually before impactful actions.
 4. MVP keeps decisions explicit and auditable.
 
+## Why context profiles matter (SDD / SDR / Security)
+
+BitsentryAI uses the same tool surface, but different intents require different guardrails and outputs.
+
+- **SDD profile:** for building or changing product features. Emphasizes specs, design clarity, acceptance criteria, and disciplined implementation steps.
+- **SDR profile:** for investigation, research, and diagnosis. Emphasizes hypothesis framing, evidence collection, and non-mutating discovery first.
+- **Security profile (hacking context, controlled):** for source/security review and authorized web-assessment planning. Emphasizes strict scope definition, authorization gates, and low-noise execution with manual approvals.
+
+Why this is useful: teams spend less time context switching, trigger fewer wrong actions, improve traceability of decisions, keep operations safer, and communicate intent more clearly across roles.
+
+MVP constraint reminder: profile selection guides intent and risk gates, but execution remains explicitly manual with no hidden autonomous runtime.
+
 See system shape in [docs/architecture.md](docs/architecture.md).
 
 ## MVP readiness taxonomy
