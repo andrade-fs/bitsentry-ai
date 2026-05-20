@@ -756,3 +756,29 @@ Minimal 6.5 roadmap note:
   - completed / PASS WITH NOTES
   - first formal CLI owned-target run documented
 
+### Phase 7 Final Closure — SecurityWeb Stabilization (completed / PASS WITH NOTES)
+- Final posture: controlled manual MVP; not a full pentest automation engine.
+- Manual execute gates require exact approval and `scope_host` required.
+- Candidate findings are not confirmed vulnerabilities; `hf-referrer-weak` remains a candidate finding.
+- No autonomous pentest in Phase 7 closure.
+- Only one-request owned-target execution happened (`HEAD /`).
+- robots/sitemap/security.txt live gates deferred.
+
+### Phase 7.20 — Public MVP Polish (completed)
+- Scope: public-facing polish for OpenCode-first MVP messaging, readiness summaries, and release docs.
+- TUI: install done summary now reports explicit MVP statuses (OpenCode/config root, pack, native agent, commands, security flows availability, edit deny contract, MCP preview-only, final PASS taxonomy).
+- CLI: `doctor` now includes concise MVP readiness block and ends with `PASS` / `PASS WITH NOTES` / `FAIL`.
+- Docs: README quickstart/constraints update + demo/release checklist artifacts for public rollout.
+- Constraints preserved in this phase:
+  - no Phase 8 work
+  - no real web execution features
+  - no crawler/scanner/fuzzing/tool integrations
+  - no POST/auth/cookies/live runtime flow execution
+  - no `.env` or secrets handling
+  - OpenCode/TUI remains primary UX; CLI stays support/debug/status
+  - `agent.bitsentry.permission.edit=deny` contract preserved
+
+### Phase 8 — Controlled Web Assessment Expansion (next)
+- Expand beyond first owned-target run while preserving strict approval/scope gates.
+- Add staged live-gate progression for robots/sitemap/security.txt under controlled approvals.
+- Keep conservative evidence policy: candidate findings remain unconfirmed until additional approved evidence exists.

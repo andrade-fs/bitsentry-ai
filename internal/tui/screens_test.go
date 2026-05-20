@@ -31,7 +31,7 @@ func TestRenderInstallReviewShowsReadinessSummary(t *testing.T) {
 		TargetSelected: true,
 	}
 	out := renderInstall(m)
-	for _, want := range []string{"Detected MCP readiness", "MCP config preview (PREVIEW ONLY)", "would_write: no", "requires_confirmation: yes", "backup_required: yes", "Engram status: configured", "Context7 status: manual_step_needed", "manual install"} {
+	for _, want := range []string{"Detected MCP readiness", "MCP config preview (PREVIEW ONLY)", "would_write: no", "requires_confirmation: yes", "backup_required: yes", "Engram status: configured", "Context7 status: manual_step_needed", "manual install", "change agent.bitsentry.permission.edit=deny contract"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in output", want)
 		}
@@ -43,6 +43,13 @@ func TestRenderInstallDoneShowsPreviewContract(t *testing.T) {
 	m.install = installWizardState{
 		CurrentStep: installStepDone,
 		ResultStatus: "PASS WITH NOTES",
+		OpenCodeDetected: true,
+		OpenCodeConfig: "/tmp/.config/opencode",
+		BitsentryPackRoot: "/tmp/.config/opencode/bitsentry",
+		PackInstalled: true,
+		NativeIntegrationOK: true,
+		RegisterAgent: true,
+		InstallCommands: true,
 		MCPConfigPreview: capabilities.OpenCodeMCPConfigPreview{
 			CurrentConfigState:   "missing_opencode_json",
 			WouldWrite:           false,
@@ -56,7 +63,7 @@ func TestRenderInstallDoneShowsPreviewContract(t *testing.T) {
 		},
 	}
 	out := renderInstall(m)
-	for _, want := range []string{"MCP config preview contract (PREVIEW ONLY)", "requires_confirmation: yes", "backup_required: yes", "manual steps:"} {
+	for _, want := range []string{"Public MVP readiness summary", "Native agent status: installed", "/bit-* commands status: installed", "Edit permission contract: agent.bitsentry.permission.edit=deny (preserved)", "Final result: PASS WITH NOTES", "MCP config status: PREVIEW ONLY (no runtime apply in this phase)", "requires_confirmation: yes", "backup_required: yes", "manual steps:"} {
 		if !strings.Contains(out, want) {
 			t.Fatalf("expected %q in done output", want)
 		}

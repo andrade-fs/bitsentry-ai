@@ -2,6 +2,39 @@
 
 `bitsentry-ai` is the BitSentry local CLI/TUI bootstrap tool. It provides an intent-aware orchestration system that routes user requests to appropriate development workflows (SDD, SDR, Support), manages AI agent integrations (OpenCode), and installs capability packs for persistent memory, documentation lookup, and skill-based task execution.
 
+## Public MVP (Phase 7.20) — At a glance
+
+### What BitsentryAI is
+- An **OpenCode-first installer and orchestration bootstrap** for local developer workflows.
+- A product that prioritizes **TUI Install/Setup + in-chat OpenCode usage** as the primary path.
+
+### What this MVP DOES
+- Detects OpenCode and prepares/updates the local Bitsentry capability pack.
+- Installs native `agent.bitsentry` + `/bit-*` commands when selected.
+- Shows explicit readiness and safety posture (`PASS` / `PASS WITH NOTES` / `FAIL`).
+- Keeps MCP handling in **preview-only** mode in this phase.
+
+### What this MVP does NOT do yet
+- No Phase 8 scope.
+- No real web execution features, crawler/scanner/fuzzing/tool integrations.
+- No POST/auth/cookies/live runtime flow execution.
+- No `.env` or secrets handling.
+
+### Quickstart (OpenCode/TUI primary UX)
+1. Run `bitsentry-ai` to open the TUI.
+2. Open **Install / Setup** and complete the guided wizard.
+3. Use the final done screen + verdict to validate MVP readiness.
+4. Continue in OpenCode with `/bit-*` commands and native bitsentry prompt guidance.
+
+CLI remains available for **support/debug/status** tasks (for example `bitsentry-ai doctor`).
+
+### Safety guardrails (MVP)
+- Preserve `agent.bitsentry.permission.edit=deny`.
+- Preview/readiness first; no hidden runtime execution.
+- Keep install messaging explicit about manual-only boundaries.
+
+Demo prompt pack: `docs/demo/public-mvp-prompts.md`
+
 ## Table of Contents
 
 1. [Overview](#1-overview)
@@ -13,6 +46,7 @@
 7. [CLI Reference](#7-cli-reference)
 8. [Profiles](#8-profiles)
 9. [Development](#9-development)
+10. [Phase 7 Final Stabilization / Release Notes](#10-phase-7-final-stabilization--release-notes)
 
 ---
 
@@ -1430,3 +1464,14 @@ bitsentry-ai doctor
   - completed / PASS WITH NOTES
   - first formal CLI owned-target run documented
 
+
+## 10. Phase 7 Final Stabilization / Release Notes
+
+- Verdict: **PASS WITH NOTES**
+- Phase 7 closes as a **controlled manual MVP** and **not a full pentest automation engine**.
+- Manual execution requires **exact approval** and `scope_host` required.
+- Candidate findings are not confirmed vulnerabilities; `hf-referrer-weak` remains candidate finding.
+- No autonomous pentest.
+- Only one-request owned-target execution happened (`HEAD /`).
+- robots/sitemap/security.txt live gates deferred.
+- Next: **Phase 8 — Controlled Web Assessment Expansion**.

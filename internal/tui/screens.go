@@ -215,19 +215,46 @@ func renderInstall(m model) string {
 		)
 	case installStepDone:
 		prompt := valueOrDefault(m.install.NextPrompt, "Install did not complete.")
+		commandsStatus := "not installed"
+		if m.install.InstallCommands {
+			if m.install.NativeIntegrationOK {
+				commandsStatus = "installed"
+			} else {
+				commandsStatus = "planned but not installed"
+			}
+		} else {
+			commandsStatus = "not requested in selected mode"
+		}
+		nativeAgentStatus := "not installed"
+		if m.install.RegisterAgent {
+			if m.install.NativeIntegrationOK {
+				nativeAgentStatus = "installed"
+			} else {
+				nativeAgentStatus = "planned but not installed"
+			}
+		} else {
+			nativeAgentStatus = "not requested in selected mode"
+		}
 		lines = append(lines,
 			fmt.Sprintf("Result: %s", valueOrDefault(m.install.ResultStatus, "FAIL")),
 			"",
-			"Install summary:",
+			"Public MVP readiness summary:",
 			fmt.Sprintf("- OpenCode detected: %s", boolLabel(m.install.OpenCodeDetected, "yes", "no")),
 			fmt.Sprintf("- OpenCode config root: %s", valueOrDefault(m.install.OpenCodeConfig, "not resolved")),
 			fmt.Sprintf("- Bitsentry pack root: %s", valueOrDefault(m.install.BitsentryPackRoot, "not resolved")),
-			fmt.Sprintf("- Pack status: %s", boolLabel(m.install.PackInstalled, "installed", "not installed")),
+			fmt.Sprintf("- Bitsentry pack status: %s", boolLabel(m.install.PackInstalled, "installed", "not installed")),
+			fmt.Sprintf("- Native agent status: %s", nativeAgentStatus),
+			fmt.Sprintf("- /bit-* commands status: %s", commandsStatus),
+			"- Security flows availability: source-security-review + web-assessment (declarative/manual-only in MVP)",
+			"- Edit permission contract: agent.bitsentry.permission.edit=deny (preserved)",
+			fmt.Sprintf("- Final result: %s", valueOrDefault(m.install.ResultStatus, "FAIL")),
+			"",
+			"Operational install details:",
 			fmt.Sprintf("- Native integration status: %s", boolLabel(m.install.NativeIntegrationOK, "installed", "not installed")),
 			fmt.Sprintf("- Backup path (config): %s", valueOrDefault(m.install.ConfigBackupPath, "none")),
 			fmt.Sprintf("- Backup path (native skills): %s", valueOrDefault(m.install.NativeBackupPath, "none")),
 			"",
-			"MCP config preview contract (PREVIEW ONLY):",
+			"MCP config status: PREVIEW ONLY (no runtime apply in this phase)",
 			fmt.Sprintf("- state: %s", valueOrDefault(m.install.MCPConfigPreview.CurrentConfigState, "unknown")),
 			fmt.Sprintf("- would_write: %s", yesNoLabel(m.install.MCPConfigPreview.WouldWrite)),
 			fmt.Sprintf("- requires_confirmation: %s", yesNoLabel(m.install.MCPConfigPreview.RequiresConfirmation)),
