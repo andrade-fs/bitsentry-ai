@@ -63,12 +63,11 @@ func renderHome(m model) string {
 
 func renderInstall(m model) string {
 	stepTitle := []string{
-		"Step 1 of 6 — Confirm OpenCode target",
-		"Step 2 of 6 — Choose install mode",
-		"Step 3 of 6 — Install intent summary",
-		"Step 4 of 6 — Review install plan",
-		"Step 5 of 6 — Install / Update",
-		"Step 6 of 6 — Done / Control panel summary",
+		"Step 1 of 5 — Confirm OpenCode target",
+		"Step 2 of 5 — Choose install mode",
+		"Step 3 of 5 — Review install plan",
+		"Step 4 of 5 — Install / Update",
+		"Step 5 of 5 — Done / Control panel summary",
 	}
 	preset, _ := capabilities.PresetByID(presetForMode(m.install.InstallMode), capabilities.DefaultPresets())
 	lines := []string{stepTitle[m.install.CurrentStep], ""}

@@ -5,177 +5,137 @@ import (
 	"strings"
 )
 
-type HeaderStatus string
-
-const (
-	HeaderStatusPresent       HeaderStatus = "present"
-	HeaderStatusMissing       HeaderStatus = "missing"
-	HeaderStatusWeak          HeaderStatus = "weak"
-	HeaderStatusNotApplicable HeaderStatus = "not_applicable"
-)
-
-type SeverityHint string
-
-const (
-	SeverityCritical      SeverityHint = "Critical"
-	SeverityHigh          SeverityHint = "High"
-	SeverityMedium        SeverityHint = "Medium"
-	SeverityLow           SeverityHint = "Low"
-	SeverityInformational SeverityHint = "Informational"
-)
-
-type ConfidenceHint string
-
-const (
-	ConfidenceHigh   ConfidenceHint = "High"
-	ConfidenceMedium ConfidenceHint = "Medium"
-	ConfidenceLow    ConfidenceHint = "Low"
-)
-
 type HeaderCheckInput struct {
-	ExecutionResult   ExecutionResult
-	AllowGETFallback  bool
-	RequestedMethod   RequestMethod
-}
-
-type HeaderObservation struct {
-	ID            string
-	Header        string
-	Status        HeaderStatus
-	Value         string
-	SeverityHint  SeverityHint
-	ConfidenceHint ConfidenceHint
-	Notes         string
-}
-
-type CandidateFinding struct {
-	ID             string
-	Title          string
-	Category       string
-	SeverityHint   SeverityHint
-	ConfidenceHint ConfidenceHint
-	EvidenceID     string
-	ObservationIDs []string
-	Summary        string
-}
-
-type HeaderCheckResult struct {
-	CheckID           string
-	EvidenceID        string
-	Observations      []HeaderObservation
-	CandidateFindings []CandidateFinding
-	Limitations       []string
+	ExecutionResult  ExecutionResult
+	AllowGETFallback bool
+	RequestedMethod  RequestMethod
 }
 
 func EvaluatePassiveHeaders(input HeaderCheckInput) HeaderCheckResult {
 	r := input.ExecutionResult
+	evidenceID := strings.TrimSpace(r.EvidenceID)
+	affectedURL := firstNonEmpty(strings.TrimSpace(r.FinalURL), strings.TrimSpace(r.URL))
+
 	result := HeaderCheckResult{
-		CheckID:    "passive_headers_mvp",
-		EvidenceID: strings.TrimSpace(r.EvidenceID),
+		CheckID:    PassiveCheckIDHeadersMVP,
+		EvidenceID: evidenceID,
 	}
 
-	if result.EvidenceID == "" {
+	if evidenceID == "" {
 		result.Limitations = append(result.Limitations, "missing evidence_id in execution result")
 	}
 
 	headers := normalizeHeaders(r.HeadersRedacted)
-	obs := make([]HeaderObservation, 0, 12)
+	obs := make([]PassiveObservation, 0, 12)
 	findings := make([]CandidateFinding, 0, 8)
 
-	mkObs := func(id, header string, status HeaderStatus, value string, sev SeverityHint, conf ConfidenceHint, notes string) HeaderObservation {
-		return HeaderObservation{ID: id, Header: header, Status: status, Value: value, SeverityHint: sev, ConfidenceHint: conf, Notes: notes}
-	}
-	addFinding := func(id, title, category string, sev SeverityHint, conf ConfidenceHint, observationIDs []string, summary string) {
-		findings = append(findings, CandidateFinding{
-			ID:             id,
-			Title:          title,
-			Category:       category,
-			SeverityHint:   sev,
-			ConfidenceHint: conf,
-			EvidenceID:     result.EvidenceID,
-			ObservationIDs: observationIDs,
-			Summary:        summary,
+	mkObs := func(id, title string, status ObservationStatus, value string, sev SeverityHint, conf ConfidenceHint, notes string) PassiveObservation {
+		return NewPassiveObservation(PassiveObservation{
+			ObservationID:     id,
+			Title:             title,
+			Status:            status,
+			EvidenceID:        evidenceID,
+			AffectedURL:       affectedURL,
+			AffectedComponent: DefaultAffectedComponentHeaders,
+			ObservedValue:     value,
+			SeverityHint:      sev,
+			ConfidenceHint:    conf,
+			Notes:             notes,
+			SourceCheckID:     PassiveCheckIDHeadersMVP,
 		})
 	}
-
-	// CSP
-	csp := strings.TrimSpace(headers["content-security-policy"])
-	if csp == "" {
-		o := mkObs("obs-csp", "Content-Security-Policy", HeaderStatusMissing, "", SeverityLow, ConfidenceHigh, "missing CSP can increase XSS/clickjacking exposure depending on app context")
-		obs = append(obs, o)
-		addFinding("hf-csp-missing", "Missing Content-Security-Policy", "Configuration", SeverityLow, ConfidenceHigh, []string{o.ID}, "CSP is missing; impact requires endpoint/content context")
-	} else {
-		obs = append(obs, mkObs("obs-csp", "Content-Security-Policy", HeaderStatusPresent, csp, SeverityInformational, ConfidenceHigh, "header present"))
+	addFinding := func(id, title string, sev SeverityHint, conf ConfidenceHint, observationIDs []string, impact, likelihood, remediation, verification string, limitations []string) {
+		findings = append(findings, NewCandidateFinding(CandidateFinding{
+			CandidateID:           id,
+			Title:                 title,
+			Category:              FindingCategoryConfiguration,
+			SeverityHint:          sev,
+			ConfidenceHint:        conf,
+			EvidenceID:            evidenceID,
+			RelatedObservationIDs: observationIDs,
+			AffectedURL:           affectedURL,
+			AffectedComponent:     DefaultAffectedComponentHeaders,
+			Impact:                impact,
+			Likelihood:            likelihood,
+			Remediation:           remediation,
+			Verification:          verification,
+			Limitations:           limitations,
+			SourceCheckID:         PassiveCheckIDHeadersMVP,
+		}))
 	}
 
-	// HSTS applicability based on final URL or request URL
-	urlForScheme := firstNonEmpty(strings.TrimSpace(r.FinalURL), strings.TrimSpace(r.URL))
+	csp := strings.TrimSpace(headers["content-security-policy"])
+	if csp == "" {
+		o := mkObs("obs-csp", "Content-Security-Policy", ObservationStatusMissing, "", SeverityLow, ConfidenceHigh, "missing CSP can increase XSS/clickjacking exposure depending on app context")
+		obs = append(obs, o)
+		addFinding("hf-csp-missing", "Missing Content-Security-Policy", SeverityLow, ConfidenceHigh, []string{o.ObservationID}, "Increases attack surface for content injection controls", "Medium", "Add a context-appropriate CSP baseline policy", "Confirm CSP header is present and enforced on target response", []string{"Missing header is not direct exploit proof"})
+	} else {
+		obs = append(obs, mkObs("obs-csp", "Content-Security-Policy", ObservationStatusPresent, csp, SeverityInformational, ConfidenceHigh, "header present"))
+	}
+
+	urlForScheme := affectedURL
 	scheme := detectScheme(urlForScheme)
 	hsts := strings.TrimSpace(headers["strict-transport-security"])
 	if scheme == "https" {
 		if hsts == "" {
-			o := mkObs("obs-hsts", "Strict-Transport-Security", HeaderStatusMissing, "", SeverityMedium, ConfidenceHigh, "missing HSTS on HTTPS response")
+			o := mkObs("obs-hsts", "Strict-Transport-Security", ObservationStatusMissing, "", SeverityMedium, ConfidenceHigh, "missing HSTS on HTTPS response")
 			obs = append(obs, o)
-			addFinding("hf-hsts-missing", "Missing HSTS on HTTPS", "Configuration", SeverityMedium, ConfidenceHigh, []string{o.ID}, "HSTS missing on HTTPS response")
+			addFinding("hf-hsts-missing", "Missing HSTS on HTTPS", SeverityMedium, ConfidenceHigh, []string{o.ObservationID}, "May allow protocol downgrade risk in some client paths", "Medium", "Set Strict-Transport-Security on HTTPS responses", "Re-check HTTPS response includes HSTS", nil)
 		} else {
-			obs = append(obs, mkObs("obs-hsts", "Strict-Transport-Security", HeaderStatusPresent, hsts, SeverityInformational, ConfidenceHigh, "header present"))
+			obs = append(obs, mkObs("obs-hsts", "Strict-Transport-Security", ObservationStatusPresent, hsts, SeverityInformational, ConfidenceHigh, "header present"))
 		}
 	} else {
-		obs = append(obs, mkObs("obs-hsts", "Strict-Transport-Security", HeaderStatusNotApplicable, hsts, SeverityInformational, ConfidenceHigh, "HSTS applies to HTTPS responses"))
+		obs = append(obs, mkObs("obs-hsts", "Strict-Transport-Security", ObservationStatusNotApplicable, hsts, SeverityInformational, ConfidenceHigh, "HSTS applies to HTTPS responses"))
 		result.Limitations = append(result.Limitations, "HSTS not applicable because response URL is not HTTPS")
 	}
 
-	// X-Content-Type-Options
 	xcto := strings.TrimSpace(headers["x-content-type-options"])
 	if xcto == "" {
-		o := mkObs("obs-xcto", "X-Content-Type-Options", HeaderStatusMissing, "", SeverityLow, ConfidenceHigh, "expected value nosniff")
+		o := mkObs("obs-xcto", "X-Content-Type-Options", ObservationStatusMissing, "", SeverityLow, ConfidenceHigh, "expected value nosniff")
 		obs = append(obs, o)
-		addFinding("hf-xcto-missing", "Missing X-Content-Type-Options", "Configuration", SeverityLow, ConfidenceHigh, []string{o.ID}, "X-Content-Type-Options missing")
+		addFinding("hf-xcto-missing", "Missing X-Content-Type-Options", SeverityLow, ConfidenceHigh, []string{o.ObservationID}, "Can weaken MIME sniffing protections", "Low", "Set X-Content-Type-Options: nosniff", "Confirm nosniff is returned", nil)
 	} else if !strings.EqualFold(xcto, "nosniff") {
-		o := mkObs("obs-xcto", "X-Content-Type-Options", HeaderStatusWeak, xcto, SeverityLow, ConfidenceHigh, "recommended value is nosniff")
+		o := mkObs("obs-xcto", "X-Content-Type-Options", ObservationStatusWeak, xcto, SeverityLow, ConfidenceHigh, "recommended value is nosniff")
 		obs = append(obs, o)
-		addFinding("hf-xcto-weak", "Weak X-Content-Type-Options", "Configuration", SeverityLow, ConfidenceHigh, []string{o.ID}, "X-Content-Type-Options present with non-recommended value")
+		addFinding("hf-xcto-weak", "Weak X-Content-Type-Options", SeverityLow, ConfidenceHigh, []string{o.ObservationID}, "Protection may not be effective", "Low", "Use exact value nosniff", "Confirm header value is nosniff", nil)
 	} else {
-		obs = append(obs, mkObs("obs-xcto", "X-Content-Type-Options", HeaderStatusPresent, xcto, SeverityInformational, ConfidenceHigh, "header present"))
+		obs = append(obs, mkObs("obs-xcto", "X-Content-Type-Options", ObservationStatusPresent, xcto, SeverityInformational, ConfidenceHigh, "header present"))
 	}
 
-	// Clickjacking: XFO or CSP frame-ancestors
 	xfo := strings.TrimSpace(headers["x-frame-options"])
 	hasFrameAncestors := hasCSPDirective(csp, "frame-ancestors")
 	if xfo == "" && !hasFrameAncestors {
-		o := mkObs("obs-clickjacking", "X-Frame-Options / CSP frame-ancestors", HeaderStatusMissing, "", SeverityLow, ConfidenceMedium, "neither X-Frame-Options nor frame-ancestors found")
+		o := mkObs("obs-clickjacking", "X-Frame-Options / CSP frame-ancestors", ObservationStatusMissing, "", SeverityLow, ConfidenceMedium, "neither X-Frame-Options nor frame-ancestors found")
 		obs = append(obs, o)
-		addFinding("hf-clickjacking-protection-missing", "Missing clickjacking protection header", "Configuration", SeverityLow, ConfidenceMedium, []string{o.ID}, "No X-Frame-Options and no CSP frame-ancestors directive")
+		addFinding("hf-clickjacking-protection-missing", "Missing clickjacking protection header", SeverityLow, ConfidenceMedium, []string{o.ObservationID}, "May increase framing risk", "Low", "Add X-Frame-Options or CSP frame-ancestors", "Verify one framing control exists", []string{"No direct exploit demonstrated in passive check"})
 	} else if xfo == "" && hasFrameAncestors {
-		obs = append(obs, mkObs("obs-clickjacking", "X-Frame-Options / CSP frame-ancestors", HeaderStatusPresent, "covered by CSP frame-ancestors", SeverityInformational, ConfidenceHigh, "X-Frame-Options missing but covered by CSP"))
+		obs = append(obs, mkObs("obs-clickjacking", "X-Frame-Options / CSP frame-ancestors", ObservationStatusPresent, "covered by CSP frame-ancestors", SeverityInformational, ConfidenceHigh, "X-Frame-Options missing but covered by CSP"))
 	} else {
-		obs = append(obs, mkObs("obs-clickjacking", "X-Frame-Options / CSP frame-ancestors", HeaderStatusPresent, xfo, SeverityInformational, ConfidenceHigh, "protection present"))
+		obs = append(obs, mkObs("obs-clickjacking", "X-Frame-Options / CSP frame-ancestors", ObservationStatusPresent, xfo, SeverityInformational, ConfidenceHigh, "protection present"))
 	}
 
-	// Referrer-Policy
 	ref := strings.TrimSpace(headers["referrer-policy"])
 	if ref == "" {
-		o := mkObs("obs-referrer", "Referrer-Policy", HeaderStatusMissing, "", SeverityLow, ConfidenceHigh, "missing referrer policy")
+		o := mkObs("obs-referrer", "Referrer-Policy", ObservationStatusMissing, "", SeverityLow, ConfidenceHigh, "missing referrer policy")
 		obs = append(obs, o)
-		addFinding("hf-referrer-missing", "Missing Referrer-Policy", "Configuration", SeverityLow, ConfidenceHigh, []string{o.ID}, "Referrer-Policy missing")
+		addFinding("hf-referrer-missing", "Missing Referrer-Policy", SeverityLow, ConfidenceHigh, []string{o.ObservationID}, "May leak referrer data", "Low", "Set strict-origin-when-cross-origin or stricter", "Confirm policy is returned in response", nil)
 	} else if isWeakReferrerPolicy(ref) {
-		o := mkObs("obs-referrer", "Referrer-Policy", HeaderStatusWeak, ref, SeverityLow, ConfidenceHigh, "policy may leak referrer data")
+		o := mkObs("obs-referrer", "Referrer-Policy", ObservationStatusWeak, ref, SeverityLow, ConfidenceHigh, "policy may leak referrer data")
 		obs = append(obs, o)
-		addFinding("hf-referrer-weak", "Weak Referrer-Policy", "Configuration", SeverityLow, ConfidenceHigh, []string{o.ID}, "Referrer-Policy is weak")
+		addFinding("hf-referrer-weak", "Weak Referrer-Policy", SeverityLow, ConfidenceHigh, []string{o.ObservationID}, "May disclose extra URL context", "Low", "Use stricter referrer policy", "Confirm stricter policy in response", nil)
 	} else {
-		obs = append(obs, mkObs("obs-referrer", "Referrer-Policy", HeaderStatusPresent, ref, SeverityInformational, ConfidenceHigh, "header present"))
+		obs = append(obs, mkObs("obs-referrer", "Referrer-Policy", ObservationStatusPresent, ref, SeverityInformational, ConfidenceHigh, "header present"))
 	}
 
-	// Additional recommended headers (conservative by default)
 	checkOptional := func(id, header string) {
 		v := strings.TrimSpace(headers[strings.ToLower(header)])
 		if v == "" {
-			o := mkObs(id, header, HeaderStatusMissing, "", SeverityInformational, ConfidenceHigh, "header missing; applicability depends on architecture/context")
+			o := mkObs(id, header, ObservationStatusNeedsContext, "", SeverityInformational, ConfidenceHigh, "header missing; applicability depends on architecture/context")
 			obs = append(obs, o)
 			result.Limitations = append(result.Limitations, header+" applicability may require endpoint/context validation")
 			return
 		}
-		obs = append(obs, mkObs(id, header, HeaderStatusPresent, v, SeverityInformational, ConfidenceHigh, "header present"))
+		obs = append(obs, mkObs(id, header, ObservationStatusPresent, v, SeverityInformational, ConfidenceHigh, "header present"))
 	}
 	checkOptional("obs-permissions", "Permissions-Policy")
 	checkOptional("obs-coop", "Cross-Origin-Opener-Policy")

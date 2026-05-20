@@ -18,7 +18,7 @@ const (
 	installStepReview
 	installStepInstall
 	installStepDone
-	installStepCount = 6
+	installStepCount = 5
 )
 
 const (

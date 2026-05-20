@@ -1,36 +1,59 @@
-# Architecture Overview (Phase 1)
+# Architecture Overview (Public MVP)
 
-Phase 1 is a **Bootstrap MVP**: a modular foundation with working CLI/TUI, environment checks, profile management, and placeholder registries for future capabilities.
+This document describes the **current public MVP architecture**, not the original bootstrap phase.
+
+## Architectural posture
+
+- **OpenCode/TUI-first** product posture.
+- **CLI as support/debug surface**, not primary onboarding UX.
+- **Controlled manual MVP**: explicit user confirmation and visible readiness states.
+- **No live web execution** in this posture.
+- **No `.env` or secrets handling**.
+
+## Runtime shape (high level)
+
+1. User enters via TUI (`bitsentry-ai`) or CLI.
+2. System performs environment + capability checks.
+3. Install/Setup presents readiness and manual next steps.
+4. OpenCode-facing guidance drives follow-up usage.
+
+The key principle is explicit control over hidden automation.
 
 ## Package map
 
 - `cmd/bitsentry-ai`
   - Binary entrypoint.
+- `internal/tui`
+  - Primary guided UX for Install/Setup and readiness signaling.
 - `internal/cli`
-  - Cobra command tree (`version`, `doctor`, `agents`, `profiles`, `profile use`, `components`, `config path`).
+  - Command surface for support/debug/status paths.
 - `internal/app`
-  - Application wiring and shared runtime services.
+  - Composition root and service wiring.
 - `internal/config`
-  - Config path resolution and config persistence (`~/.bitsentry-ai/config.yaml`).
+  - Local configuration read/write (`~/.bitsentry-ai/config.yaml`).
 - `internal/system`
   - OS/arch/shell detection and dependency checks.
 - `internal/agents`
-  - Agent detector contracts and OpenCode detection.
+  - OpenCode/agent detection and integration hooks.
 - `internal/profiles`
-  - Default profile catalog and profile selection/persistence support.
+  - Profile catalog/selection for local context management.
 - `internal/components`
-  - Component registry (stub entries for future phases).
+  - Capability registry and metadata wiring.
 - `internal/workflows`
-  - Workflow registry (stub entries for future phases).
-- `internal/tui`
-  - Minimal Bubble Tea based interactive UI.
+  - Flow definitions and routing contracts.
 - `internal/logs`
-  - Logger initialization and log path handling.
+  - Logging initialization and local log management.
 
-## Design intent
+## Control boundaries (MVP)
 
-The architecture is intentionally modular so CLI and TUI consume the same domain services. This avoids duplicated behavior and keeps future workflow/component implementation isolated behind registries and interfaces.
+- Readiness and preview signals are first-class outputs.
+- Manual intent and operator confirmation are required for impactful steps.
+- Security posture avoids autonomous or hidden runtime actions.
+- Product messaging must remain honest about current limits.
 
-## Scope note
+## Relationship with other docs
 
-In Phase 1, `components` and `workflows` are **stubs only**. They communicate roadmap intent and command shape, but do not execute real SDR/SDD/Red Team/Bug Bounty automation yet.
+- Install and operator flow: [docs/install.md](install.md)
+- Public launch readiness: [docs/releases/public-mvp-checklist.md](releases/public-mvp-checklist.md)
+- Demo scripts/prompts: [docs/demo/public-mvp-prompts.md](demo/public-mvp-prompts.md)
+- Near-term direction: [docs/roadmap.md](roadmap.md)

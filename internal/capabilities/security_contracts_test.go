@@ -1060,3 +1060,22 @@ func TestSecurityContracts_CLIManualExecuteEvidenceNormalization(t *testing.T) {
 	}
 }
 
+
+func TestSecurityContracts_Phase7ReleaseNotes(t *testing.T) {
+	content := mustReadText(t, "../../docs/releases/phase-7-securityweb.md")
+	required := []string{
+		"Phase 7 verdict: PASS WITH NOTES",
+		"controlled manual MVP",
+		"not a full pentest automation engine",
+		"exact approval required",
+		"scope_host required",
+		"candidate findings are not confirmed vulnerabilities",
+		"no autonomous pentest",
+		"Phase 8 — Controlled Web Assessment Expansion",
+	}
+	for _, token := range required {
+		if !strings.Contains(content, token) {
+			t.Fatalf("phase 7 release notes missing anchor %q", token)
+		}
+	}
+}
